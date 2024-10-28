@@ -57,9 +57,7 @@ class _ChatPageState extends State<ChatPage> {
 
   void _clearMessage() {
     setState(() {
-      final first = _messages[0];
-      _messages.clear();
-      _messages.add(first);
+      _messages.length = 1;
     });
   }
 
@@ -198,6 +196,7 @@ class ChatMessage extends StatelessWidget {
               child: MarkdownBody(
                 data: message,
                 shrinkWrap: true,
+                selectable: true,
                 styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
               ),
             ),
