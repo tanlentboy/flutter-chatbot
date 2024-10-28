@@ -84,6 +84,10 @@ class _ChatPageState extends State<ChatPage> {
       final response = await client.send(request);
       final stream = response.stream.transform(utf8.decoder);
 
+      if (response.statusCode != 200) {
+        throw Exception("bad request");
+      }
+
       outer:
       await for (final chunk in stream) {
         final lines = LineSplitter.split(chunk).toList();
@@ -100,6 +104,11 @@ class _ChatPageState extends State<ChatPage> {
           });
         }
       }
+
+      _controller.clear();
+    } catch (e) {
+      _controller.text = text;
+      _messages.length -= 2;
     } finally {
       client.close();
     }
