@@ -44,7 +44,7 @@ class _ChatPageState extends State<ChatPage> {
   Map buildContext() {
     Map<String, Object> context = {
       "model": model,
-      "stream": false,
+      "stream": true,
     };
     List<Map<String, String>> list = [];
     context["messages"] = list;
@@ -69,27 +69,42 @@ class _ChatPageState extends State<ChatPage> {
       sendable = false;
     });
 
+    final message = Message(type: MessageType.assistant, text: "");
     _messages.add(Message(type: MessageType.user, text: text));
+    _messages.add(message);
 
-    final response = await http.post(
-      Uri.parse(apiURL),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $apiKEY",
-      },
-      body: jsonEncode(buildContext()),
-    );
+    final client = http.Client();
+
+    try {
+      final request = http.Request("POST", Uri.parse(apiURL));
+      request.headers["Content-Type"] = "application/json";
+      request.headers["Authorization"] = "Bearer $apiKEY";
+      request.body = jsonEncode(buildContext());
+
+      final response = await client.send(request);
+      final stream = response.stream.transform(utf8.decoder);
+
+      outer:
+      await for (final chunk in stream) {
+        final lines = LineSplitter.split(chunk).toList();
+
+        for (final line in lines) {
+          if (!line.startsWith("data:")) continue;
+          final raw = line.substring(5);
+
+          if (raw.trim() == "[DONE]") break outer;
+          final json = jsonDecode(raw);
+
+          setState(() {
+            message.text += json["choices"][0]["delta"]["content"];
+          });
+        }
+      }
+    } finally {
+      client.close();
+    }
 
     setState(() {
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final content = data["choices"][0]["message"]["content"];
-        _messages.add(Message(type: MessageType.assistant, text: content));
-        _controller.clear();
-      } else {
-        _messages.removeLast();
-        _controller.text = text;
-      }
       sendable = true;
     });
   }
@@ -144,7 +159,7 @@ enum MessageType {
 }
 
 class Message {
-  final String text;
+  String text;
   final MessageType type;
 
   Message({required this.type, required this.text});
