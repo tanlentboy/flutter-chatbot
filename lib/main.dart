@@ -1,6 +1,7 @@
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
+import "package:file_picker/file_picker.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 
 const String model = "Qwen/Qwen2-7B-Instruct";
@@ -68,9 +69,17 @@ class _ChatPageState extends State<ChatPage> {
         _scrollCtrl.position.maxScrollExtent,
       );
 
+  void _addFile() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null) {
+      debugPrint(result.files.first.path);
+    }
+  }
+
   void _sendMessage() async {
     final text = _editCtrl.text;
-    if (text.trim().isEmpty) return;
+    if (text.isEmpty) return;
 
     setState(() {
       sendable = false;
@@ -147,6 +156,7 @@ class _ChatPageState extends State<ChatPage> {
         ChatInputField(
           editable: sendable,
           controller: _editCtrl,
+          addFile: sendable ? _addFile : null,
           onSend: sendable ? _sendMessage : null,
         ),
       ],
@@ -239,12 +249,14 @@ class ChatMessage extends StatelessWidget {
 class ChatInputField extends StatelessWidget {
   final bool editable;
   final void Function()? onSend;
+  final void Function()? addFile;
   final TextEditingController controller;
 
   const ChatInputField({
     super.key,
     this.editable = true,
     required this.onSend,
+    required this.addFile,
     required this.controller,
   });
 
@@ -252,6 +264,12 @@ class ChatInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final child = Row(
       children: [
+        IconButton.filled(
+          onPressed: addFile,
+          icon: const Icon(Icons.add),
+          style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
+        ),
+        const SizedBox(width: 8),
         Expanded(
           child: TextField(
             maxLines: null,
