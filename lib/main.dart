@@ -208,7 +208,12 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _clearMessage() => setState(() {
-        _messages.length = 1;
+        if (_messages.isNotEmpty &&
+            _messages.first.role == MessageRole.system) {
+          _messages.length = 1;
+        } else {
+          _messages.length = 0;
+        }
       });
 
   void _showSettings(BuildContext context) async => await Config.show(context);
