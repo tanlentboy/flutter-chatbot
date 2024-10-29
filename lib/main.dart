@@ -39,7 +39,8 @@ class _ChatPageState extends State<ChatPage> {
   final List<Message> _messages = [
     Message(type: MessageType.system, text: system)
   ];
-  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollCtrl = ScrollController();
+  final TextEditingController _editCtrl = TextEditingController();
 
   Map buildContext() {
     Map<String, Object> context = {
@@ -55,14 +56,16 @@ class _ChatPageState extends State<ChatPage> {
     return context;
   }
 
-  void _clearMessage() {
-    setState(() {
-      _messages.length = 1;
-    });
-  }
+  void _clearMessage() => setState(() {
+        _messages.length = 1;
+      });
+
+  void _scrollToBottom() => _scrollCtrl.jumpTo(
+        _scrollCtrl.position.maxScrollExtent,
+      );
 
   void _sendMessage() async {
-    final text = _controller.text;
+    final text = _editCtrl.text;
     if (text.trim().isEmpty) return;
 
     setState(() {
@@ -101,13 +104,14 @@ class _ChatPageState extends State<ChatPage> {
 
           setState(() {
             message.text += json["choices"][0]["delta"]["content"];
+            _scrollToBottom();
           });
         }
       }
 
-      _controller.clear();
+      _editCtrl.clear();
     } catch (e) {
-      _controller.text = text;
+      _editCtrl.text = text;
       _messages.length -= 2;
     } finally {
       client.close();
@@ -124,6 +128,7 @@ class _ChatPageState extends State<ChatPage> {
       children: [
         Expanded(
           child: ListView.builder(
+            controller: _scrollCtrl,
             itemCount: _messages.length,
             padding: const EdgeInsets.all(8),
             itemBuilder: (context, index) {
@@ -136,7 +141,8 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
         ChatInputField(
-          controller: _controller,
+          editable: sendable,
+          controller: _editCtrl,
           onSend: sendable ? _sendMessage : null,
         ),
       ],
@@ -212,7 +218,7 @@ class ChatMessage extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           return ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.7),
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.8),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -232,11 +238,13 @@ class ChatMessage extends StatelessWidget {
 }
 
 class ChatInputField extends StatelessWidget {
+  final bool editable;
   final Function()? onSend;
   final TextEditingController controller;
 
   const ChatInputField({
     super.key,
+    this.editable = true,
     required this.onSend,
     required this.controller,
   });
@@ -248,8 +256,9 @@ class ChatInputField extends StatelessWidget {
         Expanded(
           child: TextField(
             maxLines: null,
-            keyboardType: TextInputType.multiline,
+            enabled: editable,
             controller: controller,
+            keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
               hintText: 'Enter your message',
               contentPadding: const EdgeInsets.all(12),
