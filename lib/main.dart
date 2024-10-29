@@ -3,15 +3,135 @@ import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:file_picker/file_picker.dart";
+import 'package:path_provider/path_provider.dart';
 import "package:flutter_markdown/flutter_markdown.dart";
 
-const String model = "Qwen/Qwen2-VL-72B-Instruct";
-const String system = "你是一个人工智能助手，你的任务是解答用户的问题。";
-const String apiURL = "https://api.siliconflow.cn/v1/chat/completions";
-const String apiKEY = "sk-scqmbpaiugxfnwxgkwbcornphzgebmcftevknhpkiuddohiw";
+void main() async {
+  runApp(const MyApp());
+  await Config.initialize();
+}
 
-void main() => runApp(const MyApp());
 final globalKey = GlobalKey<ScaffoldMessengerState>();
+
+class Config {
+  static String model = "";
+  static String system = "";
+  static String apiUrl = "";
+  static String apiKey = "";
+
+  static const defaultConfig = {
+    "model": "Qwen/Qwen2-VL-72B-Instruct",
+    "system": "",
+    "apiUrl": "https://api.siliconflow.cn/v1/chat/completions",
+    "apiKey": "",
+  };
+
+  static late final File _file;
+  static late final String _filePath;
+  static late final Directory _directory;
+  static const _fileName = "config.json";
+
+  static initialize() async {
+    _directory = await getApplicationDocumentsDirectory();
+    _filePath = "${_directory.path}${Platform.pathSeparator}$_fileName";
+
+    _file = File(_filePath);
+    if (_file.existsSync()) {
+      final data = _file.readAsStringSync();
+      _updateFrom(jsonDecode(data));
+    } else {
+      _file.writeAsStringSync(jsonEncode(defaultConfig));
+      _updateFrom(defaultConfig);
+    }
+  }
+
+  static void _updateFrom(Map<String, dynamic> map) {
+    model = map["model"] ?? "";
+    system = map["system"] ?? "";
+    apiUrl = map["apiUrl"] ?? "";
+    apiKey = map["apiKey"] ?? "";
+  }
+
+  static bool get isEmpty {
+    return model.isEmpty || apiUrl.isEmpty || apiKey.isEmpty;
+  }
+
+  static bool get isNotEmpty {
+    return model.isNotEmpty && apiUrl.isNotEmpty && apiKey.isNotEmpty;
+  }
+
+  static void save() {
+    final configMap = <String, String>{
+      "model": model,
+      "system": system,
+      "apiUrl": apiUrl,
+      "apiKey": apiKey,
+    };
+    _file.writeAsStringSync(jsonEncode(configMap));
+  }
+
+  static final _modelCtrl = TextEditingController();
+  static final _systemCtrl = TextEditingController();
+  static final _apiUrlCtrl = TextEditingController();
+  static final _apiKeyCtrl = TextEditingController();
+
+  static show(BuildContext context) async {
+    _modelCtrl.text = model;
+    _systemCtrl.text = system;
+    _apiUrlCtrl.text = apiUrl;
+    _apiKeyCtrl.text = apiKey;
+
+    final textField = ({label, controller}) => TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          contentPadding: const EdgeInsets.all(12),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ));
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Config"),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                textField(label: "Model", controller: _modelCtrl),
+                SizedBox(height: 16),
+                textField(label: "System", controller: _systemCtrl),
+                SizedBox(height: 16),
+                textField(label: "API Url", controller: _apiUrlCtrl),
+                SizedBox(height: 16),
+                textField(label: "API Key", controller: _apiKeyCtrl),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Save"),
+              onPressed: () {
+                model = _modelCtrl.text;
+                system = _systemCtrl.text;
+                apiUrl = _apiUrlCtrl.text;
+                apiKey = _apiKeyCtrl.text;
+
+                save();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -44,18 +164,20 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   String? image;
   bool sendable = true;
-  final List<Message> _messages = [
-    Message(role: MessageRole.system, text: system)
-  ];
+  final List<Message> _messages = [];
   final ScrollController _scrollCtrl = ScrollController();
   final TextEditingController _editCtrl = TextEditingController();
 
   Map<String, Object> _buildContext() {
     Map<String, Object> context = {
-      "model": model,
+      "model": Config.model,
       "stream": true,
     };
     List<Map<String, Object>> list = [];
+
+    if (Config.system.isNotEmpty) {
+      list.add({"role": "system", "content": Config.system});
+    }
 
     for (final pair in _messages.indexed) {
       final Object content;
@@ -89,11 +211,13 @@ class _ChatPageState extends State<ChatPage> {
         _messages.length = 1;
       });
 
+  void _showSettings(BuildContext context) async => await Config.show(context);
+
   void _scrollToBottom() => _scrollCtrl.jumpTo(
         _scrollCtrl.position.maxScrollExtent,
       );
 
-  void _addFile() async {
+  void _addImage(BuildContext context) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
     );
@@ -101,9 +225,6 @@ class _ChatPageState extends State<ChatPage> {
 
     final path = result.files.first.path;
     if (path == null) {
-      globalKey.currentState?.showSnackBar(
-        SnackBar(content: const Text("failed to pick file")),
-      );
       return;
     }
 
@@ -113,9 +234,14 @@ class _ChatPageState extends State<ChatPage> {
     image = "data:image/jpeg;base64,$base64";
   }
 
-  void _sendMessage() async {
+  void _sendMessage(BuildContext context) async {
     final text = _editCtrl.text;
     if (text.isEmpty) return;
+
+    if (Config.isEmpty) {
+      await Config.show(context);
+      return;
+    }
 
     setState(() {
       sendable = false;
@@ -123,16 +249,16 @@ class _ChatPageState extends State<ChatPage> {
 
     _messages.add(Message(role: MessageRole.user, text: text, image: image));
     final message = Message(role: MessageRole.assistant, text: "");
-    final context = _buildContext();
+    final window = _buildContext();
     _messages.add(message);
 
     final client = http.Client();
 
     try {
-      final request = http.Request("POST", Uri.parse(apiURL));
+      final request = http.Request("POST", Uri.parse(Config.apiUrl));
+      request.headers["Authorization"] = "Bearer ${Config.apiKey}";
       request.headers["Content-Type"] = "application/json";
-      request.headers["Authorization"] = "Bearer $apiKEY";
-      request.body = jsonEncode(context);
+      request.body = jsonEncode(window);
 
       final response = await client.send(request);
       final stream = response.stream.transform(utf8.decoder);
@@ -195,8 +321,8 @@ class _ChatPageState extends State<ChatPage> {
         ChatInputField(
           editable: sendable,
           controller: _editCtrl,
-          addFile: sendable ? _addFile : null,
-          onSend: sendable ? _sendMessage : null,
+          addImage: sendable ? _addImage : null,
+          sendMessage: sendable ? _sendMessage : null,
         ),
       ],
     );
@@ -206,7 +332,17 @@ class _ChatPageState extends State<ChatPage> {
         actions: [
           IconButton(
             onPressed: _clearMessage,
-            icon: const Icon(Icons.delete),
+            icon: const Icon(Icons.delete_outline),
+          ),
+          Builder(
+            builder: (context) {
+              return IconButton(
+                onPressed: () {
+                  _showSettings(context);
+                },
+                icon: const Icon(Icons.settings_outlined),
+              );
+            },
           )
         ],
         title: const Text("ChatBot"),
@@ -214,11 +350,6 @@ class _ChatPageState extends State<ChatPage> {
       body: Container(child: child),
     );
   }
-}
-
-enum MessageType {
-  image,
-  text,
 }
 
 enum MessageRole {
@@ -299,24 +430,39 @@ class ChatMessage extends StatelessWidget {
 
 class ChatInputField extends StatelessWidget {
   final bool editable;
-  final void Function()? onSend;
-  final void Function()? addFile;
   final TextEditingController controller;
+  final void Function(BuildContext context)? addImage;
+  final void Function(BuildContext context)? sendMessage;
 
   const ChatInputField({
     super.key,
     this.editable = true,
-    required this.onSend,
-    required this.addFile,
+    required this.addImage,
     required this.controller,
+    required this.sendMessage,
   });
 
   @override
   Widget build(BuildContext context) {
+    void Function()? add;
+    void Function()? send;
+
+    if (addImage != null) {
+      add = () {
+        addImage!(context);
+      };
+    }
+
+    if (sendMessage != null) {
+      send = () {
+        sendMessage!(context);
+      };
+    }
+
     final child = Row(
       children: [
         IconButton.filled(
-          onPressed: addFile,
+          onPressed: add,
           icon: const Icon(Icons.add),
           style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
         ),
@@ -337,7 +483,7 @@ class ChatInputField extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         IconButton.filled(
-          onPressed: onSend,
+          onPressed: send,
           icon: const Icon(Icons.send_rounded),
           style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
         ),
