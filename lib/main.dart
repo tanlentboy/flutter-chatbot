@@ -17,10 +17,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MyApp',
-      theme: ThemeData(
-        useMaterial3: true,
+      title: "ChatBot",
+      theme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(seedColor: color),
+        appBarTheme: AppBarTheme(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+        ),
       ),
       home: const ChatPage(),
     );
@@ -42,17 +45,18 @@ class _ChatPageState extends State<ChatPage> {
   final ScrollController _scrollCtrl = ScrollController();
   final TextEditingController _editCtrl = TextEditingController();
 
-  Map buildContext() {
+  Map<String, Object> _buildContext() {
     Map<String, Object> context = {
       "model": model,
       "stream": true,
     };
     List<Map<String, String>> list = [];
-    context["messages"] = list;
 
     for (final message in _messages) {
       list.add({"role": message.type.name, "content": message.text});
     }
+
+    context["messages"] = list;
     return context;
   }
 
@@ -82,7 +86,7 @@ class _ChatPageState extends State<ChatPage> {
       final request = http.Request("POST", Uri.parse(apiURL));
       request.headers["Content-Type"] = "application/json";
       request.headers["Authorization"] = "Bearer $apiKEY";
-      request.body = jsonEncode(buildContext());
+      request.body = jsonEncode(_buildContext());
 
       final response = await client.send(request);
       final stream = response.stream.transform(utf8.decoder);
@@ -134,8 +138,8 @@ class _ChatPageState extends State<ChatPage> {
             itemBuilder: (context, index) {
               final message = _messages[index];
               return ChatMessage(
-                message: message.text,
                 type: message.type,
+                message: message.text,
               );
             },
           ),
@@ -153,16 +157,12 @@ class _ChatPageState extends State<ChatPage> {
         actions: [
           IconButton(
             onPressed: _clearMessage,
-            icon: const Icon(Icons.delete, color: Colors.white),
+            icon: const Icon(Icons.delete),
           )
         ],
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text("ChatBot", style: TextStyle(color: Colors.white)),
+        title: const Text("ChatBot"),
       ),
-      body: Container(
-        color: Theme.of(context).colorScheme.surface,
-        child: child,
-      ),
+      body: Container(child: child),
     );
   }
 }
@@ -176,7 +176,6 @@ enum MessageType {
 class Message {
   String text;
   final MessageType type;
-
   Message({required this.type, required this.text});
 }
 
@@ -197,18 +196,18 @@ class ChatMessage extends StatelessWidget {
 
     switch (type) {
       case MessageType.user:
-        background = Colors.green;
         alignment = Alignment.centerRight;
+        background = Colors.green.shade900;
         break;
 
       case MessageType.system:
-        background = Colors.green;
         alignment = Alignment.centerRight;
+        background = Colors.green.shade900;
         break;
 
       case MessageType.assistant:
-        background = Colors.grey;
         alignment = Alignment.centerLeft;
+        background = Colors.grey.shade900;
         break;
     }
 
@@ -270,7 +269,7 @@ class ChatInputField extends StatelessWidget {
         const SizedBox(width: 8),
         IconButton.filled(
           onPressed: onSend,
-          icon: const Icon(Icons.send_rounded, color: Colors.white),
+          icon: const Icon(Icons.send_rounded),
           style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
         ),
       ],
