@@ -3,27 +3,27 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:flutter_markdown/flutter_markdown.dart";
 
-const String model = "Qwen/Qwen2.5-72B-Instruct";
+const String model = "Qwen/Qwen2-7B-Instruct";
 const String system = "你是一个人工智能助手，你的任务是解答用户的问题。";
 const String apiURL = "https://api.siliconflow.cn/v1/chat/completions";
-const String apiKEY = "sk-ffkekuryoenqamomygnrokbbvcrcaqafuboylsladfekfstd";
+const String apiKEY = "sk-scqmbpaiugxfnwxgkwbcornphzgebmcftevknhpkiuddohiw";
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  final color = Colors.deepPurple;
+  static const color = Colors.deepPurple;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "ChatBot",
       theme: ThemeData.dark().copyWith(
-        colorScheme: ColorScheme.fromSeed(seedColor: color),
         appBarTheme: AppBarTheme(
           backgroundColor: color,
           foregroundColor: Colors.white,
         ),
+        colorScheme: ColorScheme.fromSeed(seedColor: color),
       ),
       home: const ChatPage(),
     );
@@ -128,7 +128,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    var child = Column(
+    final child = Column(
       children: [
         Expanded(
           child: ListView.builder(
@@ -175,7 +175,7 @@ enum MessageType {
 
 class Message {
   String text;
-  final MessageType type;
+  MessageType type;
   Message({required this.type, required this.text});
 }
 
@@ -238,7 +238,7 @@ class ChatMessage extends StatelessWidget {
 
 class ChatInputField extends StatelessWidget {
   final bool editable;
-  final Function()? onSend;
+  final void Function()? onSend;
   final TextEditingController controller;
 
   const ChatInputField({
@@ -250,7 +250,7 @@ class ChatInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var child = Row(
+    final child = Row(
       children: [
         Expanded(
           child: TextField(
@@ -259,7 +259,7 @@ class ChatInputField extends StatelessWidget {
             controller: controller,
             keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
-              hintText: 'Enter your message',
+              hintText: "Enter your message",
               contentPadding: const EdgeInsets.all(12),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
