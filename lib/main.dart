@@ -1,15 +1,17 @@
+import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:file_picker/file_picker.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 
-const String model = "Qwen/Qwen2-7B-Instruct";
+const String model = "Qwen/Qwen2-VL-72B-Instruct";
 const String system = "你是一个人工智能助手，你的任务是解答用户的问题。";
 const String apiURL = "https://api.siliconflow.cn/v1/chat/completions";
 const String apiKEY = "sk-scqmbpaiugxfnwxgkwbcornphzgebmcftevknhpkiuddohiw";
 
 void main() => runApp(const MyApp());
+final globalKey = GlobalKey<ScaffoldMessengerState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -19,6 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "ChatBot",
+      scaffoldMessengerKey: globalKey,
       theme: ThemeData.dark().copyWith(
         appBarTheme: AppBarTheme(
           backgroundColor: color,
@@ -39,9 +42,10 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  String? image;
   bool sendable = true;
   final List<Message> _messages = [
-    Message(type: MessageType.system, text: system)
+    Message(role: MessageRole.system, text: system)
   ];
   final ScrollController _scrollCtrl = ScrollController();
   final TextEditingController _editCtrl = TextEditingController();
@@ -51,10 +55,30 @@ class _ChatPageState extends State<ChatPage> {
       "model": model,
       "stream": true,
     };
-    List<Map<String, String>> list = [];
+    List<Map<String, Object>> list = [];
 
-    for (final message in _messages) {
-      list.add({"role": message.type.name, "content": message.text});
+    for (final pair in _messages.indexed) {
+      final Object content;
+      final index = pair.$1;
+      final message = pair.$2;
+      final image = message.image;
+
+      if (index != _messages.length - 1 || image == null) {
+        content = message.text;
+      } else {
+        content = [
+          {
+            "type": "image_url",
+            "image_url": {"url": image},
+          },
+          {
+            "type": "text",
+            "text": message.text,
+          },
+        ];
+      }
+
+      list.add({"role": message.role.name, "content": content});
     }
 
     context["messages"] = list;
@@ -70,11 +94,23 @@ class _ChatPageState extends State<ChatPage> {
       );
 
   void _addFile() async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.image);
-    if (result != null) {
-      debugPrint(result.files.first.path);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+    if (result == null) return;
+
+    final path = result.files.first.path;
+    if (path == null) {
+      globalKey.currentState?.showSnackBar(
+        SnackBar(content: const Text("failed to pick file")),
+      );
+      return;
     }
+
+    final bytes = await File(path).readAsBytes();
+    final base64 = base64Encode(bytes);
+
+    image = "data:image/jpeg;base64,$base64";
   }
 
   void _sendMessage() async {
@@ -85,8 +121,9 @@ class _ChatPageState extends State<ChatPage> {
       sendable = false;
     });
 
-    final message = Message(type: MessageType.assistant, text: "");
-    _messages.add(Message(type: MessageType.user, text: text));
+    _messages.add(Message(role: MessageRole.user, text: text, image: image));
+    final message = Message(role: MessageRole.assistant, text: "");
+    final context = _buildContext();
     _messages.add(message);
 
     final client = http.Client();
@@ -95,7 +132,7 @@ class _ChatPageState extends State<ChatPage> {
       final request = http.Request("POST", Uri.parse(apiURL));
       request.headers["Content-Type"] = "application/json";
       request.headers["Authorization"] = "Bearer $apiKEY";
-      request.body = jsonEncode(_buildContext());
+      request.body = jsonEncode(context);
 
       final response = await client.send(request);
       final stream = response.stream.transform(utf8.decoder);
@@ -130,6 +167,7 @@ class _ChatPageState extends State<ChatPage> {
       client.close();
     }
 
+    image = null;
     setState(() {
       sendable = true;
     });
@@ -147,7 +185,8 @@ class _ChatPageState extends State<ChatPage> {
             itemBuilder: (context, index) {
               final message = _messages[index];
               return ChatMessage(
-                type: message.type,
+                type: message.role,
+                image: message.image,
                 message: message.text,
               );
             },
@@ -178,6 +217,11 @@ class _ChatPageState extends State<ChatPage> {
 }
 
 enum MessageType {
+  image,
+  text,
+}
+
+enum MessageRole {
   assistant,
   system,
   user,
@@ -185,41 +229,48 @@ enum MessageType {
 
 class Message {
   String text;
-  MessageType type;
-  Message({required this.type, required this.text});
+  String? image;
+  MessageRole role;
+
+  Message({required this.role, required this.text, this.image});
 }
 
 class ChatMessage extends StatelessWidget {
+  final String? image;
   final String message;
-  final MessageType type;
+  final MessageRole type;
 
   const ChatMessage({
     super.key,
+    this.image,
     required this.type,
     required this.message,
   });
 
   @override
   Widget build(BuildContext context) {
+    var content = message;
     final Color background;
     final Alignment alignment;
 
     switch (type) {
-      case MessageType.user:
+      case MessageRole.user:
         alignment = Alignment.centerRight;
         background = Colors.green.shade900;
         break;
 
-      case MessageType.system:
+      case MessageRole.system:
         alignment = Alignment.centerRight;
         background = Colors.green.shade900;
         break;
 
-      case MessageType.assistant:
+      case MessageRole.assistant:
         alignment = Alignment.centerLeft;
         background = Colors.grey.shade900;
         break;
     }
+
+    if (image != null) content = "![image]($image)\n\n$content";
 
     return Container(
       alignment: alignment,
@@ -233,7 +284,7 @@ class ChatMessage extends StatelessWidget {
               decoration: BoxDecoration(
                   color: background, borderRadius: BorderRadius.circular(8)),
               child: MarkdownBody(
-                data: message,
+                data: content,
                 shrinkWrap: true,
                 selectable: true,
                 styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
