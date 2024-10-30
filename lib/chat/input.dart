@@ -1,3 +1,4 @@
+import "package:app/config.dart";
 import "package:flutter/material.dart";
 
 class InputWidget extends StatelessWidget {
@@ -34,46 +35,55 @@ class InputWidget extends StatelessWidget {
     }
 
     final child = Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Badge(
           isLabelVisible: files != 0,
           alignment: Alignment.topLeft,
           label: Text(files.toString()),
-          child: IconButton.filledTonal(
+          child: IconButton(
             onPressed: add,
-            icon: Icon(files == 0 ? Icons.add : Icons.remove),
-            style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
+            style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
+            icon: Icon(files == 0 ? Icons.add_photo_alternate : Icons.delete),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: TextField(
-            maxLines: null,
-            enabled: editable,
-            controller: controller,
-            keyboardType: TextInputType.multiline,
-            decoration: InputDecoration(
-              hintText: "Enter your message",
-              contentPadding: const EdgeInsets.all(12),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: 120),
+            child: TextField(
+              maxLines: null,
+              enabled: editable,
+              controller: controller,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Enter your message",
+              ),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        IconButton.filledTonal(
+        IconButton(
           onPressed: send,
-          icon: const Icon(Icons.reply),
-          style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
+          icon: const Icon(Icons.send),
+          style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
         ),
       ],
     );
 
-    return Column(
-      children: [
-        Divider(height: 1, thickness: 1, color: Colors.grey.withOpacity(0.5)),
-        Padding(padding: const EdgeInsets.all(12), child: child)
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+        color: colorScheme.surfaceContainer,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16, left: 8, right: 8, bottom: 16),
+        child: child,
+      ),
     );
   }
 }
