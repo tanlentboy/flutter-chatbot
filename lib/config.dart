@@ -3,6 +3,11 @@ import "dart:convert";
 import "package:flutter/material.dart";
 import 'package:path_provider/path_provider.dart';
 
+final ColorScheme colorScheme = ColorScheme.fromSeed(
+  brightness: Brightness.dark,
+  seedColor: Colors.indigo,
+);
+
 const _defaultConfig = {
   "model": "Qwen/Qwen2-VL-72B-Instruct",
   "system": "",

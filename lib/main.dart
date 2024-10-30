@@ -9,23 +9,17 @@ void main() async {
 
 class App extends StatelessWidget {
   const App({super.key});
-  static const color = Colors.deepPurple;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = ColorScheme.fromSeed(
-      brightness: Brightness.dark,
-      seedColor: color,
-    );
-
     return MaterialApp(
       title: "ChatBot",
       theme: ThemeData.dark().copyWith(
         colorScheme: colorScheme,
-        appBarTheme: AppBarTheme(color: color),
         bottomSheetTheme: BottomSheetThemeData(
           backgroundColor: colorScheme.surface,
         ),
+        appBarTheme: AppBarTheme(color: colorScheme.primaryContainer),
       ),
       home: const ChatPage(),
     );

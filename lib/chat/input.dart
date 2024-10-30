@@ -39,7 +39,7 @@ class InputWidget extends StatelessWidget {
           isLabelVisible: files != 0,
           alignment: Alignment.topLeft,
           label: Text(files.toString()),
-          child: IconButton.filled(
+          child: IconButton.filledTonal(
             onPressed: add,
             icon: Icon(files == 0 ? Icons.add : Icons.remove),
             style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
@@ -61,7 +61,7 @@ class InputWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        IconButton.filled(
+        IconButton.filledTonal(
           onPressed: send,
           icon: const Icon(Icons.reply),
           style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),

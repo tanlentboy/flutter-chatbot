@@ -1,3 +1,4 @@
+import "package:app/config.dart";
 import "package:flutter/material.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 
@@ -31,18 +32,18 @@ class MessageWidget extends StatelessWidget {
 
     switch (message.role) {
       case MessageRole.user:
+        background = colorScheme.secondaryContainer;
         alignment = Alignment.centerRight;
-        background = Colors.green.shade900;
         break;
 
       case MessageRole.system:
+        background = colorScheme.primaryContainer;
         alignment = Alignment.centerRight;
-        background = Colors.green.shade900;
         break;
 
       case MessageRole.assistant:
+        background = colorScheme.surfaceContainer;
         alignment = Alignment.centerLeft;
-        background = Colors.grey.shade900;
         break;
     }
 
