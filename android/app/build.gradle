@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.app"
+    namespace = "cc.arthur63.chatbot"
     compileSdk = flutter.compileSdkVersion
 
     compileOptions {
@@ -18,15 +18,17 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.app"
         minSdk = flutter.minSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         targetSdk = flutter.targetSdkVersion
+        applicationId = "cc.arthur63.chatbot"
     }
 
     buildTypes {
         release {
+            minifyEnabled true
+            shrinkResources true
             signingConfig = signingConfigs.debug
         }
     }
