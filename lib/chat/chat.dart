@@ -23,6 +23,13 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _editCtrl = TextEditingController();
 
   void _addImage(BuildContext context) async {
+    if (image != null) {
+      setState(() {
+        image = null;
+      });
+      return;
+    }
+
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
     );
@@ -36,7 +43,9 @@ class _ChatPageState extends State<ChatPage> {
     final bytes = await File(path).readAsBytes();
     final base64 = base64Encode(bytes);
 
-    image = "data:image/jpeg;base64,$base64";
+    setState(() {
+      image = "data:image/jpeg;base64,$base64";
+    });
   }
 
   void _sendMessage(BuildContext context) async {
@@ -98,8 +107,8 @@ class _ChatPageState extends State<ChatPage> {
       client.close();
     }
 
-    image = null;
     setState(() {
+      image = null;
       sendable = true;
     });
   }
@@ -122,6 +131,7 @@ class _ChatPageState extends State<ChatPage> {
         InputWidget(
           editable: sendable,
           controller: _editCtrl,
+          files: image != null ? 1 : 0,
           addImage: sendable ? _addImage : null,
           sendMessage: sendable ? _sendMessage : null,
         ),
@@ -134,6 +144,7 @@ class _ChatPageState extends State<ChatPage> {
           IconButton(
             onPressed: () {
               setState(() {
+                image = null;
                 _messages.length = 0;
               });
             },

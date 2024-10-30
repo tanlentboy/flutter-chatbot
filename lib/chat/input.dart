@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 class InputWidget extends StatelessWidget {
+  final int files;
   final bool editable;
   final TextEditingController controller;
   final void Function(BuildContext context)? addImage;
@@ -8,6 +9,7 @@ class InputWidget extends StatelessWidget {
 
   const InputWidget({
     super.key,
+    this.files = 0,
     this.editable = true,
     required this.addImage,
     required this.controller,
@@ -33,10 +35,15 @@ class InputWidget extends StatelessWidget {
 
     final child = Row(
       children: [
-        IconButton.filled(
-          onPressed: add,
-          icon: const Icon(Icons.add),
-          style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
+        Badge(
+          isLabelVisible: files != 0,
+          alignment: Alignment.topLeft,
+          label: Text(files.toString()),
+          child: IconButton.filled(
+            onPressed: add,
+            icon: Icon(files == 0 ? Icons.add : Icons.remove),
+            style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -56,7 +63,7 @@ class InputWidget extends StatelessWidget {
         const SizedBox(width: 8),
         IconButton.filled(
           onPressed: send,
-          icon: const Icon(Icons.send_rounded),
+          icon: const Icon(Icons.reply),
           style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
         ),
       ],
