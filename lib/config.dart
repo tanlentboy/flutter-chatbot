@@ -36,10 +36,10 @@ class Config {
   }
 
   static void _updateFrom(Map<String, dynamic> map) {
-    model = map["model"] ?? "";
-    system = map["system"] ?? "";
-    apiUrl = map["apiUrl"] ?? "";
-    apiKey = map["apiKey"] ?? "";
+    model = map["model"] ?? _defaultConfig["model"];
+    system = map["system"] ?? _defaultConfig["system"];
+    apiUrl = map["apiUrl"] ?? _defaultConfig["apiUrl"];
+    apiKey = map["apiKey"] ?? _defaultConfig["apiKey"];
   }
 
   static bool get isEmpty {
