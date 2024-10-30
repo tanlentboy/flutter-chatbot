@@ -6,7 +6,7 @@ import "message.dart";
 import "../config.dart";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
-import "package:file_picker/file_picker.dart";
+import "package:image_picker/image_picker.dart";
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -19,26 +19,45 @@ class _ChatPageState extends State<ChatPage> {
   String? image;
   bool sendable = true;
   final List<Message> _messages = [];
+  final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollCtrl = ScrollController();
   final TextEditingController _editCtrl = TextEditingController();
 
   void _addImage(BuildContext context) async {
     if (image != null) {
-      setState(() {
+      return setState(() {
         image = null;
       });
-      return;
     }
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
+    final ImageSource? source = await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(
+          children: [
+            ListTile(
+              title: const Text("Camera"),
+              leading: const Icon(Icons.camera),
+              onTap: () {
+                Navigator.pop(context, ImageSource.camera);
+              },
+            ),
+            ListTile(
+              title: const Text("Gallery"),
+              leading: const Icon(Icons.photo_library),
+              onTap: () {
+                Navigator.pop(context, ImageSource.gallery);
+              },
+            ),
+          ],
+        );
+      },
     );
-    if (result == null) return;
+    if (source == null) return;
 
-    final path = result.files.first.path;
-    if (path == null) {
-      return;
-    }
+    final result = await _picker.pickImage(source: source!);
+    if (result == null) return;
+    final path = result.path;
 
     final bytes = await File(path).readAsBytes();
     final base64 = base64Encode(bytes);
@@ -49,13 +68,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage(BuildContext context) async {
-    final text = _editCtrl.text;
-    if (text.isEmpty) return;
-
     if (Config.isEmpty) {
       await Config.show(context);
       return;
     }
+
+    final text = _editCtrl.text;
+    if (text.isEmpty) return;
 
     setState(() {
       sendable = false;
