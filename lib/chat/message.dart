@@ -1,6 +1,11 @@
-import "package:app/config.dart";
+import "../config.dart";
+
 import "package:flutter/material.dart";
+import "package:markdown/markdown.dart" as md;
 import "package:flutter_markdown/flutter_markdown.dart";
+import "package:flutter_highlighter/flutter_highlighter.dart";
+import "package:flutter_highlighter/themes/atom-one-dark.dart";
+import "package:flutter_highlighter/themes/atom-one-light.dart";
 
 class Message {
   String text;
@@ -66,11 +71,38 @@ class MessageWidget extends StatelessWidget {
                 data: content,
                 shrinkWrap: true,
                 selectable: true,
+                builders: {"code": _CodeElementBuilder()},
                 styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _CodeElementBuilder extends MarkdownElementBuilder {
+  @override
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    final theme = switch (colorScheme.brightness) {
+      Brightness.light => atomOneLightTheme,
+      Brightness.dark => atomOneDarkTheme,
+    };
+    var language = "";
+
+    if (element.attributes["class"] != null) {
+      language = element.attributes["class"]!.substring(9);
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: HighlightView(
+        tabSize: 2,
+        theme: theme,
+        language: language,
+        element.textContent,
+        padding: const EdgeInsets.all(8),
       ),
     );
   }

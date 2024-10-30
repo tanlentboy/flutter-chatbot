@@ -12,9 +12,11 @@ dependencies:
     sdk: flutter
 
   http: ^1.2.2
+  markdown: ^7.2.2
   image_picker: ^1.1.2
   path_provider: ^2.1.4
   flutter_markdown: ^0.7.4+1
+  flutter_highlighter: ^0.1.1
 
 dev_dependencies:
   flutter_test:
