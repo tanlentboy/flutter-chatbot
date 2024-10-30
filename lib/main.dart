@@ -11,8 +11,6 @@ void main() async {
   await Config.initialize();
 }
 
-final globalKey = GlobalKey<ScaffoldMessengerState>();
-
 class Config {
   static String model = "";
   static String system = "";
@@ -75,35 +73,39 @@ class Config {
   static final _apiUrlCtrl = TextEditingController();
   static final _apiKeyCtrl = TextEditingController();
 
+  static TextField buildTextField(
+      {required String labelText, required TextEditingController controller}) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        contentPadding: const EdgeInsets.all(12),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
   static show(BuildContext context) async {
     _modelCtrl.text = model;
     _systemCtrl.text = system;
     _apiUrlCtrl.text = apiUrl;
     _apiKeyCtrl.text = apiKey;
 
-    final textField = ({label, controller}) => TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          contentPadding: const EdgeInsets.all(12),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        ));
-
     return showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Config"),
+          title: Text("Settings"),
           content: SingleChildScrollView(
             child: Column(
               children: [
-                textField(label: "Model", controller: _modelCtrl),
+                buildTextField(labelText: "Model", controller: _modelCtrl),
                 SizedBox(height: 16),
-                textField(label: "System", controller: _systemCtrl),
+                buildTextField(labelText: "System", controller: _systemCtrl),
                 SizedBox(height: 16),
-                textField(label: "API Url", controller: _apiUrlCtrl),
+                buildTextField(labelText: "API Url", controller: _apiUrlCtrl),
                 SizedBox(height: 16),
-                textField(label: "API Key", controller: _apiKeyCtrl),
+                buildTextField(labelText: "API Key", controller: _apiKeyCtrl),
               ],
             ),
           ),
@@ -141,7 +143,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "ChatBot",
-      scaffoldMessengerKey: globalKey,
       theme: ThemeData.dark().copyWith(
         appBarTheme: AppBarTheme(
           backgroundColor: color,
@@ -207,21 +208,6 @@ class _ChatPageState extends State<ChatPage> {
     return context;
   }
 
-  void _clearMessage() => setState(() {
-        if (_messages.isNotEmpty &&
-            _messages.first.role == MessageRole.system) {
-          _messages.length = 1;
-        } else {
-          _messages.length = 0;
-        }
-      });
-
-  void _showSettings(BuildContext context) async => await Config.show(context);
-
-  void _scrollToBottom() => _scrollCtrl.jumpTo(
-        _scrollCtrl.position.maxScrollExtent,
-      );
-
   void _addImage(BuildContext context) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
@@ -285,7 +271,7 @@ class _ChatPageState extends State<ChatPage> {
 
           setState(() {
             message.text += json["choices"][0]["delta"]["content"];
-            _scrollToBottom();
+            _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
           });
         }
       }
@@ -336,14 +322,18 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         actions: [
           IconButton(
-            onPressed: _clearMessage,
+            onPressed: () {
+              setState(() {
+                _messages.length = 0;
+              });
+            },
             icon: const Icon(Icons.delete_outline),
           ),
           Builder(
             builder: (context) {
               return IconButton(
-                onPressed: () {
-                  _showSettings(context);
+                onPressed: () async {
+                  await Config.show(context);
                 },
                 icon: const Icon(Icons.settings_outlined),
               );
@@ -469,7 +459,7 @@ class ChatInputField extends StatelessWidget {
         IconButton.filled(
           onPressed: add,
           icon: const Icon(Icons.add),
-          style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
+          style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -490,7 +480,7 @@ class ChatInputField extends StatelessWidget {
         IconButton.filled(
           onPressed: send,
           icon: const Icon(Icons.send_rounded),
-          style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
+          style: IconButton.styleFrom(padding: const EdgeInsets.all(8)),
         ),
       ],
     );
