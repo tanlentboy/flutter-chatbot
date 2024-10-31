@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:markdown/markdown.dart" as md;
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:flutter_highlighter/flutter_highlighter.dart";
+import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
 
 class Message {
   String text;
@@ -70,9 +71,16 @@ class MessageWidget extends StatelessWidget {
                 data: content,
                 shrinkWrap: true,
                 selectable: true,
+                extensionSet: md.ExtensionSet(
+                  [LatexBlockSyntax()],
+                  [LatexInlineSyntax()],
+                ),
+                builders: {
+                  "code": CodeElementBuilder(context: context),
+                  "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                },
                 styleSheet: markdownStyleSheet,
                 styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                builders: {"code": _CodeElementBuilder(context: context)},
               ),
             ),
           );
@@ -82,15 +90,15 @@ class MessageWidget extends StatelessWidget {
   }
 }
 
-class _CodeElementBuilder extends MarkdownElementBuilder {
+class CodeElementBuilder extends MarkdownElementBuilder {
   final BuildContext context;
-  _CodeElementBuilder({required this.context});
+  CodeElementBuilder({required this.context});
 
   @override
   Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     final theme = switch (Theme.of(context).colorScheme.brightness) {
-      Brightness.light => atomOneLightTheme,
-      Brightness.dark => atomOneDarkTheme,
+      Brightness.light => codeblockLightTheme,
+      Brightness.dark => codeblockDarkTheme,
     };
     var language = "";
 

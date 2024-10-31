@@ -153,7 +153,7 @@ final lightTheme = ThemeData.light(useMaterial3: true).copyWith(
   appBarTheme: AppBarTheme(color: lightColorScheme.primaryContainer),
 );
 
-const atomOneDarkTheme = {
+const codeblockDarkTheme = {
   "root":
       TextStyle(color: Color(0xffabb2bf), backgroundColor: Colors.transparent),
   "comment": TextStyle(color: Color(0xff5c6370), fontStyle: FontStyle.italic),
@@ -191,7 +191,7 @@ const atomOneDarkTheme = {
   "strong": TextStyle(fontWeight: FontWeight.bold),
 };
 
-const atomOneLightTheme = {
+const codeblockLightTheme = {
   "root":
       TextStyle(color: Color(0xff383a42), backgroundColor: Colors.transparent),
   "comment": TextStyle(color: Color(0xffa0a1a7), fontStyle: FontStyle.italic),
