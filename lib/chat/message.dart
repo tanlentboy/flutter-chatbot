@@ -4,8 +4,6 @@ import "package:flutter/material.dart";
 import "package:markdown/markdown.dart" as md;
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:flutter_highlighter/flutter_highlighter.dart";
-import "package:flutter_highlighter/themes/atom-one-dark.dart";
-import "package:flutter_highlighter/themes/atom-one-light.dart";
 
 class Message {
   String text;
@@ -17,7 +15,6 @@ class Message {
 
 enum MessageRole {
   assistant,
-  system,
   user,
 }
 
@@ -33,7 +30,14 @@ class MessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color background;
     final Alignment alignment;
-    var content = message.text;
+    String content = message.text;
+    final colorScheme = Theme.of(context).colorScheme;
+    final markdownStyleSheet = MarkdownStyleSheet(
+      codeblockDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: colorScheme.surfaceContainer,
+      ),
+    );
 
     switch (message.role) {
       case MessageRole.user:
@@ -41,13 +45,8 @@ class MessageWidget extends StatelessWidget {
         alignment = Alignment.centerRight;
         break;
 
-      case MessageRole.system:
-        background = colorScheme.primaryContainer;
-        alignment = Alignment.centerRight;
-        break;
-
       case MessageRole.assistant:
-        background = colorScheme.surfaceContainer;
+        background = colorScheme.surfaceContainerHighest;
         alignment = Alignment.centerLeft;
         break;
     }
@@ -71,9 +70,9 @@ class MessageWidget extends StatelessWidget {
                 data: content,
                 shrinkWrap: true,
                 selectable: true,
-                styleSheet: _markdownStyleSheet,
-                builders: {"code": _CodeElementBuilder()},
+                styleSheet: markdownStyleSheet,
                 styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                builders: {"code": _CodeElementBuilder(context: context)},
               ),
             ),
           );
@@ -84,9 +83,12 @@ class MessageWidget extends StatelessWidget {
 }
 
 class _CodeElementBuilder extends MarkdownElementBuilder {
+  final BuildContext context;
+  _CodeElementBuilder({required this.context});
+
   @override
   Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
-    final theme = switch (colorScheme.brightness) {
+    final theme = switch (Theme.of(context).colorScheme.brightness) {
       Brightness.light => atomOneLightTheme,
       Brightness.dark => atomOneDarkTheme,
     };
@@ -102,15 +104,9 @@ class _CodeElementBuilder extends MarkdownElementBuilder {
         tabSize: 2,
         theme: theme,
         language: language,
-        element.textContent,
+        element.textContent.trim(),
         padding: const EdgeInsets.all(8),
       ),
     );
   }
 }
-
-final _markdownStyleSheet = MarkdownStyleSheet(
-  codeblockDecoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(8),
-  ),
-);

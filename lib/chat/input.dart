@@ -1,4 +1,3 @@
-import "package:app/config.dart";
 import "package:flutter/material.dart";
 
 class InputWidget extends StatelessWidget {
@@ -78,7 +77,7 @@ class InputWidget extends StatelessWidget {
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
         ),
-        color: colorScheme.surfaceContainer,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       child: Padding(
         padding: const EdgeInsets.only(top: 12, left: 8, right: 8, bottom: 12),

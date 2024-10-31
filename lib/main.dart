@@ -14,15 +14,11 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "ChatBot",
-      theme: ThemeData.dark().copyWith(
-        colorScheme: colorScheme,
-        bottomSheetTheme: BottomSheetThemeData(
-          backgroundColor: colorScheme.surface,
-        ),
-        appBarTheme: AppBarTheme(color: colorScheme.primaryContainer),
-      ),
+      themeMode: ThemeMode.system,
       home: const ChatPage(),
+      darkTheme: darkTheme,
+      theme: lightTheme,
+      title: "ChatBot",
     );
   }
 }

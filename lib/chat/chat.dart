@@ -55,7 +55,7 @@ class _ChatPageState extends State<ChatPage> {
     );
     if (source == null) return;
 
-    final result = await _picker.pickImage(source: source!);
+    final result = await _picker.pickImage(source: source);
     if (result == null) return;
     final path = result.path;
 
