@@ -125,7 +125,7 @@ class _ChatPageState extends State<ChatPage> {
       final stream = response.stream.transform(utf8.decoder);
 
       if (response.statusCode != 200) {
-        throw Exception("bad request");
+        throw "${response.statusCode} ${await stream.join()}";
       }
 
       outer:
@@ -147,15 +147,23 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       _editCtrl.clear();
+      image = null;
     } catch (e) {
-      _editCtrl.text = text;
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("$e"),
+            behavior: SnackBarBehavior.floating,
+            dismissDirection: DismissDirection.horizontal,
+          ),
+        );
+      }
       _messages.length -= 2;
     } finally {
       client.close();
     }
 
     setState(() {
-      image = null;
       sendable = true;
     });
   }
