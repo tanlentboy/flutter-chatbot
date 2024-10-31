@@ -81,7 +81,7 @@ class InputWidget extends StatelessWidget {
         color: colorScheme.surfaceContainer,
       ),
       child: Padding(
-        padding: const EdgeInsets.only(top: 16, left: 8, right: 8, bottom: 16),
+        padding: const EdgeInsets.only(top: 12, left: 8, right: 8, bottom: 12),
         child: child,
       ),
     );

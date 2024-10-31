@@ -71,6 +71,7 @@ class MessageWidget extends StatelessWidget {
                 data: content,
                 shrinkWrap: true,
                 selectable: true,
+                styleSheet: _markdownStyleSheet,
                 builders: {"code": _CodeElementBuilder()},
                 styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
               ),
@@ -107,3 +108,9 @@ class _CodeElementBuilder extends MarkdownElementBuilder {
     );
   }
 }
+
+final _markdownStyleSheet = MarkdownStyleSheet(
+  codeblockDecoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(8),
+  ),
+);
