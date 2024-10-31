@@ -4,9 +4,11 @@ import "../config.dart";
 
 import "dart:io";
 import "dart:convert";
+import "dart:typed_data";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:image_picker/image_picker.dart";
+import "package:flutter_image_compress/flutter_image_compress.dart";
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -30,7 +32,7 @@ class _ChatPageState extends State<ChatPage> {
       });
     }
 
-    final ImageSource? source = await showModalBottomSheet(
+    final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (BuildContext context) {
         return Wrap(
@@ -53,13 +55,39 @@ class _ChatPageState extends State<ChatPage> {
         );
       },
     );
+
     if (source == null) return;
 
     final result = await _picker.pickImage(source: source);
-    if (result == null) return;
-    final path = result.path;
+    if (result == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text("Failed to pick image"),
+            dismissDirection: DismissDirection.horizontal,
+          ),
+        );
+      }
+      return;
+    }
 
-    final bytes = await File(path).readAsBytes();
+    final compressed = await FlutterImageCompress.compressWithFile(result.path,
+        quality: 60, minWidth: 1024, minHeight: 1024);
+    Uint8List bytes = compressed ?? await File(result.path).readAsBytes();
+
+    if (compressed == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text("Failed to comprese image"),
+            dismissDirection: DismissDirection.horizontal,
+          ),
+        );
+      }
+    }
+
     final base64 = base64Encode(bytes);
 
     setState(() {
