@@ -157,10 +157,10 @@ final lightTheme = ThemeData.light(useMaterial3: true).copyWith(
   appBarTheme: AppBarTheme(color: lightColorScheme.primaryContainer),
 );
 
-final codeblockDarkTheme = Map.of(atomOneDarkTheme)
+final codeDarkTheme = Map.of(atomOneDarkTheme)
   ..["root"] =
       TextStyle(color: Color(0xffabb2bf), backgroundColor: Colors.transparent);
 
-final codeblockLightTheme = Map.of(atomOneLightTheme)
+final codeLightTheme = Map.of(atomOneLightTheme)
   ..["root"] =
       TextStyle(color: Color(0xffabb2bf), backgroundColor: Colors.transparent);
