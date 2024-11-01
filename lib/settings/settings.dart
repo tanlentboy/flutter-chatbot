@@ -13,7 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:chatbot/settings/bot.dart";
+import "bot.dart";
+import "api.dart";
+
 import "package:flutter/material.dart";
 
 class SettingsPage extends StatefulWidget {
@@ -42,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
         body: TabBarView(
           children: [
             Container(padding: EdgeInsets.all(16), child: BotWidget()),
-            Center(child: Text("API")),
+            Container(padding: EdgeInsets.all(16), child: APIWidget()),
             Center(child: Text("Other")),
           ],
         ),

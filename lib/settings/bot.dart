@@ -39,8 +39,8 @@ class _BotWidgetState extends State<BotWidget> {
               flex: 1,
               child: DropdownButtonFormField<String>(
                 items: [],
-                hint: Text("API"),
                 value: _api,
+                hint: Text("API"),
                 onChanged: (String? it) {
                   setState(() {
                     _api = it;
@@ -57,8 +57,8 @@ class _BotWidgetState extends State<BotWidget> {
               flex: 2,
               child: DropdownButtonFormField<String>(
                 items: [],
+                value: _model,
                 hint: Text("Model"),
-                value: _api,
                 onChanged: (String? it) {
                   setState(() {
                     _api = it;
@@ -81,7 +81,7 @@ class _BotWidgetState extends State<BotWidget> {
                 controller: _temperatureCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  hintText: "Temperature",
+                  labelText: "Temperature",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
@@ -95,7 +95,7 @@ class _BotWidgetState extends State<BotWidget> {
                 controller: _maxTokensCtrl,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  hintText: "Max Tokens",
+                  labelText: "Max Tokens",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
@@ -109,7 +109,8 @@ class _BotWidgetState extends State<BotWidget> {
           maxLines: 4,
           controller: _systemPromptsCtrl,
           decoration: InputDecoration(
-            hintText: "System Prompts",
+            alignLabelWithHint: true,
+            labelText: "System Prompts",
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
