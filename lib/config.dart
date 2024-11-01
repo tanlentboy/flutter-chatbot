@@ -34,17 +34,19 @@ class Config {
   static String system = "";
   static String apiUrl = "";
   static String apiKey = "";
+  static int maxTokens = 1024;
+  static num temperature = 0.7;
 
   static late final File _file;
   static late final String _filePath;
   static late final Directory _directory;
   static const String _fileName = "config.json";
 
-  static bool get isEmpty {
+  static bool get isOk {
     return model.isEmpty || apiUrl.isEmpty || apiKey.isEmpty;
   }
 
-  static bool get isNotEmpty {
+  static bool get isNotOk {
     return model.isNotEmpty && apiUrl.isNotEmpty && apiKey.isNotEmpty;
   }
 

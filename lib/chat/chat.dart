@@ -98,7 +98,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage(BuildContext context) async {
-    if (Config.isEmpty) {
+    if (Config.isOk) {
       await Config.show(context);
       return;
     }
@@ -210,8 +210,8 @@ class _ChatPageState extends State<ChatPage> {
           Builder(
             builder: (context) {
               return IconButton(
-                onPressed: () async {
-                  await Config.show(context);
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/settings");
                 },
                 icon: const Icon(Icons.settings),
               );
