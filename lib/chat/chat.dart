@@ -98,8 +98,14 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _sendMessage(BuildContext context) async {
-    if (Config.isOk) {
-      await Config.show(context);
+    if (Config.isNotOk) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Set up the Bot and API first"),
+          behavior: SnackBarBehavior.floating,
+          dismissDirection: DismissDirection.horizontal,
+        ),
+      );
       return;
     }
 
@@ -118,7 +124,7 @@ class _ChatPageState extends State<ChatPage> {
     final client = http.Client();
 
     try {
-      final request = http.Request("POST", Uri.parse(Config.apiUrl));
+      final request = http.Request("POST", Uri.parse(Config.apiUrl!));
       request.headers["Authorization"] = "Bearer ${Config.apiKey}";
       request.headers["Content-Type"] = "application/json";
       request.body = jsonEncode(window);
@@ -227,14 +233,13 @@ class _ChatPageState extends State<ChatPage> {
 
 Map<String, Object> _buildContext(List<Message> messages) {
   Map<String, Object> context = {
-    "model": Config.model,
+    "temperature": Config.bot.temperature,
+    "max_tokens": Config.bot.maxTokens,
+    "model": Config.bot.model!,
     "stream": true,
   };
   List<Map<String, Object>> list = [];
-
-  if (Config.system.isNotEmpty) {
-    list.add({"role": "system", "content": Config.system});
-  }
+  list.add({"role": "system", "content": Config.bot.systemPrompts});
 
   for (final pair in messages.indexed) {
     final Object content;

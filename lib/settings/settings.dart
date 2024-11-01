@@ -34,7 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
           bottom: TabBar(
             tabs: [
               Tab(text: "Bot"),
-              Tab(text: "API"),
+              Tab(text: "APIs"),
               Tab(text: "Other"),
             ],
           ),

@@ -20,133 +20,119 @@ import "package:path_provider/path_provider.dart";
 import "package:flutter_highlighter/themes/atom-one-dark.dart";
 import "package:flutter_highlighter/themes/atom-one-light.dart";
 
-const _baseColor = Colors.indigo;
+class ConfigBot {
+  String? api;
+  String? model;
+  int maxTokens = 1024;
+  num temperature = 0.7;
+  String systemPrompts = "";
+}
 
-const _defaultConfig = {
-  "model": "Qwen/Qwen2-VL-72B-Instruct",
-  "system": "",
-  "apiUrl": "https://api.siliconflow.cn/v1/chat/completions",
-  "apiKey": "",
-};
+class ConfigAPI {
+  String url;
+  String key;
+  List<String> models;
+
+  ConfigAPI({
+    required this.url,
+    required this.key,
+    required this.models,
+  });
+}
 
 class Config {
-  static String model = "";
-  static String system = "";
-  static String apiUrl = "";
-  static String apiKey = "";
-  static int maxTokens = 1024;
-  static num temperature = 0.7;
+  static late final ConfigBot bot;
+  static late final Map<String, ConfigAPI> apis;
+
+  static String? get apiUrl {
+    if (bot.api == null) return null;
+    return apis[bot.api]!.url;
+  }
+
+  static String? get apiKey {
+    if (bot.api == null) return null;
+    return apis[bot.api]!.key;
+  }
+
+  static bool get isOk {
+    return bot.model != null && apiUrl != null && apiKey != null;
+  }
+
+  static bool get isNotOk {
+    return bot.model == null || apiUrl == null || apiKey == null;
+  }
+
+  static void fromJson(Map<String, dynamic> json) {
+    final botJson = json["bot"];
+    bot.maxTokens = botJson["maxTokens"];
+    bot.temperature = botJson["temperature"];
+    bot.systemPrompts = botJson["systemPrompts"];
+    if (json["api"] != null) bot.api = botJson["api"];
+    if (json["model"] != null) bot.model = botJson["model"];
+
+    final apisJson = json["apis"] as Map<String, Map>;
+    for (final pair in apisJson.entries) {
+      final api = pair.value;
+      apis[pair.key] = ConfigAPI(
+        url: api["url"],
+        key: api["key"],
+        models: api["models"],
+      );
+    }
+  }
+
+  static Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+
+    json["bot"] = {
+      "api": bot.api,
+      "model": bot.model,
+      "maxTokens": bot.maxTokens,
+      "temperature": bot.temperature,
+      "systemPrompts": bot.systemPrompts,
+    };
+
+    final map = {};
+    json["apis"] = map;
+
+    for (final pair in apis.entries) {
+      final api = pair.value;
+      map[pair.key] = {
+        "url": api.url,
+        "key": api.key,
+        "models": api.models,
+      };
+    }
+
+    return json;
+  }
 
   static late final File _file;
   static late final String _filePath;
   static late final Directory _directory;
-  static const String _fileName = "config.json";
+  static const String _fileName = "settings.json";
 
-  static bool get isOk {
-    return model.isEmpty || apiUrl.isEmpty || apiKey.isEmpty;
-  }
-
-  static bool get isNotOk {
-    return model.isNotEmpty && apiUrl.isNotEmpty && apiKey.isNotEmpty;
-  }
-
-  static initialize() async {
+  static Future<void> initialize() async {
     _directory = await getApplicationDocumentsDirectory();
     _filePath = "${_directory.path}${Platform.pathSeparator}$_fileName";
 
     _file = File(_filePath);
     if (await _file.exists()) {
       final data = await _file.readAsString();
-      _updateFrom(jsonDecode(data));
+      fromJson(jsonDecode(data));
     } else {
-      await _file.writeAsString(jsonEncode(_defaultConfig));
-      _updateFrom(_defaultConfig);
+      bot = ConfigBot();
+      apis = {};
+      save();
     }
   }
 
-  static void _updateFrom(Map<String, dynamic> map) {
-    model = map["model"] ?? _defaultConfig["model"];
-    system = map["system"] ?? _defaultConfig["system"];
-    apiUrl = map["apiUrl"] ?? _defaultConfig["apiUrl"];
-    apiKey = map["apiKey"] ?? _defaultConfig["apiKey"];
-  }
-
   static Future<void> save() async {
-    final configMap = <String, String>{
-      "model": model,
-      "system": system,
-      "apiUrl": apiUrl,
-      "apiKey": apiKey,
-    };
-    await _file.writeAsString(jsonEncode(configMap));
-  }
-
-  static final _modelCtrl = TextEditingController();
-  static final _systemCtrl = TextEditingController();
-  static final _apiUrlCtrl = TextEditingController();
-  static final _apiKeyCtrl = TextEditingController();
-
-  static Future<void> show(BuildContext context) async {
-    _modelCtrl.text = model;
-    _systemCtrl.text = system;
-    _apiUrlCtrl.text = apiUrl;
-    _apiKeyCtrl.text = apiKey;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Settings"),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                _textField(labelText: "Model", controller: _modelCtrl),
-                SizedBox(height: 16),
-                _textField(labelText: "System", controller: _systemCtrl),
-                SizedBox(height: 16),
-                _textField(labelText: "API Url", controller: _apiUrlCtrl),
-                SizedBox(height: 16),
-                _textField(labelText: "API Key", controller: _apiKeyCtrl),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: Text("Save"),
-              onPressed: () {
-                model = _modelCtrl.text;
-                system = _systemCtrl.text;
-                apiUrl = _apiUrlCtrl.text;
-                apiKey = _apiKeyCtrl.text;
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    if (result != null && result) await save();
+    await _file.writeAsString(jsonEncode(toJson()));
   }
 }
 
-TextField _textField(
-    {required String labelText, required TextEditingController controller}) {
-  return TextField(
-    controller: controller,
-    decoration: InputDecoration(
-      labelText: labelText,
-      contentPadding: const EdgeInsets.all(12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    ),
-  );
-}
+const _baseColor = Colors.indigo;
 
 final ColorScheme darkColorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
