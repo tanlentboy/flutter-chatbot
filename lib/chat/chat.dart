@@ -74,33 +74,20 @@ class _ChatPageState extends State<ChatPage> {
     if (source == null) return;
 
     final result = await _picker.pickImage(source: source);
-    if (result == null) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text("Failed to pick image"),
-            dismissDirection: DismissDirection.horizontal,
-          ),
-        );
-      }
-      return;
-    }
+    if (result == null) return;
 
     final compressed = await FlutterImageCompress.compressWithFile(result.path,
         quality: 60, minWidth: 1024, minHeight: 1024);
     Uint8List bytes = compressed ?? await File(result.path).readAsBytes();
 
-    if (compressed == null) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text("Failed to comprese image"),
-            dismissDirection: DismissDirection.horizontal,
-          ),
-        );
-      }
+    if (compressed == null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text("Failed to comprese image"),
+          dismissDirection: DismissDirection.horizontal,
+        ),
+      );
     }
 
     final base64 = base64Encode(bytes);
