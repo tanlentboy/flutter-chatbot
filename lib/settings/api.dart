@@ -54,6 +54,8 @@ class _APIWidgetState extends State<APIWidget> {
                 child: ListTile(
                   title: Text(apis[index].key),
                   leading: const Icon(Icons.api),
+                  contentPadding:
+                      EdgeInsets.only(top: 0, left: 12, right: 8, bottom: 0),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {

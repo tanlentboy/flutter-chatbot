@@ -67,6 +67,7 @@ class _BotWidgetState extends State<BotWidget> {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         content: Text("Saved Successfully"),
+        duration: Duration(milliseconds: 500),
         dismissDirection: DismissDirection.horizontal,
       ),
     );
