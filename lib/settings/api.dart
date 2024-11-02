@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "settings.dart";
 import "../config.dart";
 
 import "package:flutter/material.dart";
@@ -25,10 +26,11 @@ class APIWidget extends StatefulWidget {
 }
 
 class _APIWidgetState extends State<APIWidget> {
-  List<MapEntry<String, ApiConfig>> apis = Config.apis.entries.toList();
-
   @override
   Widget build(BuildContext context) {
+    final shared = SettingsShared.of(context);
+    final apis = Config.apis.entries.toList();
+
     return Column(
       children: [
         FilledButton(
@@ -36,13 +38,10 @@ class _APIWidgetState extends State<APIWidget> {
           onPressed: () async {
             final changed = await showDialog<bool>(
               context: context,
-              builder: (context) => ApiInfoWidget(),
+              builder: (context) => ApiInfoWidget(shared: shared),
             );
             if (changed != null && changed) {
-              setState(() {
-                apis = Config.apis.entries.toList();
-              });
-              Config.save();
+              await Config.save();
             }
           },
         ),
@@ -60,13 +59,11 @@ class _APIWidgetState extends State<APIWidget> {
                     onPressed: () async {
                       final changed = await showDialog<bool>(
                         context: context,
-                        builder: (context) => ApiInfoWidget(entry: apis[index]),
+                        builder: (context) =>
+                            ApiInfoWidget(shared: shared, entry: apis[index]),
                       );
                       if (changed != null && changed) {
-                        setState(() {
-                          apis = Config.apis.entries.toList();
-                        });
-                        Config.save();
+                        await Config.save();
                       }
                     },
                   ),
@@ -81,12 +78,18 @@ class _APIWidgetState extends State<APIWidget> {
 }
 
 class ApiInfoWidget extends StatelessWidget {
+  final SettingsShared shared;
   final MapEntry<String, ApiConfig>? entry;
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _modelsCtrl = TextEditingController();
   final TextEditingController _apiUrlCtrl = TextEditingController();
   final TextEditingController _apiKeyCtrl = TextEditingController();
-  ApiInfoWidget({super.key, this.entry});
+
+  ApiInfoWidget({
+    super.key,
+    this.entry,
+    required this.shared,
+  });
 
   bool save(BuildContext context) {
     final name = _nameCtrl.text;
@@ -118,11 +121,12 @@ class ApiInfoWidget extends StatelessWidget {
     }
 
     if (entry != null) {
-      Config.apis.remove(entry!.key);
+      shared.setState(() => Config.apis.remove(entry!.key));
     }
 
     final modelList = models.split(",").map((e) => e.trim()).toList();
-    Config.apis[name] = ApiConfig(url: apiUrl, key: apiKey, models: modelList);
+    shared.setState(() => Config.apis[name] =
+        ApiConfig(url: apiUrl, key: apiKey, models: modelList));
 
     return true;
   }
@@ -213,7 +217,7 @@ class ApiInfoWidget extends StatelessWidget {
                         foregroundColor: Theme.of(context).colorScheme.onError,
                       ),
                       onPressed: () {
-                        Config.apis.remove(entry!.key);
+                        shared.setState(() => Config.apis.remove(entry!.key));
                         Navigator.of(context).pop(true);
                       },
                       child: Text("Delete"),

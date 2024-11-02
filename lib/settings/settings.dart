@@ -15,6 +15,7 @@
 
 import "bot.dart";
 import "api.dart";
+import "../config.dart";
 
 import "package:flutter/material.dart";
 
@@ -22,10 +23,10 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<SettingsPage> createState() => SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -41,14 +42,39 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            Container(padding: EdgeInsets.all(16), child: BotWidget()),
-            Container(padding: EdgeInsets.all(16), child: APIWidget()),
-            Center(child: Text("Other")),
-          ],
+        body: SettingsShared(
+          apis: Config.apis,
+          setState: setState,
+          child: TabBarView(
+            children: [
+              Container(padding: EdgeInsets.all(16), child: BotWidget()),
+              Container(padding: EdgeInsets.all(16), child: APIWidget()),
+              Center(child: Text("Other")),
+            ],
+          ),
         ),
       ),
     );
+  }
+}
+
+class SettingsShared extends InheritedWidget {
+  final Map<String, ApiConfig> apis;
+  final void Function(VoidCallback) setState;
+
+  const SettingsShared({
+    super.key,
+    required this.apis,
+    required super.child,
+    required this.setState,
+  });
+
+  static SettingsShared of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SettingsShared>()!;
+  }
+
+  @override
+  bool updateShouldNotify(SettingsShared oldWidget) {
+    return oldWidget.apis != apis;
   }
 }
