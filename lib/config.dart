@@ -20,7 +20,7 @@ import "package:path_provider/path_provider.dart";
 import "package:flutter_highlighter/themes/atom-one-dark.dart";
 import "package:flutter_highlighter/themes/atom-one-light.dart";
 
-class ConfigBot {
+class BotConfig {
   String? api;
   String? model;
   int maxTokens = 1024;
@@ -28,12 +28,12 @@ class ConfigBot {
   String systemPrompts = "";
 }
 
-class ConfigAPI {
+class ApiConfig {
   String url;
   String key;
   List<String> models;
 
-  ConfigAPI({
+  ApiConfig({
     required this.url,
     required this.key,
     required this.models,
@@ -41,8 +41,8 @@ class ConfigAPI {
 }
 
 class Config {
-  static late final ConfigBot bot;
-  static late final Map<String, ConfigAPI> apis;
+  static final BotConfig bot = BotConfig();
+  static final Map<String, ApiConfig> apis = {};
 
   static String? get apiUrl {
     if (bot.api == null) return null;
@@ -63,20 +63,22 @@ class Config {
   }
 
   static void fromJson(Map<String, dynamic> json) {
-    final botJson = json["bot"];
+    final botJson = json["bot"] as Map<String, dynamic>;
+    final apisJson = json["apis"] as Map<String, dynamic>;
+
     bot.maxTokens = botJson["maxTokens"];
     bot.temperature = botJson["temperature"];
     bot.systemPrompts = botJson["systemPrompts"];
     if (json["api"] != null) bot.api = botJson["api"];
     if (json["model"] != null) bot.model = botJson["model"];
 
-    final apisJson = json["apis"] as Map<String, Map>;
     for (final pair in apisJson.entries) {
-      final api = pair.value;
-      apis[pair.key] = ConfigAPI(
+      final api = pair.value as Map<String, dynamic>;
+      final models = api["models"] as List<dynamic>;
+      apis[pair.key] = ApiConfig(
         url: api["url"],
         key: api["key"],
-        models: api["models"],
+        models: models.cast<String>(),
       );
     }
   }
@@ -113,7 +115,7 @@ class Config {
   static const String _fileName = "settings.json";
 
   static Future<void> initialize() async {
-    _directory = await getApplicationDocumentsDirectory();
+    _directory = (await getExternalStorageDirectory())!;
     _filePath = "${_directory.path}${Platform.pathSeparator}$_fileName";
 
     _file = File(_filePath);
@@ -121,8 +123,6 @@ class Config {
       final data = await _file.readAsString();
       fromJson(jsonDecode(data));
     } else {
-      bot = ConfigBot();
-      apis = {};
       save();
     }
   }
