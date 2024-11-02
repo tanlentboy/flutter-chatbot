@@ -66,11 +66,11 @@ class Config {
     final botJson = json["bot"] as Map<String, dynamic>;
     final apisJson = json["apis"] as Map<String, dynamic>;
 
+    bot.api = botJson["api"];
+    bot.model = botJson["model"];
     bot.maxTokens = botJson["maxTokens"];
     bot.temperature = botJson["temperature"];
     bot.systemPrompts = botJson["systemPrompts"];
-    if (json["api"] != null) bot.api = botJson["api"];
-    if (json["model"] != null) bot.model = botJson["model"];
 
     for (final pair in apisJson.entries) {
       final api = pair.value as Map<String, dynamic>;
