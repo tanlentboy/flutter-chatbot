@@ -43,7 +43,6 @@ class SettingsPageState extends State<SettingsPage> {
           ),
         ),
         body: SettingsShared(
-          apis: Config.apis,
           setState: setState,
           child: TabBarView(
             children: [
@@ -59,12 +58,11 @@ class SettingsPageState extends State<SettingsPage> {
 }
 
 class SettingsShared extends InheritedWidget {
-  final Map<String, ApiConfig> apis;
   final void Function(VoidCallback) setState;
+  final Map<String, ApiConfig> apis = Config.apis;
 
-  const SettingsShared({
+  SettingsShared({
     super.key,
-    required this.apis,
     required super.child,
     required this.setState,
   });
