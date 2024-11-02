@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "../config.dart";
+
 import "package:flutter/material.dart";
 
 class APIWidget extends StatefulWidget {
@@ -23,22 +25,55 @@ class APIWidget extends StatefulWidget {
 }
 
 class _APIWidgetState extends State<APIWidget> {
+  List<MapEntry<String, ApiConfig>> apis = Config.apis.entries.toList();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         FilledButton(
           child: Text("New API"),
-          onPressed: () {
-            showDialog(
+          onPressed: () async {
+            final changed = await showDialog<bool>(
               context: context,
               builder: (context) => ApiInfoWidget(),
             );
+            if (changed != null && changed) {
+              setState(() {
+                apis = Config.apis.entries.toList();
+              });
+              Config.save();
+            }
           },
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 16),
         Expanded(
-          child: ListView(),
+          child: ListView.builder(
+            itemCount: apis.length,
+            itemBuilder: (context, index) {
+              return Card.filled(
+                child: ListTile(
+                  title: Text(apis[index].key),
+                  leading: const Icon(Icons.api),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () async {
+                      final changed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => ApiInfoWidget(entry: apis[index]),
+                      );
+                      if (changed != null && changed) {
+                        setState(() {
+                          apis = Config.apis.entries.toList();
+                        });
+                        Config.save();
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
@@ -46,20 +81,66 @@ class _APIWidgetState extends State<APIWidget> {
 }
 
 class ApiInfoWidget extends StatelessWidget {
-  final _nameCtrl = TextEditingController();
-  final _modelsCtrl = TextEditingController();
-  final _apiUrlCtrl = TextEditingController();
-  final _apiKeyCtrl = TextEditingController();
+  final MapEntry<String, ApiConfig>? entry;
+  final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _modelsCtrl = TextEditingController();
+  final TextEditingController _apiUrlCtrl = TextEditingController();
+  final TextEditingController _apiKeyCtrl = TextEditingController();
+  ApiInfoWidget({super.key, this.entry});
 
-  ApiInfoWidget({super.key});
+  bool save(BuildContext context) {
+    final name = _nameCtrl.text;
+    final models = _modelsCtrl.text;
+    final apiUrl = _apiUrlCtrl.text;
+    final apiKey = _apiKeyCtrl.text;
+
+    if (name.isEmpty || models.isEmpty || apiUrl.isEmpty || apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text("Please complete all fields"),
+          dismissDirection: DismissDirection.horizontal,
+        ),
+      );
+      return false;
+    }
+
+    if (Config.apis.containsKey(name) &&
+        (entry == null || name != entry!.key)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text("The $name API already exists"),
+          dismissDirection: DismissDirection.horizontal,
+        ),
+      );
+      return false;
+    }
+
+    if (entry != null) {
+      Config.apis.remove(entry!.key);
+    }
+
+    final modelList = models.split(",").map((e) => e.trim()).toList();
+    Config.apis[name] = ApiConfig(url: apiUrl, key: apiKey, models: modelList);
+
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (entry != null) {
+      _nameCtrl.text = entry!.key;
+      _apiUrlCtrl.text = entry!.value.url;
+      _apiKeyCtrl.text = entry!.value.key;
+      _modelsCtrl.text = entry!.value.models.join(", ");
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(false),
         ),
         title: Text("API"),
       ),
@@ -67,6 +148,7 @@ class ApiInfoWidget extends StatelessWidget {
         padding: EdgeInsets.all(16),
         child: ListView(
           children: [
+            SizedBox(height: 8),
             TextField(
               controller: _nameCtrl,
               decoration: InputDecoration(
@@ -114,8 +196,28 @@ class ApiInfoWidget extends StatelessWidget {
                 Expanded(
                   flex: 1,
                   child: FilledButton.tonal(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
                     child: Text("Cancel"),
-                    onPressed: () {},
+                  ),
+                ),
+                SizedBox(width: 8),
+                Visibility(
+                  visible: entry != null,
+                  child: Expanded(
+                    flex: 1,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor: Theme.of(context).colorScheme.onError,
+                      ),
+                      onPressed: () {
+                        Config.apis.remove(entry!.key);
+                        Navigator.of(context).pop(true);
+                      },
+                      child: Text("Delete"),
+                    ),
                   ),
                 ),
                 SizedBox(width: 8),
@@ -123,11 +225,15 @@ class ApiInfoWidget extends StatelessWidget {
                   flex: 1,
                   child: FilledButton(
                     child: Text("Save"),
-                    onPressed: () {},
+                    onPressed: () {
+                      if (save(context)) {
+                        Navigator.of(context).pop(true);
+                      }
+                    },
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
