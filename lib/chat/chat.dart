@@ -101,8 +101,8 @@ class _ChatPageState extends State<ChatPage> {
     if (Config.isNotOk) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Set up the Bot and API first"),
           behavior: SnackBarBehavior.floating,
+          content: Text("Set up the Bot and API first"),
           dismissDirection: DismissDirection.horizontal,
         ),
       );

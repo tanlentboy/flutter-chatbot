@@ -19,9 +19,9 @@ import "settings/settings.dart";
 
 import "package:flutter/material.dart";
 
-void main() async {
-  runApp(const App());
-  await Config.initialize();
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Config.initialize().then((_) => runApp(const App()));
 }
 
 class App extends StatelessWidget {
