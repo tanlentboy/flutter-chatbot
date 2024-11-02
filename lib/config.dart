@@ -23,9 +23,9 @@ import "package:flutter_highlighter/themes/atom-one-light.dart";
 class BotConfig {
   String? api;
   String? model;
-  int maxTokens = 1024;
-  num temperature = 0.7;
-  String systemPrompts = "";
+  int? maxTokens;
+  num? temperature;
+  String? systemPrompts;
 }
 
 class ApiConfig {

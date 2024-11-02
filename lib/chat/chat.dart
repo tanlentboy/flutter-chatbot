@@ -70,7 +70,6 @@ class _ChatPageState extends State<ChatPage> {
         );
       },
     );
-
     if (source == null) return;
 
     final result = await _picker.pickImage(source: source);
@@ -233,13 +232,20 @@ class _ChatPageState extends State<ChatPage> {
 
 Map<String, Object> _buildContext(List<Message> messages) {
   Map<String, Object> context = {
-    "temperature": Config.bot.temperature,
-    "max_tokens": Config.bot.maxTokens,
     "model": Config.bot.model!,
     "stream": true,
   };
+  if (Config.bot.maxTokens != null) {
+    context["max_tokens"] = Config.bot.maxTokens!;
+  }
+  if (Config.bot.temperature != null) {
+    context["temperature"] = Config.bot.temperature!;
+  }
+
   List<Map<String, Object>> list = [];
-  list.add({"role": "system", "content": Config.bot.systemPrompts});
+  if (Config.bot.systemPrompts != null) {
+    list.add({"role": "system", "content": Config.bot.systemPrompts!});
+  }
 
   for (final pair in messages.indexed) {
     final Object content;

@@ -27,9 +27,13 @@ class BotWidget extends StatefulWidget {
 class _BotWidgetState extends State<BotWidget> {
   String? _api = Config.bot.api;
   String? _model = Config.bot.model;
-  final TextEditingController _maxTokensCtrl = TextEditingController();
-  final TextEditingController _temperatureCtrl = TextEditingController();
-  final TextEditingController _systemPromptsCtrl = TextEditingController();
+
+  final TextEditingController _maxTokensCtrl =
+      TextEditingController(text: Config.bot.maxTokens?.toString());
+  final TextEditingController _temperatureCtrl =
+      TextEditingController(text: Config.bot.temperature?.toString());
+  final TextEditingController _systemPromptsCtrl =
+      TextEditingController(text: Config.bot.systemPrompts?.toString());
 
   Future<void> save(BuildContext context) async {
     final maxTokens = int.tryParse(_maxTokensCtrl.text);
@@ -59,9 +63,10 @@ class _BotWidgetState extends State<BotWidget> {
 
     Config.bot.api = _api;
     Config.bot.model = _model;
-    Config.bot.systemPrompts = _systemPromptsCtrl.text;
-    if (maxTokens != null) Config.bot.maxTokens = maxTokens;
-    if (temperature != null) Config.bot.temperature = temperature;
+    Config.bot.maxTokens = maxTokens;
+    Config.bot.temperature = temperature;
+    final systemPrompts = _systemPromptsCtrl.text;
+    Config.bot.systemPrompts = systemPrompts.isNotEmpty ? systemPrompts : null;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -91,10 +96,6 @@ class _BotWidgetState extends State<BotWidget> {
       modelList.add(DropdownMenuItem(
           value: model, child: Text(model, overflow: TextOverflow.ellipsis)));
     }
-
-    _maxTokensCtrl.text = Config.bot.maxTokens.toString();
-    _temperatureCtrl.text = Config.bot.temperature.toString();
-    _systemPromptsCtrl.text = Config.bot.systemPrompts.toString();
 
     return ListView(
       children: [
@@ -184,18 +185,16 @@ class _BotWidgetState extends State<BotWidget> {
             Expanded(
               flex: 1,
               child: FilledButton.tonal(
-                child: const Text("Reset"),
-                onPressed: () {
-                  final bot = BotConfig();
-                  _maxTokensCtrl.text = bot.maxTokens.toString();
-                  _temperatureCtrl.text = bot.temperature.toString();
-                  _systemPromptsCtrl.text = bot.systemPrompts.toString();
-                  setState(() {
-                    _api = null;
-                    _model = null;
-                  });
-                },
-              ),
+                  child: const Text("Reset"),
+                  onPressed: () {
+                    _maxTokensCtrl.text = "";
+                    _temperatureCtrl.text = "";
+                    _systemPromptsCtrl.text = "";
+                    setState(() {
+                      _api = null;
+                      _model = null;
+                    });
+                  }),
             ),
             SizedBox(width: 8),
             Expanded(
