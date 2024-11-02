@@ -91,6 +91,23 @@ class ApiInfoWidget extends StatelessWidget {
     required this.shared,
   });
 
+  void fix() {
+    final api = Config.bot.api;
+    final model = Config.bot.model;
+
+    if (api != null) {
+      final apis = Config.apis[api];
+      if (apis == null) {
+        Config.bot.api = null;
+        Config.bot.model = null;
+      } else if (!apis.models.contains(model)) {
+        Config.bot.model = null;
+      }
+    } else if (model != null) {
+      Config.bot.model = null;
+    }
+  }
+
   bool save(BuildContext context) {
     final name = _nameCtrl.text;
     final models = _modelsCtrl.text;
@@ -125,8 +142,14 @@ class ApiInfoWidget extends StatelessWidget {
     }
 
     final modelList = models.split(",").map((e) => e.trim()).toList();
-    shared.setState(() => Config.apis[name] =
-        ApiConfig(url: apiUrl, key: apiKey, models: modelList));
+    shared.setState(() {
+      Config.apis[name] = ApiConfig(
+        url: apiUrl,
+        key: apiKey,
+        models: modelList,
+      );
+      fix();
+    });
 
     return true;
   }
@@ -217,7 +240,10 @@ class ApiInfoWidget extends StatelessWidget {
                         foregroundColor: Theme.of(context).colorScheme.onError,
                       ),
                       onPressed: () {
-                        shared.setState(() => Config.apis.remove(entry!.key));
+                        shared.setState(() {
+                          Config.apis.remove(entry!.key);
+                          fix();
+                        });
                         Navigator.of(context).pop(true);
                       },
                       child: Text("Delete"),
