@@ -42,9 +42,7 @@ class _ChatPageState extends State<ChatPage> {
 
   void _addImage(BuildContext context) async {
     if (image != null) {
-      return setState(() {
-        image = null;
-      });
+      return setState(() => image = null);
     }
 
     final source = await showModalBottomSheet<ImageSource>(
@@ -55,16 +53,12 @@ class _ChatPageState extends State<ChatPage> {
             ListTile(
               title: const Text("Camera"),
               leading: const Icon(Icons.camera),
-              onTap: () {
-                Navigator.pop(context, ImageSource.camera);
-              },
+              onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               title: const Text("Gallery"),
               leading: const Icon(Icons.photo_library),
-              onTap: () {
-                Navigator.pop(context, ImageSource.gallery);
-              },
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
         );
@@ -90,10 +84,7 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     final base64 = base64Encode(bytes);
-
-    setState(() {
-      image = "data:image/jpeg;base64,$base64";
-    });
+    setState(() => image = "data:image/jpeg;base64,$base64");
   }
 
   void _sendMessage(BuildContext context) async {
@@ -111,9 +102,7 @@ class _ChatPageState extends State<ChatPage> {
     final text = _editCtrl.text;
     if (text.isEmpty) return;
 
-    setState(() {
-      sendable = false;
-    });
+    setState(() => sendable = false);
 
     _messages.add(Message(role: MessageRole.user, text: text, image: image));
     final message = Message(role: MessageRole.assistant, text: "");
@@ -148,8 +137,8 @@ class _ChatPageState extends State<ChatPage> {
 
           setState(() {
             message.text += json["choices"][0]["delta"]["content"];
-            _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
           });
+          _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
         }
       }
 
@@ -170,9 +159,7 @@ class _ChatPageState extends State<ChatPage> {
       client.close();
     }
 
-    setState(() {
-      sendable = true;
-    });
+    setState(() => sendable = true);
   }
 
   @override
