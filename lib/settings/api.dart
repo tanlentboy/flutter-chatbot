@@ -55,7 +55,7 @@ class _APIWidgetState extends State<APIWidget> {
                   title: Text(apis[index].key),
                   leading: const Icon(Icons.api),
                   contentPadding:
-                      EdgeInsets.only(top: 0, left: 12, right: 8, bottom: 0),
+                      EdgeInsets.only(top: 0, left: 12, right: 4, bottom: 0),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
@@ -174,10 +174,9 @@ class ApiInfoWidget extends StatelessWidget {
         title: Text("API"),
       ),
       body: Container(
-        padding: EdgeInsets.all(16),
+        margin: EdgeInsets.all(16),
         child: ListView(
           children: [
-            SizedBox(height: 8),
             TextField(
               controller: _nameCtrl,
               decoration: InputDecoration(

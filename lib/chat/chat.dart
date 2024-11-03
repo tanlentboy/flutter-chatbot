@@ -163,6 +163,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _longPress(BuildContext context, int index) async {
+    if (!sendable) return;
+
     final message = _messages[index];
     final children = [
       ListTile(
