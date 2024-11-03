@@ -15,6 +15,7 @@
 
 import "input.dart";
 import "message.dart";
+import "../util.dart";
 import "../config.dart";
 
 import "dart:io";
@@ -74,12 +75,9 @@ class _ChatPageState extends State<ChatPage> {
     Uint8List bytes = compressed ?? await File(result.path).readAsBytes();
 
     if (compressed == null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text("Failed to comprese image"),
-          dismissDirection: DismissDirection.horizontal,
-        ),
+      Util.showSnackBar(
+        context: context,
+        content: const Text("Failed to comprese image"),
       );
     }
 
@@ -89,12 +87,9 @@ class _ChatPageState extends State<ChatPage> {
 
   void _sendMessage(BuildContext context) async {
     if (Config.isNotOk) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text("Set up the Bot and API first"),
-          dismissDirection: DismissDirection.horizontal,
-        ),
+      Util.showSnackBar(
+        context: context,
+        content: const Text("Set up the Bot and API first"),
       );
       return;
     }
@@ -146,12 +141,10 @@ class _ChatPageState extends State<ChatPage> {
       image = null;
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("$e"),
-            behavior: SnackBarBehavior.floating,
-            dismissDirection: DismissDirection.horizontal,
-          ),
+        Util.showSnackBar(
+          context: context,
+          content: Text("$e"),
+          duration: const Duration(milliseconds: 1500),
         );
       }
       _messages.length -= 2;
@@ -169,19 +162,19 @@ class _ChatPageState extends State<ChatPage> {
     final children = [
       ListTile(
         title: const Text("Copy"),
-        leading: const Icon(Icons.copy),
+        leading: const Icon(Icons.copy_all),
         onTap: () => Navigator.pop(context, MessageEvent.copy),
       ),
-      ListTile(
-        title: const Text("Edit"),
-        leading: const Icon(Icons.edit_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.edit),
-      ),
-      ListTile(
-        title: const Text("Source"),
-        leading: const Icon(Icons.code),
-        onTap: () => Navigator.pop(context, MessageEvent.source),
-      ),
+      // ListTile(
+      //   title: const Text("Edit"),
+      //   leading: const Icon(Icons.edit_outlined),
+      //   onTap: () => Navigator.pop(context, MessageEvent.edit),
+      // ),
+      // ListTile(
+      //   title: const Text("Source"),
+      //   leading: const Icon(Icons.code_outlined),
+      //   onTap: () => Navigator.pop(context, MessageEvent.source),
+      // ),
     ];
 
     if (message.role == MessageRole.user) {
@@ -206,12 +199,10 @@ class _ChatPageState extends State<ChatPage> {
       case MessageEvent.copy:
         await Clipboard.setData(ClipboardData(text: message.text));
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text("Copied Successfully"),
-            duration: Duration(milliseconds: 500),
-            dismissDirection: DismissDirection.horizontal,
-          ));
+          Util.showSnackBar(
+            context: context,
+            content: const Text("Copied Successfully"),
+          );
         }
         break;
 
@@ -221,12 +212,10 @@ class _ChatPageState extends State<ChatPage> {
 
       default:
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text("Not implemented yet."),
-            duration: Duration(milliseconds: 500),
-            dismissDirection: DismissDirection.horizontal,
-          ));
+          Util.showSnackBar(
+            context: context,
+            content: Text("Not implemented yet"),
+          );
         }
         break;
     }

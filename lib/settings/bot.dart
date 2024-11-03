@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "../util.dart";
 import "../config.dart";
 
 import "package:flutter/material.dart";
@@ -40,23 +41,17 @@ class _BotWidgetState extends State<BotWidget> {
     final temperature = num.tryParse(_temperatureCtrl.text);
 
     if (_maxTokensCtrl.text.isNotEmpty && maxTokens == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text("Invalid Max Tokens"),
-          dismissDirection: DismissDirection.horizontal,
-        ),
+      Util.showSnackBar(
+        context: context,
+        content: const Text("Invalid Max Tokens"),
       );
       return;
     }
 
     if (_temperatureCtrl.text.isNotEmpty && temperature == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text("Invalid Temperature"),
-          dismissDirection: DismissDirection.horizontal,
-        ),
+      Util.showSnackBar(
+        context: context,
+        content: const Text("Invalid Temperature"),
       );
       return;
     }
@@ -68,13 +63,9 @@ class _BotWidgetState extends State<BotWidget> {
     final systemPrompts = _systemPromptsCtrl.text;
     Config.bot.systemPrompts = systemPrompts.isNotEmpty ? systemPrompts : null;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Text("Saved Successfully"),
-        duration: Duration(milliseconds: 500),
-        dismissDirection: DismissDirection.horizontal,
-      ),
+    Util.showSnackBar(
+      context: context,
+      content: const Text("Saved Successfully"),
     );
 
     await Config.save();

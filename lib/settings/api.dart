@@ -14,6 +14,7 @@
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
 import "settings.dart";
+import "../util.dart";
 import "../config.dart";
 
 import "package:flutter/material.dart";
@@ -117,24 +118,18 @@ class ApiInfoWidget extends StatelessWidget {
     final apiKey = _apiKeyCtrl.text;
 
     if (name.isEmpty || models.isEmpty || apiUrl.isEmpty || apiKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text("Please complete all fields"),
-          dismissDirection: DismissDirection.horizontal,
-        ),
+      Util.showSnackBar(
+        context: context,
+        content: const Text("Please complete all fields"),
       );
       return false;
     }
 
     if (Config.apis.containsKey(name) &&
         (entry == null || name != entry!.key)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text("The $name API already exists"),
-          dismissDirection: DismissDirection.horizontal,
-        ),
+      Util.showSnackBar(
+        context: context,
+        content: Text("The $name API already exists"),
       );
       return false;
     }
