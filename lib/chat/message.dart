@@ -35,12 +35,21 @@ enum MessageRole {
   user,
 }
 
+enum MessageEvent {
+  source,
+  delete,
+  copy,
+  edit,
+}
+
 class MessageWidget extends StatelessWidget {
   final Message message;
+  final VoidCallback longPress;
 
   const MessageWidget({
     super.key,
     required this.message,
+    required this.longPress,
   });
 
   static final extensionSet = ExtensionSet(
@@ -92,30 +101,25 @@ class MessageWidget extends StatelessWidget {
 
     return Container(
       alignment: alignment,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.8),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                  color: background, borderRadius: BorderRadius.circular(8)),
-              child: MarkdownBody(
-                data: content,
-                shrinkWrap: true,
-                selectable: true,
-                extensionSet: extensionSet,
-                builders: {
-                  "code": CodeElementBuilder(context: context),
-                  "latex": LatexElementBuilder(textScaleFactor: 1.2),
-                },
-                styleSheet: markdownStyleSheet,
-                styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-              ),
-            ),
-          );
-        },
+      margin: const EdgeInsets.all(8),
+      child: GestureDetector(
+        onLongPress: longPress,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+              color: background, borderRadius: BorderRadius.circular(8)),
+          child: MarkdownBody(
+            data: content,
+            shrinkWrap: true,
+            extensionSet: extensionSet,
+            builders: {
+              "code": CodeElementBuilder(context: context),
+              "latex": LatexElementBuilder(textScaleFactor: 1.2),
+            },
+            styleSheet: markdownStyleSheet,
+            styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+          ),
+        ),
       ),
     );
   }

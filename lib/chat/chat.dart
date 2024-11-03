@@ -19,8 +19,8 @@ import "../config.dart";
 
 import "dart:io";
 import "dart:convert";
-import "dart:typed_data";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:http/http.dart" as http;
 import "package:image_picker/image_picker.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
@@ -162,6 +162,74 @@ class _ChatPageState extends State<ChatPage> {
     setState(() => sendable = true);
   }
 
+  Future<void> _longPress(BuildContext context, int index) async {
+    final message = _messages[index];
+    final children = [
+      ListTile(
+        title: const Text("Copy"),
+        leading: const Icon(Icons.copy),
+        onTap: () => Navigator.pop(context, MessageEvent.copy),
+      ),
+      ListTile(
+        title: const Text("Edit"),
+        leading: const Icon(Icons.edit_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.edit),
+      ),
+      ListTile(
+        title: const Text("Source"),
+        leading: const Icon(Icons.code),
+        onTap: () => Navigator.pop(context, MessageEvent.source),
+      ),
+    ];
+
+    if (message.role == MessageRole.user) {
+      children.add(
+        ListTile(
+          title: const Text("Delete"),
+          leading: const Icon(Icons.delete_outlined),
+          onTap: () => Navigator.pop(context, MessageEvent.delete),
+        ),
+      );
+    }
+
+    final event = await showModalBottomSheet<MessageEvent>(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(children: children);
+      },
+    );
+    if (event == null) return;
+
+    switch (event) {
+      case MessageEvent.copy:
+        await Clipboard.setData(ClipboardData(text: message.text));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text("Copied Successfully"),
+            duration: Duration(milliseconds: 500),
+            dismissDirection: DismissDirection.horizontal,
+          ));
+        }
+        break;
+
+      case MessageEvent.delete:
+        setState(() => _messages.removeRange(index, index + 2));
+        break;
+
+      default:
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text("Not implemented yet."),
+            duration: Duration(milliseconds: 500),
+            dismissDirection: DismissDirection.horizontal,
+          ));
+        }
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final child = Column(
@@ -173,7 +241,10 @@ class _ChatPageState extends State<ChatPage> {
             padding: const EdgeInsets.all(8),
             itemBuilder: (context, index) {
               final message = _messages[index];
-              return MessageWidget(message: message);
+              return MessageWidget(
+                message: message,
+                longPress: () async => await _longPress(context, index),
+              );
             },
           ),
         ),
@@ -202,10 +273,8 @@ class _ChatPageState extends State<ChatPage> {
           Builder(
             builder: (context) {
               return IconButton(
-                onPressed: () {
-                  Navigator.of(context).pushNamed("/settings");
-                },
                 icon: const Icon(Icons.settings),
+                onPressed: () => Navigator.of(context).pushNamed("/settings"),
               );
             },
           )
