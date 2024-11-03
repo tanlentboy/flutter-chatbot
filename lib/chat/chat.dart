@@ -272,6 +272,29 @@ class _ChatPageState extends State<ChatPage> {
         ],
         title: const Text("ChatBot"),
       ),
+      drawer: Drawer(
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text(
+                "ChatBot",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              contentPadding: EdgeInsets.only(left: 16, right: 8),
+              trailing: IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {},
+              ),
+            ),
+            Divider(),
+            ListTile(
+              title: Text("All Chats",
+                  style: Theme.of(context).textTheme.labelSmall),
+            )
+          ],
+        ),
+      ),
       body: Container(child: child),
     );
   }

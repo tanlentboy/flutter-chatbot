@@ -57,11 +57,9 @@ class InputWidget extends StatelessWidget {
           label: Text(files.toString()),
           child: IconButton(
             onPressed: add,
-            style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
             icon: Icon(files == 0 ? Icons.add_photo_alternate : Icons.delete),
           ),
         ),
-        const SizedBox(width: 8),
         Expanded(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxHeight: 120),
@@ -77,11 +75,9 @@ class InputWidget extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
         IconButton(
           onPressed: send,
           icon: const Icon(Icons.send),
-          style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
         ),
       ],
     );
@@ -89,13 +85,13 @@ class InputWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       child: Padding(
-        padding: const EdgeInsets.only(top: 12, left: 8, right: 8, bottom: 12),
+        padding: const EdgeInsets.only(top: 12, left: 6, right: 6, bottom: 12),
         child: child,
       ),
     );
