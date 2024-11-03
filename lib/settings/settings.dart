@@ -46,8 +46,8 @@ class SettingsPageState extends State<SettingsPage> {
           setState: setState,
           child: TabBarView(
             children: [
-              Container(padding: EdgeInsets.all(16), child: BotWidget()),
-              Container(padding: EdgeInsets.all(16), child: APIWidget()),
+              Container(margin: EdgeInsets.all(16), child: BotWidget()),
+              Container(margin: EdgeInsets.all(16), child: APIWidget()),
               Center(child: Text("Other")),
             ],
           ),

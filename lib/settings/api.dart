@@ -169,9 +169,10 @@ class ApiInfoWidget extends StatelessWidget {
         title: Text("API"),
       ),
       body: Container(
-        margin: EdgeInsets.all(16),
+        margin: EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
         child: ListView(
           children: [
+            SizedBox(height: 8),
             TextField(
               controller: _nameCtrl,
               decoration: InputDecoration(
