@@ -26,6 +26,30 @@ class BotConfig {
   int? maxTokens;
   num? temperature;
   String? systemPrompts;
+
+  BotConfig({
+    this.api,
+    this.model,
+    this.maxTokens,
+    this.temperature,
+    this.systemPrompts,
+  });
+
+  Map<String, dynamic> toJson() => {
+        "api": api,
+        "model": model,
+        "maxTokens": maxTokens,
+        "temperature": temperature,
+        "systemPrompts": systemPrompts,
+      };
+
+  factory BotConfig.fromJson(Map<String, dynamic> json) => BotConfig(
+        api: json["api"],
+        model: json["model"],
+        maxTokens: json["maxTokens"],
+        temperature: json["temperature"],
+        systemPrompts: json["systemPrompts"],
+      );
 }
 
 class ApiConfig {
@@ -38,6 +62,18 @@ class ApiConfig {
     required this.key,
     required this.models,
   });
+
+  Map<String, Object> toJson() => {
+        "url": url,
+        "key": key,
+        "models": models,
+      };
+
+  factory ApiConfig.fromJson(Map<String, dynamic> json) => ApiConfig(
+        url: json["url"],
+        key: json["key"],
+        models: json["models"].cast<String>(),
+      );
 }
 
 class ChatConfig {
@@ -50,12 +86,24 @@ class ChatConfig {
     required this.title,
     required this.fileName,
   });
+
+  Map<String, String> toJson() => {
+        "time": time,
+        "title": title,
+        "fileName": fileName,
+      };
+
+  factory ChatConfig.fromJson(Map<String, dynamic> json) => ChatConfig(
+        time: json["time"],
+        title: json["title"],
+        fileName: json["fileName"],
+      );
 }
 
 class Config {
-  static final BotConfig bot = BotConfig();
-  static final Map<String, ApiConfig> apis = {};
-  static final List<ChatConfig> chats = [];
+  static BotConfig bot = BotConfig();
+  static Map<String, ApiConfig> apis = {};
+  static List<ChatConfig> chats = [];
 
   static String? get apiUrl {
     if (bot.api == null) return null;
@@ -76,74 +124,31 @@ class Config {
   }
 
   static void fromJson(Map<String, dynamic> json) {
-    final botJson = (json["bot"] ?? {}) as Map<String, dynamic>;
-    final apisJson = (json["apis"] ?? {}) as Map<String, dynamic>;
-    final chatsJson = (json["chats"] ?? []) as List<dynamic>;
+    final botJson = json["bot"] ?? {};
+    final apisJson = json["apis"] ?? {};
+    final chatsJson = json["chats"] ?? [];
 
-    bot.api = botJson["api"];
-    bot.model = botJson["model"];
-    bot.maxTokens = botJson["maxTokens"];
-    bot.temperature = botJson["temperature"];
-    bot.systemPrompts = botJson["systemPrompts"];
+    bot = BotConfig.fromJson(botJson);
 
     for (final pair in apisJson.entries) {
-      final api = pair.value as Map<String, dynamic>;
-      final models = api["models"] as List<dynamic>;
-      apis[pair.key] = ApiConfig(
-        url: api["url"],
-        key: api["key"],
-        models: models.cast<String>(),
-      );
+      apis[pair.key] = ApiConfig.fromJson(pair.value);
     }
 
     for (final chat in chatsJson) {
-      chats.add(ChatConfig(
-        time: chat["time"],
-        title: chat["title"],
-        fileName: chat["fileName"],
-      ));
+      chats.add(ChatConfig.fromJson(chat));
     }
   }
 
-  static Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-
-    final botJson = {
-      "api": bot.api,
-      "model": bot.model,
-      "maxTokens": bot.maxTokens,
-      "temperature": bot.temperature,
-      "systemPrompts": bot.systemPrompts,
-    };
-    json["bot"] = botJson;
-
-    final apisJson = {};
-    json["apis"] = apisJson;
-    for (final pair in apis.entries) {
-      final api = pair.value;
-      apisJson[pair.key] = {
-        "url": api.url,
-        "key": api.key,
-        "models": api.models,
+  static Map<String, dynamic> toJson() => {
+        "bot": bot,
+        "apis": apis,
+        "chats": chats,
       };
-    }
-
-    final chatsJson = [];
-    json["chats"] = chatsJson;
-    for (final chat in chats) {
-      chatsJson.add({
-        "time": chat.time,
-        "title": chat.title,
-        "fileName": chat.fileName,
-      });
-    }
-
-    return json;
-  }
 
   static late final File _file;
   static late final String _filePath;
   static late final Directory _directory;
+  static const String _chatsDirectory = "chats";
   static const String _fileName = "settings.json";
 
   static Future<void> initialize() async {
@@ -161,6 +166,11 @@ class Config {
 
   static Future<void> save() async {
     await _file.writeAsString(jsonEncode(toJson()));
+  }
+
+  static String chatFilePath(String fileName) {
+    final separator = Platform.pathSeparator;
+    return "${_directory.path}$separator$_chatsDirectory$separator$fileName";
   }
 }
 
