@@ -28,6 +28,22 @@ class Message {
   MessageRole role;
 
   Message({this.image, required this.role, required this.text});
+
+  Map<String, String?> toJson() => {
+        "text": text,
+        "image": image,
+        "role": role.name,
+      };
+
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
+        text: json["text"],
+        image: json["image"],
+        role: switch (json["role"]) {
+          "assistant" => MessageRole.assistant,
+          "user" => MessageRole.user,
+          _ => throw "bad role",
+        },
+      );
 }
 
 enum MessageRole {

@@ -148,7 +148,6 @@ class Config {
   static late final File _file;
   static late final String _filePath;
   static late final Directory _directory;
-  static const String _chatsDirectory = "chats";
   static const String _fileName = "settings.json";
 
   static Future<void> initialize() async {
@@ -169,8 +168,7 @@ class Config {
   }
 
   static String chatFilePath(String fileName) {
-    final separator = Platform.pathSeparator;
-    return "${_directory.path}$separator$_chatsDirectory$separator$fileName";
+    return "${_directory.path}${Platform.pathSeparator}$fileName";
   }
 }
 

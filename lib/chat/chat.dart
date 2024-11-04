@@ -36,12 +36,16 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   String? image;
   bool sendable = true;
+
+  File? currentFile;
+  ChatConfig? currentChat;
   final List<Message> _messages = [];
+
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollCtrl = ScrollController();
   final TextEditingController _editCtrl = TextEditingController();
 
-  void _addImage(BuildContext context) async {
+  Future<void> _addImage(BuildContext context) async {
     if (image != null) {
       return setState(() => image = null);
     }
@@ -85,7 +89,23 @@ class _ChatPageState extends State<ChatPage> {
     setState(() => image = "data:image/jpeg;base64,$base64");
   }
 
-  void _sendMessage(BuildContext context) async {
+  Future<void> _saveChat() async {
+    if (currentChat == null || currentFile == null) {
+      final fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final filePath = Config.chatFilePath(fileName);
+
+      currentChat = ChatConfig(
+        time: DateTime.now().toString(),
+        title: _messages[0].text,
+        fileName: fileName,
+      );
+      currentFile = File(filePath);
+
+      setState(() => Config.chats.add(currentChat!));
+    }
+  }
+
+  Future<void> _sendMessage(BuildContext context) async {
     if (Config.isNotOk) {
       Util.showSnackBar(
         context: context,
@@ -137,8 +157,9 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
 
-      _editCtrl.clear();
       image = null;
+      _editCtrl.clear();
+      await _saveChat();
     } catch (e) {
       if (context.mounted) {
         Util.showSnackBar(
@@ -223,7 +244,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final child = Column(
+    final body = Column(
       children: [
         Expanded(
           child: ListView.builder(
@@ -249,53 +270,67 @@ class _ChatPageState extends State<ChatPage> {
       ],
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                image = null;
-                _messages.length = 0;
-              });
-            },
-            icon: const Icon(Icons.delete),
+    final drawer = Column(
+      children: [
+        ListTile(
+          title: Text(
+            "ChatBot",
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () => Navigator.of(context).pushNamed("/settings"),
+          contentPadding: EdgeInsets.only(left: 16, right: 8),
+          trailing: IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {},
+          ),
+        ),
+        Divider(),
+        ListTile(
+          title: Text(
+            "All Chats",
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: Config.chats.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: const Icon(Icons.message),
+                title: Text(Config.chats[index].title),
+                onTap: () {},
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {},
+                ),
               );
             },
-          )
-        ],
+          ),
+        ),
+      ],
+    );
+
+    return Scaffold(
+      appBar: AppBar(
         title: const Text("ChatBot"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => setState(() {
+              image = null;
+              _messages.length = 0;
+            }),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.of(context).pushNamed("/settings"),
+          ),
+        ],
       ),
       drawer: Drawer(
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-        child: ListView(
-          children: [
-            ListTile(
-              title: Text(
-                "ChatBot",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              contentPadding: EdgeInsets.only(left: 16, right: 8),
-              trailing: IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () {},
-              ),
-            ),
-            Divider(),
-            ListTile(
-              title: Text("All Chats",
-                  style: Theme.of(context).textTheme.labelSmall),
-            )
-          ],
-        ),
+        child: SafeArea(child: drawer),
       ),
-      body: Container(child: child),
+      body: body,
     );
   }
 }
