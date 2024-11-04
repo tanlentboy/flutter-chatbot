@@ -310,24 +310,24 @@ class _ChatPageState extends State<ChatPage> {
           child: ListView.builder(
             itemCount: Config.chats.length,
             itemBuilder: (context, index) {
+              final chat = Config.chats[index];
               return ListTile(
                 contentPadding: EdgeInsets.only(left: 16, right: 8),
                 leading: const Icon(Icons.message),
                 title: Text(
-                  Config.chats[index].title,
-                  overflow: TextOverflow.ellipsis,
+                  chat.title,
                   maxLines: 1,
                   softWrap: false,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                subtitle: Text(Config.chats[index].time),
+                subtitle: Text(chat.time),
                 onTap: () async {
+                  if (currentChat == chat) return;
                   _messages.clear();
-
-                  final chat = Config.chats[index];
-                  currentChat = chat;
 
                   final file = File(Config.chatFilePath(chat.fileName));
                   currentFile = file;
+                  currentChat = chat;
 
                   final json = jsonDecode(await file.readAsString());
                   for (final message in json) {
@@ -339,8 +339,6 @@ class _ChatPageState extends State<ChatPage> {
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () async {
-                    final chat = Config.chats[index];
-
                     if (currentChat == chat) {
                       currentChat = null;
                       currentFile = null;
