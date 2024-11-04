@@ -135,9 +135,10 @@ class _ChatPageState extends State<ChatPage> {
     _messages.add(message);
 
     final client = http.Client();
+    final chatEndpoint = "${Config.apiUrl!}/chat/completions";
 
     try {
-      final request = http.Request("POST", Uri.parse(Config.apiUrl!));
+      final request = http.Request("POST", Uri.parse(chatEndpoint));
       request.headers["Authorization"] = "Bearer ${Config.apiKey}";
       request.headers["Content-Type"] = "application/json";
       request.body = jsonEncode(window);
@@ -289,15 +290,6 @@ class _ChatPageState extends State<ChatPage> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           contentPadding: EdgeInsets.only(left: 16, right: 8),
-          trailing: IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              _messages.clear();
-              currentChat = null;
-              currentFile = null;
-              setState(() => image = null);
-            },
-          ),
         ),
         Divider(),
         Container(
@@ -364,15 +356,15 @@ class _ChatPageState extends State<ChatPage> {
         title: const Text("ChatBot"),
         actions: [
           IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                if (currentChat == null) return;
+              icon: const Icon(Icons.note_add_outlined),
+              onPressed: () {
                 _messages.clear();
-                await _saveChat();
+                currentChat = null;
+                currentFile = null;
                 setState(() => image = null);
               }),
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.of(context).pushNamed("/settings"),
           ),
         ],
