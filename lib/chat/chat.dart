@@ -300,11 +300,11 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
         Divider(),
-        ListTile(
-          title: Text(
-            "All Chats",
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
+        Container(
+          alignment: Alignment.topLeft,
+          padding: EdgeInsets.only(left: 16, top: 8, bottom: 8),
+          child:
+              Text("All Chats", style: Theme.of(context).textTheme.labelSmall),
         ),
         Expanded(
           child: ListView.builder(
@@ -314,6 +314,7 @@ class _ChatPageState extends State<ChatPage> {
               return ListTile(
                 contentPadding: EdgeInsets.only(left: 16, right: 8),
                 leading: const Icon(Icons.message),
+                selected: currentChat == chat,
                 title: Text(
                   chat.title,
                   maxLines: 1,
