@@ -40,9 +40,22 @@ class ApiConfig {
   });
 }
 
+class ChatConfig {
+  String time;
+  String title;
+  String fileName;
+
+  ChatConfig({
+    required this.time,
+    required this.title,
+    required this.fileName,
+  });
+}
+
 class Config {
   static final BotConfig bot = BotConfig();
   static final Map<String, ApiConfig> apis = {};
+  static final List<ChatConfig> chats = [];
 
   static String? get apiUrl {
     if (bot.api == null) return null;
@@ -63,8 +76,9 @@ class Config {
   }
 
   static void fromJson(Map<String, dynamic> json) {
-    final botJson = json["bot"] as Map<String, dynamic>;
-    final apisJson = json["apis"] as Map<String, dynamic>;
+    final botJson = (json["bot"] ?? {}) as Map<String, dynamic>;
+    final apisJson = (json["apis"] ?? {}) as Map<String, dynamic>;
+    final chatsJson = (json["chats"] ?? []) as List<dynamic>;
 
     bot.api = botJson["api"];
     bot.model = botJson["model"];
@@ -81,29 +95,47 @@ class Config {
         models: models.cast<String>(),
       );
     }
+
+    for (final chat in chatsJson) {
+      chats.add(ChatConfig(
+        time: chat["time"],
+        title: chat["title"],
+        fileName: chat["fileName"],
+      ));
+    }
   }
 
   static Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
 
-    json["bot"] = {
+    final botJson = {
       "api": bot.api,
       "model": bot.model,
       "maxTokens": bot.maxTokens,
       "temperature": bot.temperature,
       "systemPrompts": bot.systemPrompts,
     };
+    json["bot"] = botJson;
 
-    final map = {};
-    json["apis"] = map;
-
+    final apisJson = {};
+    json["apis"] = apisJson;
     for (final pair in apis.entries) {
       final api = pair.value;
-      map[pair.key] = {
+      apisJson[pair.key] = {
         "url": api.url,
         "key": api.key,
         "models": api.models,
       };
+    }
+
+    final chatsJson = [];
+    json["chats"] = chatsJson;
+    for (final chat in chats) {
+      chatsJson.add({
+        "time": chat.time,
+        "title": chat.title,
+        "fileName": chat.fileName,
+      });
     }
 
     return json;

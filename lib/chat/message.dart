@@ -27,7 +27,7 @@ class Message {
   String? image;
   MessageRole role;
 
-  Message({required this.role, required this.text, this.image});
+  Message({this.image, required this.role, required this.text});
 }
 
 enum MessageRole {
