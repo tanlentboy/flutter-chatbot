@@ -90,19 +90,29 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _saveChat() async {
-    if (currentChat == null || currentFile == null) {
-      final fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      final filePath = Config.chatFilePath(fileName);
+    if (currentChat == null) {
+      final now = DateTime.now();
+      final timestamp = now.millisecondsSinceEpoch.toString();
 
-      currentChat = ChatConfig(
-        time: DateTime.now().toString(),
-        title: _messages[0].text,
+      final time = Util.formatDateTime(now);
+      final title = _messages.first.text;
+      final fileName = "$timestamp.json";
+
+      final chat = ChatConfig(
+        time: time,
+        title: title,
         fileName: fileName,
       );
+      currentChat = chat;
+
+      final filePath = Config.chatFilePath(fileName);
       currentFile = File(filePath);
 
-      setState(() => Config.chats.add(currentChat!));
+      setState(() => Config.chats.add(chat));
+      Config.save();
     }
+
+    await currentFile!.writeAsString(jsonEncode(_messages));
   }
 
   Future<void> _sendMessage(BuildContext context) async {
@@ -229,6 +239,7 @@ class _ChatPageState extends State<ChatPage> {
 
       case MessageEvent.delete:
         setState(() => _messages.removeRange(index, index + 2));
+        await _saveChat();
         break;
 
       default:
@@ -280,7 +291,12 @@ class _ChatPageState extends State<ChatPage> {
           contentPadding: EdgeInsets.only(left: 16, right: 8),
           trailing: IconButton(
             icon: Icon(Icons.add),
-            onPressed: () {},
+            onPressed: () {
+              _messages.clear();
+              currentChat = null;
+              currentFile = null;
+              setState(() => image = null);
+            },
           ),
         ),
         Divider(),
@@ -295,12 +311,47 @@ class _ChatPageState extends State<ChatPage> {
             itemCount: Config.chats.length,
             itemBuilder: (context, index) {
               return ListTile(
+                contentPadding: EdgeInsets.only(left: 16, right: 8),
                 leading: const Icon(Icons.message),
-                title: Text(Config.chats[index].title),
-                onTap: () {},
+                title: Text(
+                  Config.chats[index].title,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+                subtitle: Text(Config.chats[index].time),
+                onTap: () async {
+                  _messages.clear();
+
+                  final chat = Config.chats[index];
+                  currentChat = chat;
+
+                  final file = File(Config.chatFilePath(chat.fileName));
+                  currentFile = file;
+
+                  final json = jsonDecode(await file.readAsString());
+                  for (final message in json) {
+                    _messages.add(Message.fromJson(message));
+                  }
+
+                  setState(() => image = null);
+                },
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () {},
+                  onPressed: () async {
+                    final chat = Config.chats[index];
+
+                    if (currentChat == chat) {
+                      currentChat = null;
+                      currentFile = null;
+                      _messages.clear();
+                      image = null;
+                    }
+
+                    await File(Config.chatFilePath(chat.fileName)).delete();
+                    setState(() => Config.chats.removeAt(index));
+                    await Config.save();
+                  },
                 ),
               );
             },
@@ -314,12 +365,13 @@ class _ChatPageState extends State<ChatPage> {
         title: const Text("ChatBot"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => setState(() {
-              image = null;
-              _messages.length = 0;
-            }),
-          ),
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                if (currentChat == null) return;
+                _messages.clear();
+                await _saveChat();
+                setState(() => image = null);
+              }),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => Navigator.of(context).pushNamed("/settings"),

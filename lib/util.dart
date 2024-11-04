@@ -16,4 +16,11 @@ class Util {
       ),
     );
   }
+
+  static String _keepTwo(int n) => n.toString().padLeft(2, "0");
+
+  static String formatDateTime(DateTime time) {
+    return "${_keepTwo(time.month)}-${_keepTwo(time.day)} "
+        "${_keepTwo(time.hour)}:${_keepTwo(time.minute)}";
+  }
 }
