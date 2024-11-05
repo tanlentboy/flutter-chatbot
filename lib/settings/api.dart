@@ -13,11 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "dart:convert";
+
 import "settings.dart";
 import "../util.dart";
 import "../config.dart";
 
 import "package:flutter/material.dart";
+import "package:http/http.dart" as http;
 
 class APIWidget extends StatefulWidget {
   const APIWidget({super.key});
@@ -35,7 +38,7 @@ class _APIWidgetState extends State<APIWidget> {
     return Column(
       children: [
         FilledButton(
-          child: Text("New API"),
+          child: const Text("New API"),
           onPressed: () async {
             final changed = await showDialog<bool>(
               context: context,
@@ -46,7 +49,7 @@ class _APIWidgetState extends State<APIWidget> {
             }
           },
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Expanded(
           child: ListView.builder(
             itemCount: apis.length,
@@ -55,7 +58,7 @@ class _APIWidgetState extends State<APIWidget> {
                 child: ListTile(
                   title: Text(apis[index].key),
                   leading: const Icon(Icons.api),
-                  contentPadding: EdgeInsets.only(left: 16, right: 8),
+                  contentPadding: const EdgeInsets.only(left: 16, right: 8),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
@@ -150,6 +153,47 @@ class ApiInfoWidget extends StatelessWidget {
     return true;
   }
 
+  Future<void> _editModels(BuildContext context) async {}
+
+  Future<void> _fetchModels(BuildContext context) async {
+    final url = _apiUrlCtrl.text;
+    final key = _apiKeyCtrl.text;
+
+    if (url.isEmpty || key.isEmpty) {
+      Util.showSnackBar(
+        context: context,
+        content: const Text("Please complete all fields"),
+      );
+      return;
+    }
+
+    final modelsEndpoint = "$url/models";
+
+    try {
+      final response = await http.get(
+        Uri.parse(modelsEndpoint),
+        headers: {"Authorization": "Bearer $key"},
+      );
+
+      if (response.statusCode != 200) {
+        throw "${response.statusCode} ${response.body}";
+      }
+
+      final json = jsonDecode(response.body);
+      final models = <String>[for (final cell in json["data"]) cell["id"]];
+
+      _modelsCtrl.text = models.join(", ");
+    } catch (e) {
+      if (context.mounted) {
+        Util.showSnackBar(
+          context: context,
+          content: Text("$e"),
+          duration: const Duration(milliseconds: 1500),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (entry != null) {
@@ -162,34 +206,44 @@ class ApiInfoWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.close),
+          icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(false),
         ),
         title: Text("API"),
       ),
       body: Container(
-        margin: EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
+        margin: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
         child: ListView(
           children: [
-            SizedBox(height: 8),
-            TextField(
-              controller: _nameCtrl,
-              decoration: InputDecoration(
-                labelText: "Name",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextField(
+                    controller: _nameCtrl,
+                    decoration: InputDecoration(
+                      labelText: "Name",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _apiUrlCtrl,
-              decoration: InputDecoration(
-                labelText: "API Url",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _apiUrlCtrl,
+                    decoration: InputDecoration(
+                      labelText: "API Url",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             SizedBox(height: 16),
             TextField(
@@ -201,17 +255,37 @@ class ApiInfoWidget extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 16),
-            TextField(
-              maxLines: 4,
-              controller: _modelsCtrl,
-              decoration: InputDecoration(
-                labelText: "Model List",
-                alignLabelWithHint: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    maxLines: 4,
+                    controller: _modelsCtrl,
+                    decoration: InputDecoration(
+                      labelText: "Model List",
+                      alignLabelWithHint: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                SizedBox(width: 8),
+                Column(
+                  children: [
+                    IconButton.outlined(
+                      onPressed: () async => _fetchModels(context),
+                      icon: const Icon(Icons.sync),
+                    ),
+                    SizedBox(height: 8),
+                    IconButton.outlined(
+                      onPressed: () async => _editModels(context),
+                      icon: const Icon(Icons.edit),
+                    ),
+                  ],
+                )
+              ],
             ),
             SizedBox(height: 16),
             Row(
@@ -222,10 +296,10 @@ class ApiInfoWidget extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop(false);
                     },
-                    child: Text("Cancel"),
+                    child: const Text("Cancel"),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Visibility(
                   visible: entry != null,
                   child: Expanded(
@@ -242,7 +316,7 @@ class ApiInfoWidget extends StatelessWidget {
                         });
                         Navigator.of(context).pop(true);
                       },
-                      child: Text("Delete"),
+                      child: const Text("Delete"),
                     ),
                   ),
                 ),
@@ -250,7 +324,7 @@ class ApiInfoWidget extends StatelessWidget {
                 Expanded(
                   flex: 1,
                   child: FilledButton(
-                    child: Text("Save"),
+                    child: const Text("Save"),
                     onPressed: () {
                       if (save(context)) {
                         Navigator.of(context).pop(true);

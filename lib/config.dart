@@ -24,7 +24,7 @@ class BotConfig {
   String? api;
   String? model;
   int? maxTokens;
-  num? temperature;
+  double? temperature;
   String? systemPrompts;
 
   BotConfig({

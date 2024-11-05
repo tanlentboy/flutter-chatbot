@@ -38,7 +38,7 @@ class _BotWidgetState extends State<BotWidget> {
 
   Future<void> save(BuildContext context) async {
     final maxTokens = int.tryParse(_maxTokensCtrl.text);
-    final temperature = num.tryParse(_temperatureCtrl.text);
+    final temperature = double.tryParse(_temperatureCtrl.text);
 
     if (_maxTokensCtrl.text.isNotEmpty && maxTokens == null) {
       Util.showSnackBar(

@@ -22,8 +22,8 @@ import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:http/http.dart" as http;
 import "package:image_picker/image_picker.dart";
+import "package:openai_dart/openai_dart.dart" as openai;
 import "package:flutter_image_compress/flutter_image_compress.dart";
 
 class ChatPage extends StatefulWidget {
@@ -131,41 +131,21 @@ class _ChatPageState extends State<ChatPage> {
 
     _messages.add(Message(role: MessageRole.user, text: text, image: image));
     final message = Message(role: MessageRole.assistant, text: "");
-    final window = _buildContext(_messages);
+    final request = _createRequest(_messages);
     _messages.add(message);
 
-    final client = http.Client();
-    final chatEndpoint = "${Config.apiUrl!}/chat/completions";
-
     try {
-      final request = http.Request("POST", Uri.parse(chatEndpoint));
-      request.headers["Authorization"] = "Bearer ${Config.apiKey}";
-      request.headers["Content-Type"] = "application/json";
-      request.body = jsonEncode(window);
+      final client = openai.OpenAIClient(
+        baseUrl: Config.apiUrl,
+        apiKey: Config.apiKey,
+      );
 
-      final response = await client.send(request);
-      final stream = response.stream.transform(utf8.decoder);
+      final stream = client.createChatCompletionStream(request: request);
 
-      if (response.statusCode != 200) {
-        throw "${response.statusCode} ${await stream.join()}";
-      }
-
-      outer:
       await for (final chunk in stream) {
-        final lines = LineSplitter.split(chunk).toList();
-
-        for (final line in lines) {
-          if (!line.startsWith("data:")) continue;
-          final raw = line.substring(5);
-
-          if (raw.trim() == "[DONE]") break outer;
-          final json = jsonDecode(raw);
-
-          setState(() {
-            message.text += json["choices"][0]["delta"]["content"];
-          });
-          _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
-        }
+        final content = chunk.choices.first.delta.content;
+        if (content != null) setState(() => message.text += content);
+        _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
       }
 
       image = null;
@@ -180,8 +160,6 @@ class _ChatPageState extends State<ChatPage> {
         );
       }
       _messages.length -= 2;
-    } finally {
-      client.close();
     }
 
     setState(() => sendable = true);
@@ -305,7 +283,7 @@ class _ChatPageState extends State<ChatPage> {
               final chat = Config.chats[index];
               return ListTile(
                 contentPadding: EdgeInsets.only(left: 16, right: 8),
-                leading: const Icon(Icons.message),
+                leading: const Icon(Icons.article),
                 selected: currentChat == chat,
                 title: Text(
                   chat.title,
@@ -378,47 +356,60 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
-Map<String, Object> _buildContext(List<Message> messages) {
-  Map<String, Object> context = {
-    "model": Config.bot.model!,
-    "stream": true,
-  };
-  if (Config.bot.maxTokens != null) {
-    context["max_tokens"] = Config.bot.maxTokens!;
-  }
-  if (Config.bot.temperature != null) {
-    context["temperature"] = Config.bot.temperature!;
-  }
+openai.CreateChatCompletionRequest _createRequest(List<Message> list) {
+  final messages = <openai.ChatCompletionMessage>[];
 
-  List<Map<String, Object>> list = [];
   if (Config.bot.systemPrompts != null) {
-    list.add({"role": "system", "content": Config.bot.systemPrompts!});
+    messages.add(
+      openai.ChatCompletionMessage.system(content: Config.bot.systemPrompts!),
+    );
   }
 
-  for (final pair in messages.indexed) {
-    final Object content;
-    final index = pair.$1;
-    final message = pair.$2;
-    final image = message.image;
+  for (final item in list) {
+    switch (item.role) {
+      case MessageRole.assistant:
+        messages.add(
+          openai.ChatCompletionMessage.assistant(content: item.text),
+        );
+        break;
 
-    if (index != messages.length - 1 || image == null) {
-      content = message.text;
-    } else {
-      content = [
-        {
-          "type": "image_url",
-          "image_url": {"url": image},
-        },
-        {
-          "type": "text",
-          "text": message.text,
-        },
-      ];
+      case MessageRole.user:
+        if (item.image == null) {
+          messages.add(
+            openai.ChatCompletionMessage.user(
+              content: openai.ChatCompletionUserMessageContent.string(
+                item.text,
+              ),
+            ),
+          );
+        } else {
+          messages.add(
+            openai.ChatCompletionMessage.user(
+              content: openai.ChatCompletionUserMessageContent.parts(
+                [
+                  openai.ChatCompletionMessageContentPart.text(
+                    text: item.text,
+                  ),
+                  openai.ChatCompletionMessageContentPart.image(
+                    imageUrl: openai.ChatCompletionMessageImageUrl(
+                      url: item.image!,
+                      detail: openai.ChatCompletionMessageImageDetail.auto,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
     }
-
-    list.add({"role": message.role.name, "content": content});
   }
 
-  context["messages"] = list;
-  return context;
+  final request = openai.CreateChatCompletionRequest(
+    model: openai.ChatCompletionModel.modelId(Config.bot.model!),
+    temperature: Config.bot.temperature,
+    maxTokens: Config.bot.maxTokens,
+    messages: messages,
+  );
+
+  return request;
 }
