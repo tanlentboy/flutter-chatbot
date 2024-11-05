@@ -152,7 +152,60 @@ class ApiInfoWidget extends StatelessWidget {
     return true;
   }
 
-  Future<void> _editModels(BuildContext context) async {}
+  Future<void> _editModels(BuildContext context) async {
+    final models = _modelsCtrl.text;
+    if (models.isEmpty) return;
+
+    final chosen = {for (final model in models.split(",")) model.trim(): true};
+    if (chosen.isEmpty) return;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Select Models"),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: chosen.keys.map((model) {
+                    return CheckboxListTile(
+                      title: Text(model),
+                      value: chosen[model],
+                      onChanged: (value) =>
+                          setState(() => chosen[model] = value ?? false),
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text("Cancel"),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                TextButton(
+                  child: const Text("Clear"),
+                  onPressed: () => setState(() =>
+                      chosen.forEach((model, _) => chosen[model] = false)),
+                ),
+                TextButton(
+                  child: const Text("Save"),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null || !result) return;
+
+    _modelsCtrl.text = [
+      for (final pair in chosen.entries)
+        if (pair.value) pair.key
+    ].join(", ");
+  }
 
   Future<void> _fetchModels(BuildContext context) async {
     final url = _apiUrlCtrl.text;
