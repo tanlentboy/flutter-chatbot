@@ -100,7 +100,8 @@ class MessageWidget extends StatelessWidget {
     );
 
     if (message.image != null) {
-      content = "![image](${message.image})\n\n${message.text}";
+      content =
+          "![image](data:image/jpeg;base64,${message.image})\n\n${message.text}";
     }
 
     switch (message.role) {

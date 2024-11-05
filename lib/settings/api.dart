@@ -13,12 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "dart:convert";
-
 import "settings.dart";
 import "../util.dart";
 import "../config.dart";
 
+import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 

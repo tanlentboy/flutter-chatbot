@@ -22,8 +22,9 @@ import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:langchain/langchain.dart";
 import "package:image_picker/image_picker.dart";
-import "package:openai_dart/openai_dart.dart" as openai;
+import "package:langchain_openai/langchain_openai.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
 
 class ChatPage extends StatefulWidget {
@@ -34,11 +35,11 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  String? image;
-  bool sendable = true;
+  String? _image;
+  bool _sendable = true;
 
-  File? currentFile;
-  ChatConfig? currentChat;
+  File? _currentFile;
+  ChatConfig? _currentChat;
   final List<Message> _messages = [];
 
   final ImagePicker _picker = ImagePicker();
@@ -46,8 +47,8 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _editCtrl = TextEditingController();
 
   Future<void> _addImage(BuildContext context) async {
-    if (image != null) {
-      return setState(() => image = null);
+    if (_image != null) {
+      return setState(() => _image = null);
     }
 
     final source = await showModalBottomSheet<ImageSource>(
@@ -86,11 +87,11 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     final base64 = base64Encode(bytes);
-    setState(() => image = "data:image/jpeg;base64,$base64");
+    setState(() => _image = base64);
   }
 
   Future<void> _saveChat() async {
-    if (currentChat == null) {
+    if (_currentChat == null) {
       final now = DateTime.now();
       final timestamp = now.millisecondsSinceEpoch.toString();
 
@@ -103,16 +104,16 @@ class _ChatPageState extends State<ChatPage> {
         title: title,
         fileName: fileName,
       );
-      currentChat = chat;
+      _currentChat = chat;
 
       final filePath = Config.chatFilePath(fileName);
-      currentFile = File(filePath);
+      _currentFile = File(filePath);
 
       setState(() => Config.chats.add(chat));
       Config.save();
     }
 
-    await currentFile!.writeAsString(jsonEncode(_messages));
+    await _currentFile!.writeAsString(jsonEncode(_messages));
   }
 
   Future<void> _sendMessage(BuildContext context) async {
@@ -127,28 +128,33 @@ class _ChatPageState extends State<ChatPage> {
     final text = _editCtrl.text;
     if (text.isEmpty) return;
 
-    setState(() => sendable = false);
+    setState(() => _sendable = false);
 
-    _messages.add(Message(role: MessageRole.user, text: text, image: image));
+    _messages.add(Message(role: MessageRole.user, text: text, image: _image));
     final message = Message(role: MessageRole.assistant, text: "");
-    final request = _createRequest(_messages);
+    final messages = _buildContext(_messages);
     _messages.add(message);
 
     try {
-      final client = openai.OpenAIClient(
-        baseUrl: Config.apiUrl,
-        apiKey: Config.apiKey,
+      final llm = ChatOpenAI(
+        apiKey: Config.apiKey!,
+        baseUrl: Config.apiUrl!,
+        defaultOptions: ChatOpenAIOptions(
+          model: Config.bot.model,
+          maxTokens: Config.bot.maxTokens,
+          temperature: Config.bot.temperature,
+        ),
       );
 
-      final stream = client.createChatCompletionStream(request: request);
+      final stream = llm.stream(PromptValue.chat(messages));
 
       await for (final chunk in stream) {
-        final content = chunk.choices.first.delta.content;
-        if (content != null) setState(() => message.text += content);
+        final content = chunk.output.content;
+        setState(() => message.text += content);
         _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
       }
 
-      image = null;
+      _image = null;
       _editCtrl.clear();
       await _saveChat();
     } catch (e) {
@@ -162,11 +168,11 @@ class _ChatPageState extends State<ChatPage> {
       _messages.length -= 2;
     }
 
-    setState(() => sendable = true);
+    setState(() => _sendable = true);
   }
 
   Future<void> _longPress(BuildContext context, int index) async {
-    if (!sendable) return;
+    if (!_sendable) return;
 
     final message = _messages[index];
     final children = [
@@ -251,11 +257,11 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
         InputWidget(
-          editable: sendable,
+          editable: _sendable,
           controller: _editCtrl,
-          files: image != null ? 1 : 0,
-          addImage: sendable ? _addImage : null,
-          sendMessage: sendable ? _sendMessage : null,
+          files: _image != null ? 1 : 0,
+          addImage: _sendable ? _addImage : null,
+          sendMessage: _sendable ? _sendMessage : null,
         ),
       ],
     );
@@ -284,7 +290,7 @@ class _ChatPageState extends State<ChatPage> {
               return ListTile(
                 contentPadding: EdgeInsets.only(left: 16, right: 8),
                 leading: const Icon(Icons.article),
-                selected: currentChat == chat,
+                selected: _currentChat == chat,
                 title: Text(
                   chat.title,
                   maxLines: 1,
@@ -293,28 +299,28 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 subtitle: Text(chat.time),
                 onTap: () async {
-                  if (currentChat == chat) return;
+                  if (_currentChat == chat) return;
                   _messages.clear();
 
                   final file = File(Config.chatFilePath(chat.fileName));
-                  currentFile = file;
-                  currentChat = chat;
+                  _currentFile = file;
+                  _currentChat = chat;
 
                   final json = jsonDecode(await file.readAsString());
                   for (final message in json) {
                     _messages.add(Message.fromJson(message));
                   }
 
-                  setState(() => image = null);
+                  setState(() => _image = null);
                 },
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () async {
-                    if (currentChat == chat) {
-                      currentChat = null;
-                      currentFile = null;
+                    if (_currentChat == chat) {
+                      _currentChat = null;
+                      _currentFile = null;
                       _messages.clear();
-                      image = null;
+                      _image = null;
                     }
 
                     await File(Config.chatFilePath(chat.fileName)).delete();
@@ -337,9 +343,9 @@ class _ChatPageState extends State<ChatPage> {
               icon: const Icon(Icons.note_add_outlined),
               onPressed: () {
                 _messages.clear();
-                currentChat = null;
-                currentFile = null;
-                setState(() => image = null);
+                _currentChat = null;
+                _currentFile = null;
+                setState(() => _image = null);
               }),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -356,60 +362,33 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
-openai.CreateChatCompletionRequest _createRequest(List<Message> list) {
-  final messages = <openai.ChatCompletionMessage>[];
+List<ChatMessage> _buildContext(List<Message> list) {
+  final context = <ChatMessage>[];
 
   if (Config.bot.systemPrompts != null) {
-    messages.add(
-      openai.ChatCompletionMessage.system(content: Config.bot.systemPrompts!),
-    );
+    context.add(ChatMessage.system(Config.bot.systemPrompts!));
   }
 
   for (final item in list) {
     switch (item.role) {
       case MessageRole.assistant:
-        messages.add(
-          openai.ChatCompletionMessage.assistant(content: item.text),
-        );
+        context.add(ChatMessage.ai(item.text));
         break;
 
       case MessageRole.user:
         if (item.image == null) {
-          messages.add(
-            openai.ChatCompletionMessage.user(
-              content: openai.ChatCompletionUserMessageContent.string(
-                item.text,
-              ),
-            ),
-          );
+          context.add(ChatMessage.humanText(item.text));
         } else {
-          messages.add(
-            openai.ChatCompletionMessage.user(
-              content: openai.ChatCompletionUserMessageContent.parts(
-                [
-                  openai.ChatCompletionMessageContentPart.text(
-                    text: item.text,
-                  ),
-                  openai.ChatCompletionMessageContentPart.image(
-                    imageUrl: openai.ChatCompletionMessageImageUrl(
-                      url: item.image!,
-                      detail: openai.ChatCompletionMessageImageDetail.auto,
-                    ),
-                  ),
-                ],
-              ),
+          context.add(ChatMessage.human(ChatMessageContent.multiModal([
+            ChatMessageContent.text(item.text),
+            ChatMessageContent.image(
+              mimeType: "image/jpeg",
+              data: item.image!,
             ),
-          );
+          ])));
         }
     }
   }
 
-  final request = openai.CreateChatCompletionRequest(
-    model: openai.ChatCompletionModel.modelId(Config.bot.model!),
-    temperature: Config.bot.temperature,
-    maxTokens: Config.bot.maxTokens,
-    messages: messages,
-  );
-
-  return request;
+  return context;
 }
