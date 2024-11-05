@@ -62,13 +62,13 @@ class InputWidget extends StatelessWidget {
         ),
         Expanded(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: 120),
+            constraints: const BoxConstraints(maxHeight: 120),
             child: TextField(
               maxLines: null,
               enabled: editable,
               controller: controller,
               keyboardType: TextInputType.multiline,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: "Enter your message",
               ),

@@ -94,7 +94,7 @@ class MessageWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final markdownStyleSheet = MarkdownStyleSheet(
       codeblockDecoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.surfaceContainer,
       ),
     );
@@ -124,7 +124,8 @@ class MessageWidget extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-              color: background, borderRadius: BorderRadius.circular(8)),
+              color: background,
+              borderRadius: const BorderRadius.all(Radius.circular(8))),
           child: MarkdownBody(
             data: content,
             shrinkWrap: true,

@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "settings.dart";
 import "../util.dart";
 import "../config.dart";
 
@@ -22,7 +21,9 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 
 class APIWidget extends StatefulWidget {
-  const APIWidget({super.key});
+  final void Function(VoidCallback) parentSetState;
+
+  const APIWidget({super.key, required this.parentSetState});
 
   @override
   State<APIWidget> createState() => _APIWidgetState();
@@ -31,8 +32,8 @@ class APIWidget extends StatefulWidget {
 class _APIWidgetState extends State<APIWidget> {
   @override
   Widget build(BuildContext context) {
-    final shared = SettingsShared.of(context);
     final apis = Config.apis.entries.toList();
+    final parentSetState = widget.parentSetState;
 
     return Column(
       children: [
@@ -41,7 +42,8 @@ class _APIWidgetState extends State<APIWidget> {
           onPressed: () async {
             final changed = await showDialog<bool>(
               context: context,
-              builder: (context) => ApiInfoWidget(shared: shared),
+              builder: (context) =>
+                  ApiInfoWidget(parentSetState: parentSetState),
             );
             if (changed != null && changed) {
               await Config.save();
@@ -63,8 +65,8 @@ class _APIWidgetState extends State<APIWidget> {
                     onPressed: () async {
                       final changed = await showDialog<bool>(
                         context: context,
-                        builder: (context) =>
-                            ApiInfoWidget(shared: shared, entry: apis[index]),
+                        builder: (_) => ApiInfoWidget(
+                            parentSetState: parentSetState, entry: apis[index]),
                       );
                       if (changed != null && changed) {
                         await Config.save();
@@ -82,8 +84,8 @@ class _APIWidgetState extends State<APIWidget> {
 }
 
 class ApiInfoWidget extends StatelessWidget {
-  final SettingsShared shared;
   final MapEntry<String, ApiConfig>? entry;
+  final void Function(VoidCallback) parentSetState;
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _modelsCtrl = TextEditingController();
   final TextEditingController _apiUrlCtrl = TextEditingController();
@@ -92,7 +94,7 @@ class ApiInfoWidget extends StatelessWidget {
   ApiInfoWidget({
     super.key,
     this.entry,
-    required this.shared,
+    required this.parentSetState,
   });
 
   void fix() {
@@ -136,11 +138,11 @@ class ApiInfoWidget extends StatelessWidget {
     }
 
     if (entry != null) {
-      shared.setState(() => Config.apis.remove(entry!.key));
+      parentSetState(() => Config.apis.remove(entry!.key));
     }
 
     final modelList = models.split(",").map((e) => e.trim()).toList();
-    shared.setState(() {
+    parentSetState(() {
       Config.apis[name] = ApiConfig(
         url: apiUrl,
         key: apiKey,
@@ -261,7 +263,7 @@ class ApiInfoWidget extends StatelessWidget {
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        title: Text("API"),
+        title: const Text("API"),
       ),
       body: Container(
         margin: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
@@ -297,7 +299,7 @@ class ApiInfoWidget extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _apiKeyCtrl,
               decoration: InputDecoration(
@@ -318,19 +320,20 @@ class ApiInfoWidget extends StatelessWidget {
                       labelText: "Model List",
                       alignLabelWithHint: true,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Column(
                   children: [
                     IconButton.outlined(
                       onPressed: () async => _fetchModels(context),
                       icon: const Icon(Icons.sync),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     IconButton.outlined(
                       onPressed: () async => _editModels(context),
                       icon: const Icon(Icons.edit),
@@ -339,7 +342,7 @@ class ApiInfoWidget extends StatelessWidget {
                 )
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -362,7 +365,7 @@ class ApiInfoWidget extends StatelessWidget {
                         foregroundColor: Theme.of(context).colorScheme.onError,
                       ),
                       onPressed: () {
-                        shared.setState(() {
+                        parentSetState(() {
                           Config.apis.remove(entry!.key);
                           fix();
                         });
@@ -372,7 +375,7 @@ class ApiInfoWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   flex: 1,
                   child: FilledButton(

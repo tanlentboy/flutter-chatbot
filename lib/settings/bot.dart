@@ -98,35 +98,37 @@ class _BotWidgetState extends State<BotWidget> {
                 value: _api,
                 items: apiList,
                 isExpanded: true,
-                hint: Text("API"),
-                onChanged: (String? it) => setState(() {
+                hint: const Text("API"),
+                onChanged: (it) => setState(() {
                   _model = null;
                   _api = it;
                 }),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8))),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
                 ),
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               flex: 2,
               child: DropdownButtonFormField<String>(
                 value: _model,
                 items: modelList,
                 isExpanded: true,
-                hint: Text("Model"),
-                onChanged: (String? it) => setState(() => _model = it),
-                decoration: InputDecoration(
+                hint: const Text("Model"),
+                onChanged: (it) => setState(() => _model = it),
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8))),
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
                 ),
               ),
             ),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -134,7 +136,7 @@ class _BotWidgetState extends State<BotWidget> {
               child: TextField(
                 controller: _temperatureCtrl,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Temperature",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -142,13 +144,13 @@ class _BotWidgetState extends State<BotWidget> {
                 ),
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               flex: 1,
               child: TextField(
                 controller: _maxTokensCtrl,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Max Tokens",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -158,11 +160,11 @@ class _BotWidgetState extends State<BotWidget> {
             ),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         TextField(
           maxLines: 4,
           controller: _systemPromptsCtrl,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             alignLabelWithHint: true,
             labelText: "System Prompts",
             border: OutlineInputBorder(
@@ -170,24 +172,25 @@ class _BotWidgetState extends State<BotWidget> {
             ),
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               flex: 1,
               child: FilledButton.tonal(
-                  child: const Text("Reset"),
-                  onPressed: () {
-                    _maxTokensCtrl.text = "";
-                    _temperatureCtrl.text = "";
-                    _systemPromptsCtrl.text = "";
-                    setState(() {
-                      _api = null;
-                      _model = null;
-                    });
-                  }),
+                child: const Text("Reset"),
+                onPressed: () {
+                  _maxTokensCtrl.text = "";
+                  _temperatureCtrl.text = "";
+                  _systemPromptsCtrl.text = "";
+                  setState(() {
+                    _api = null;
+                    _model = null;
+                  });
+                },
+              ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               flex: 1,
               child: FilledButton(
