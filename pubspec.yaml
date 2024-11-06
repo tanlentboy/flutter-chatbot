@@ -1,7 +1,6 @@
 name: chatbot
-version: 0.0.8+1
-publish_to: "none"
-description: "ChatBot"
+version: 0.0.9+1
+description: ChatBot
 
 environment:
   sdk: ^3.5.4
