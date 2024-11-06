@@ -24,6 +24,7 @@
     "max_tokens": "最大输出",
     "temperature": "温度",
     "system_prompts": "系统提示词",
+    "streaming_response": "流式响应",
 
     "name": "名称",
     "new_api": "新接口",

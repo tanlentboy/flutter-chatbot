@@ -29,6 +29,7 @@ class BotWidget extends StatefulWidget {
 class _BotWidgetState extends State<BotWidget> {
   String? _api = Config.bot.api;
   String? _model = Config.bot.model;
+  bool? _stream = Config.bot.stream;
 
   final TextEditingController _maxTokensCtrl =
       TextEditingController(text: Config.bot.maxTokens?.toString());
@@ -59,6 +60,7 @@ class _BotWidgetState extends State<BotWidget> {
 
     Config.bot.api = _api;
     Config.bot.model = _model;
+    Config.bot.stream = _stream;
     Config.bot.maxTokens = maxTokens;
     Config.bot.temperature = temperature;
     final systemPrompts = _systemPromptsCtrl.text;
@@ -133,7 +135,6 @@ class _BotWidgetState extends State<BotWidget> {
         Row(
           children: [
             Expanded(
-              flex: 1,
               child: TextField(
                 controller: _temperatureCtrl,
                 keyboardType: TextInputType.number,
@@ -147,7 +148,6 @@ class _BotWidgetState extends State<BotWidget> {
             ),
             const SizedBox(width: 8),
             Expanded(
-              flex: 1,
               child: TextField(
                 controller: _maxTokensCtrl,
                 keyboardType: TextInputType.number,
@@ -176,6 +176,20 @@ class _BotWidgetState extends State<BotWidget> {
         const SizedBox(height: 16),
         Row(
           children: [
+            Flexible(
+              child: SwitchListTile(
+                title: Text(S.of(context).streaming_response),
+                value: _stream ?? true,
+                onChanged: (value) {
+                  setState(() => _stream = value);
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
             Expanded(
               flex: 1,
               child: FilledButton.tonal(
@@ -187,6 +201,7 @@ class _BotWidgetState extends State<BotWidget> {
                   setState(() {
                     _api = null;
                     _model = null;
+                    _stream = null;
                   });
                 },
               ),

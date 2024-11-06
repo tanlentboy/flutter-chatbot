@@ -250,6 +250,16 @@ class S {
     );
   }
 
+  /// `Streaming Response`
+  String get streaming_response {
+    return Intl.message(
+      'Streaming Response',
+      name: 'streaming_response',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Name`
   String get name {
     return Intl.message(

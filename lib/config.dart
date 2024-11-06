@@ -22,6 +22,7 @@ import "package:flutter_highlighter/themes/atom-one-light.dart";
 
 class BotConfig {
   String? api;
+  bool? stream;
   String? model;
   int? maxTokens;
   double? temperature;
@@ -30,6 +31,7 @@ class BotConfig {
   BotConfig({
     this.api,
     this.model,
+    this.stream,
     this.maxTokens,
     this.temperature,
     this.systemPrompts,
@@ -38,6 +40,7 @@ class BotConfig {
   Map<String, dynamic> toJson() => {
         "api": api,
         "model": model,
+        "stream": stream,
         "maxTokens": maxTokens,
         "temperature": temperature,
         "systemPrompts": systemPrompts,
@@ -46,6 +49,7 @@ class BotConfig {
   factory BotConfig.fromJson(Map<String, dynamic> json) => BotConfig(
         api: json["api"],
         model: json["model"],
+        stream: json["stream"],
         maxTokens: json["maxTokens"],
         temperature: json["temperature"],
         systemPrompts: json["systemPrompts"],

@@ -147,11 +147,16 @@ class _ChatPageState extends State<ChatPage> {
         ),
       );
 
-      final stream = llm.stream(PromptValue.chat(messages));
-
-      await for (final chunk in stream) {
-        final content = chunk.output.content;
-        setState(() => message.text += content);
+      if (Config.bot.stream ?? true) {
+        final stream = llm.stream(PromptValue.chat(messages));
+        await for (final chunk in stream) {
+          final content = chunk.output.content;
+          setState(() => message.text += content);
+          _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
+        }
+      } else {
+        final result = await llm.invoke(PromptValue.chat(messages));
+        setState(() => message.text += result.output.content);
         _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
       }
 

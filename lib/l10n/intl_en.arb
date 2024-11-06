@@ -24,6 +24,7 @@
     "max_tokens": "Max Tokens",
     "temperature": "Temperature",
     "system_prompts": "System Prompts",
+    "streaming_response": "Streaming Response",
 
     "name": "Name",
     "new_api": "New API",
