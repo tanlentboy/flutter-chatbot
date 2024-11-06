@@ -15,6 +15,7 @@
 
 import "../util.dart";
 import "../config.dart";
+import "../gen/l10n.dart";
 
 import "dart:convert";
 import "package:flutter/material.dart";
@@ -38,7 +39,7 @@ class _APIWidgetState extends State<APIWidget> {
     return Column(
       children: [
         FilledButton(
-          child: const Text("New API"),
+          child: Text(S.of(context).new_api),
           onPressed: () async {
             final changed = await showDialog<bool>(
               context: context,
@@ -57,7 +58,10 @@ class _APIWidgetState extends State<APIWidget> {
             itemBuilder: (context, index) {
               return Card.filled(
                 child: ListTile(
-                  title: Text(apis[index].key),
+                  title: Text(
+                    apis[index].key,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   leading: const Icon(Icons.api),
                   contentPadding: const EdgeInsets.only(left: 16, right: 8),
                   trailing: IconButton(
@@ -123,7 +127,7 @@ class ApiInfoWidget extends StatelessWidget {
     if (name.isEmpty || models.isEmpty || apiUrl.isEmpty || apiKey.isEmpty) {
       Util.showSnackBar(
         context: context,
-        content: const Text("Please complete all fields"),
+        content: Text(S.of(context).complete_all_fields),
       );
       return false;
     }
@@ -132,7 +136,7 @@ class ApiInfoWidget extends StatelessWidget {
         (entry == null || name != entry!.key)) {
       Util.showSnackBar(
         context: context,
-        content: Text("The $name API already exists"),
+        content: Text(S.of(context).duplicate_api_name),
       );
       return false;
     }
@@ -167,7 +171,7 @@ class ApiInfoWidget extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text("Select Models"),
+              title: Text(S.of(context).select_models),
               content: SingleChildScrollView(
                 child: ListBody(
                   children: chosen.keys.map((model) {
@@ -182,16 +186,16 @@ class ApiInfoWidget extends StatelessWidget {
               ),
               actions: [
                 TextButton(
-                  child: const Text("Cancel"),
+                  child: Text(S.of(context).cancel),
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
                 TextButton(
-                  child: const Text("Clear"),
+                  child: Text(S.of(context).clear),
                   onPressed: () => setState(() =>
                       chosen.forEach((model, _) => chosen[model] = false)),
                 ),
                 TextButton(
-                  child: const Text("Save"),
+                  child: Text(S.of(context).save),
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
               ],
@@ -216,7 +220,7 @@ class ApiInfoWidget extends StatelessWidget {
     if (url.isEmpty || key.isEmpty) {
       Util.showSnackBar(
         context: context,
-        content: const Text("Please complete all fields"),
+        content: Text(S.of(context).complete_all_fields),
       );
       return;
     }
@@ -263,7 +267,7 @@ class ApiInfoWidget extends StatelessWidget {
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        title: const Text("API"),
+        title: Text(S.of(context).api),
       ),
       body: Container(
         margin: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
@@ -277,9 +281,10 @@ class ApiInfoWidget extends StatelessWidget {
                   child: TextField(
                     controller: _nameCtrl,
                     decoration: InputDecoration(
-                      labelText: "Name",
+                      labelText: S.of(context).name,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
                       ),
                     ),
                   ),
@@ -290,9 +295,10 @@ class ApiInfoWidget extends StatelessWidget {
                   child: TextField(
                     controller: _apiUrlCtrl,
                     decoration: InputDecoration(
-                      labelText: "API Url",
+                      labelText: S.of(context).api_url,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
                       ),
                     ),
                   ),
@@ -303,9 +309,9 @@ class ApiInfoWidget extends StatelessWidget {
             TextField(
               controller: _apiKeyCtrl,
               decoration: InputDecoration(
-                labelText: "API Key",
+                labelText: S.of(context).api_key,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                 ),
               ),
             ),
@@ -317,7 +323,7 @@ class ApiInfoWidget extends StatelessWidget {
                     maxLines: 4,
                     controller: _modelsCtrl,
                     decoration: InputDecoration(
-                      labelText: "Model List",
+                      labelText: S.of(context).model_list,
                       alignLabelWithHint: true,
                       border: OutlineInputBorder(
                         borderRadius:
@@ -351,7 +357,7 @@ class ApiInfoWidget extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop(false);
                     },
-                    child: const Text("Cancel"),
+                    child: Text(S.of(context).cancel),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -371,7 +377,7 @@ class ApiInfoWidget extends StatelessWidget {
                         });
                         Navigator.of(context).pop(true);
                       },
-                      child: const Text("Delete"),
+                      child: Text(S.of(context).delete),
                     ),
                   ),
                 ),
@@ -379,7 +385,7 @@ class ApiInfoWidget extends StatelessWidget {
                 Expanded(
                   flex: 1,
                   child: FilledButton(
-                    child: const Text("Save"),
+                    child: Text(S.of(context).save),
                     onPressed: () {
                       if (save(context)) {
                         Navigator.of(context).pop(true);

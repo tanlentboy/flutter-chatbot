@@ -15,6 +15,7 @@
 
 import "bot.dart";
 import "api.dart";
+import "../gen/l10n.dart";
 
 import "package:flutter/material.dart";
 
@@ -32,12 +33,12 @@ class SettingsPageState extends State<SettingsPage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Settings"),
-          bottom: const TabBar(
+          title: Text(S.of(context).settings),
+          bottom: TabBar(
             tabs: [
-              Tab(text: "Bot"),
-              Tab(text: "APIs"),
-              Tab(text: "Other"),
+              Tab(text: S.of(context).bot),
+              Tab(text: S.of(context).apis),
+              Tab(text: S.of(context).other),
             ],
           ),
         ),
@@ -51,7 +52,7 @@ class SettingsPageState extends State<SettingsPage> {
               margin: const EdgeInsets.all(16),
               child: APIWidget(parentSetState: setState),
             ),
-            const Center(child: Text("Other")),
+            Center(child: Text(S.of(context).other)),
           ],
         ),
       ),

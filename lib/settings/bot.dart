@@ -15,6 +15,7 @@
 
 import "../util.dart";
 import "../config.dart";
+import "../gen/l10n.dart";
 
 import "package:flutter/material.dart";
 
@@ -43,7 +44,7 @@ class _BotWidgetState extends State<BotWidget> {
     if (_maxTokensCtrl.text.isNotEmpty && maxTokens == null) {
       Util.showSnackBar(
         context: context,
-        content: const Text("Invalid Max Tokens"),
+        content: Text(S.of(context).invalid_max_tokens),
       );
       return;
     }
@@ -51,7 +52,7 @@ class _BotWidgetState extends State<BotWidget> {
     if (_temperatureCtrl.text.isNotEmpty && temperature == null) {
       Util.showSnackBar(
         context: context,
-        content: const Text("Invalid Temperature"),
+        content: Text(S.of(context).invalid_temperature),
       );
       return;
     }
@@ -65,7 +66,7 @@ class _BotWidgetState extends State<BotWidget> {
 
     Util.showSnackBar(
       context: context,
-      content: const Text("Saved Successfully"),
+      content: Text(S.of(context).saved_successfully),
     );
 
     await Config.save();
@@ -98,7 +99,7 @@ class _BotWidgetState extends State<BotWidget> {
                 value: _api,
                 items: apiList,
                 isExpanded: true,
-                hint: const Text("API"),
+                hint: Text(S.of(context).api),
                 onChanged: (it) => setState(() {
                   _model = null;
                   _api = it;
@@ -117,7 +118,7 @@ class _BotWidgetState extends State<BotWidget> {
                 value: _model,
                 items: modelList,
                 isExpanded: true,
-                hint: const Text("Model"),
+                hint: Text(S.of(context).model),
                 onChanged: (it) => setState(() => _model = it),
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
@@ -136,8 +137,8 @@ class _BotWidgetState extends State<BotWidget> {
               child: TextField(
                 controller: _temperatureCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Temperature",
+                decoration: InputDecoration(
+                  labelText: S.of(context).temperature,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
@@ -150,8 +151,8 @@ class _BotWidgetState extends State<BotWidget> {
               child: TextField(
                 controller: _maxTokensCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Max Tokens",
+                decoration: InputDecoration(
+                  labelText: S.of(context).max_tokens,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
@@ -164,9 +165,9 @@ class _BotWidgetState extends State<BotWidget> {
         TextField(
           maxLines: 4,
           controller: _systemPromptsCtrl,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             alignLabelWithHint: true,
-            labelText: "System Prompts",
+            labelText: S.of(context).system_prompts,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
@@ -178,7 +179,7 @@ class _BotWidgetState extends State<BotWidget> {
             Expanded(
               flex: 1,
               child: FilledButton.tonal(
-                child: const Text("Reset"),
+                child: Text(S.of(context).reset),
                 onPressed: () {
                   _maxTokensCtrl.text = "";
                   _temperatureCtrl.text = "";
@@ -194,7 +195,7 @@ class _BotWidgetState extends State<BotWidget> {
             Expanded(
               flex: 1,
               child: FilledButton(
-                child: const Text("Save"),
+                child: Text(S.of(context).save),
                 onPressed: () async => save(context),
               ),
             ),

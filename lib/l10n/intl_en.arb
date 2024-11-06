@@ -1,0 +1,51 @@
+{
+    "@@locale": "en",
+    "title": "ChatBot",
+
+    "copy": "copy",
+    "edit": "edit",
+    "source": "source",
+    "delete": "delete",
+    "camera": "camera",
+    "gallery": "gallery",
+    "settings": "Settings",
+
+    "bot": "Bot",
+    "apis": "APIs",
+    "other": "Other",
+
+    "save": "Save",
+    "reset": "Reset",
+    "clear": "Clear",
+    "cancel": "Cancel",
+
+    "api": "API",
+    "model": "Model",
+    "max_tokens": "Max Tokens",
+    "temperature": "Temperature",
+    "system_prompts": "System Prompts",
+
+    "name": "Name",
+    "new_api": "New API",
+    "api_url": "API Url",
+    "api_key": "API Key",
+    "model_list": "Model List",
+    "select_models": "Select Models",
+
+    "duplicate_api_name": "Duplicate API name",
+    "complete_all_fields": "Please complete all fields",
+
+    "no_model": "no model",
+    "all_chats": "All Chats",
+
+    "saved_successfully": "Saved Successfully",
+    "copied_successfully": "Copied Successfully",
+    "not_implemented_yet": "Not implemented yet",
+
+    "invalid_max_tokens": "Invalid Max Tokens",
+    "invalid_temperature": "Invalid Temperature",
+
+    "enter_your_message": "Enter your message",
+    "image_compress_failed": "Failed to comprese image",
+    "setup_bot_api_first": "Set up the Bot and API first"
+}

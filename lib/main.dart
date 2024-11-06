@@ -14,10 +14,12 @@
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
 import "config.dart";
+import "gen/l10n.dart";
 import "chat/chat.dart";
 import "settings/settings.dart";
 
 import "package:flutter/material.dart";
+import "package:flutter_localizations/flutter_localizations.dart";
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,13 @@ class App extends StatelessWidget {
         "/": (context) => ChatPage(),
         "/settings": (context) => SettingsPage(),
       },
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
     );
   }
 }

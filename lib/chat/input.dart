@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "../gen/l10n.dart";
 import "package:flutter/material.dart";
 
 class InputWidget extends StatelessWidget {
@@ -68,9 +69,9 @@ class InputWidget extends StatelessWidget {
               enabled: editable,
               controller: controller,
               keyboardType: TextInputType.multiline,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: "Enter your message",
+                hintText: S.of(context).enter_your_message,
               ),
             ),
           ),

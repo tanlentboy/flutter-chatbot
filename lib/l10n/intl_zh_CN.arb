@@ -1,0 +1,51 @@
+{
+    "@@locale": "zh_CN",
+    "title": "ChatBot",
+
+    "copy": "拷贝",
+    "edit": "编辑",
+    "source": "源码",
+    "delete": "删除",
+    "camera": "相机",
+    "gallery": "图库",
+    "settings": "设置",
+
+    "bot": "参数",
+    "apis": "接口",
+    "other": "其他",
+
+    "save": "保存",
+    "reset": "重置",
+    "clear": "清除",
+    "cancel": "取消",
+
+    "api": "接口",
+    "model": "模型",
+    "max_tokens": "最大输出",
+    "temperature": "温度",
+    "system_prompts": "系统提示词",
+
+    "name": "名称",
+    "new_api": "新接口",
+    "api_url": "接口地址",
+    "api_key": "接口密钥",
+    "model_list": "模型列表",
+    "select_models": "选择模型",
+
+    "duplicate_api_name": "名称重复",
+    "complete_all_fields": "请填写所有字段",
+
+    "no_model": "无模型",
+    "all_chats": "所有聊天",
+
+    "saved_successfully": "保存成功",
+    "copied_successfully": "拷贝成功",
+    "not_implemented_yet": "还未实现",
+
+    "invalid_max_tokens": "非法的最大输出",
+    "invalid_temperature": "非法的温度",
+
+    "enter_your_message": "输入你的消息",
+    "image_compress_failed": "图片压缩失败",
+    "setup_bot_api_first": "请先配置参数和接口"
+}

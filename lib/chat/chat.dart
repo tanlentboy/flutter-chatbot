@@ -17,6 +17,7 @@ import "input.dart";
 import "message.dart";
 import "../util.dart";
 import "../config.dart";
+import "../gen/l10n.dart";
 
 import "dart:io";
 import "dart:convert";
@@ -57,13 +58,13 @@ class _ChatPageState extends State<ChatPage> {
         return Wrap(
           children: [
             ListTile(
-              title: const Text("Camera"),
               leading: const Icon(Icons.camera),
+              title: Text(S.of(context).camera),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
-              title: const Text("Gallery"),
               leading: const Icon(Icons.photo_library),
+              title: Text(S.of(context).gallery),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
@@ -82,7 +83,7 @@ class _ChatPageState extends State<ChatPage> {
     if (compressed == null && context.mounted) {
       Util.showSnackBar(
         context: context,
-        content: const Text("Failed to comprese image"),
+        content: Text(S.of(context).image_compress_failed),
       );
     }
 
@@ -120,7 +121,7 @@ class _ChatPageState extends State<ChatPage> {
     if (Config.isNotOk) {
       Util.showSnackBar(
         context: context,
-        content: const Text("Set up the Bot and API first"),
+        content: Text(S.of(context).setup_bot_api_first),
       );
       return;
     }
@@ -177,26 +178,26 @@ class _ChatPageState extends State<ChatPage> {
     final message = _messages[index];
     final children = [
       ListTile(
-        title: const Text("Copy"),
+        title: Text(S.of(context).copy),
         leading: const Icon(Icons.copy_all),
         onTap: () => Navigator.pop(context, MessageEvent.copy),
       ),
       // ListTile(
-      //   title: const Text("Edit"),
-      //   leading: const Icon(Icons.edit_outlined),
-      //   onTap: () => Navigator.pop(context, MessageEvent.edit),
-      // ),
-      // ListTile(
-      //   title: const Text("Source"),
+      //   title: Text(S.of(context).source),
       //   leading: const Icon(Icons.code_outlined),
       //   onTap: () => Navigator.pop(context, MessageEvent.source),
+      // ),
+      // ListTile(
+      //   title: Text(S.of(context).edit),
+      //   leading: const Icon(Icons.edit_outlined),
+      //   onTap: () => Navigator.pop(context, MessageEvent.edit),
       // ),
     ];
 
     if (message.role == MessageRole.user) {
       children.add(
         ListTile(
-          title: const Text("Delete"),
+          title: Text(S.of(context).delete),
           leading: const Icon(Icons.delete_outlined),
           onTap: () => Navigator.pop(context, MessageEvent.delete),
         ),
@@ -217,7 +218,7 @@ class _ChatPageState extends State<ChatPage> {
         if (context.mounted) {
           Util.showSnackBar(
             context: context,
-            content: const Text("Copied Successfully"),
+            content: Text(S.of(context).copied_successfully),
           );
         }
         break;
@@ -231,7 +232,7 @@ class _ChatPageState extends State<ChatPage> {
         if (context.mounted) {
           Util.showSnackBar(
             context: context,
-            content: Text("Not implemented yet"),
+            content: Text(S.of(context).not_implemented_yet),
           );
         }
         break;
@@ -273,14 +274,16 @@ class _ChatPageState extends State<ChatPage> {
             "ChatBot",
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          contentPadding: EdgeInsets.only(left: 16, right: 8),
+          contentPadding: const EdgeInsets.only(left: 16, right: 8),
         ),
         Divider(),
         Container(
           alignment: Alignment.topLeft,
-          padding: EdgeInsets.only(left: 16, top: 8, bottom: 8),
-          child:
-              Text("All Chats", style: Theme.of(context).textTheme.labelSmall),
+          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+          child: Text(
+            S.of(context).all_chats,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
         ),
         Expanded(
           child: ListView.builder(
@@ -288,7 +291,7 @@ class _ChatPageState extends State<ChatPage> {
             itemBuilder: (context, index) {
               final chat = Config.chats[index];
               return ListTile(
-                contentPadding: EdgeInsets.only(left: 16, right: 8),
+                contentPadding: const EdgeInsets.only(left: 16, right: 8),
                 leading: const Icon(Icons.article),
                 selected: _currentChat == chat,
                 title: Text(
@@ -337,7 +340,30 @@ class _ChatPageState extends State<ChatPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("ChatBot"),
+        title: Row(children: [
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "ChatBot",
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  Config.bot.model ?? S.of(context).no_model,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.swap_vert),
+            iconSize: 20,
+            onPressed: () {},
+          ),
+        ]),
         actions: [
           IconButton(
               icon: const Icon(Icons.note_add_outlined),
