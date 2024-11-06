@@ -50,7 +50,7 @@ class SettingsPageState extends State<SettingsPage> {
             ),
             Container(
               margin: const EdgeInsets.all(16),
-              child: APIWidget(parentSetState: setState),
+              child: const APIWidget(),
             ),
             Center(child: Text(S.of(context).other)),
           ],

@@ -18,6 +18,7 @@ import "message.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../settings/api.dart";
 
 import "dart:io";
 import "dart:convert";
@@ -26,6 +27,7 @@ import "package:flutter/services.dart";
 import "package:langchain/langchain.dart";
 import "package:image_picker/image_picker.dart";
 import "package:langchain_openai/langchain_openai.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
 
 class ChatPage extends StatefulWidget {
@@ -355,11 +357,14 @@ class _ChatPageState extends State<ChatPage> {
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                Text(
-                  Config.bot.model ?? S.of(context).no_model,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
+                Consumer(builder: (context, ref, child) {
+                  ref.watch(apisNotifierProvider);
+                  return Text(
+                    Config.bot.model ?? S.of(context).no_model,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall,
+                  );
+                })
               ],
             ),
           ),

@@ -20,11 +20,24 @@ import "../gen/l10n.dart";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+final apisNotifierProvider =
+    NotifierProvider<ApisNotifier, Map<String, ApiConfig>>(ApisNotifier.new);
+
+class ApisNotifier extends Notifier<Map<String, ApiConfig>> {
+  @override
+  Map<String, ApiConfig> build() {
+    return Config.apis;
+  }
+
+  void notify() {
+    ref.notifyListeners();
+  }
+}
 
 class APIWidget extends StatefulWidget {
-  final void Function(VoidCallback) parentSetState;
-
-  const APIWidget({super.key, required this.parentSetState});
+  const APIWidget({super.key});
 
   @override
   State<APIWidget> createState() => _APIWidgetState();
@@ -33,9 +46,6 @@ class APIWidget extends StatefulWidget {
 class _APIWidgetState extends State<APIWidget> {
   @override
   Widget build(BuildContext context) {
-    final apis = Config.apis.entries.toList();
-    final parentSetState = widget.parentSetState;
-
     return Column(
       children: [
         FilledButton(
@@ -43,8 +53,7 @@ class _APIWidgetState extends State<APIWidget> {
           onPressed: () async {
             final changed = await showDialog<bool>(
               context: context,
-              builder: (context) =>
-                  ApiInfoWidget(parentSetState: parentSetState),
+              builder: (context) => ApiInfoWidget(),
             );
             if (changed != null && changed) {
               await Config.save();
@@ -53,34 +62,38 @@ class _APIWidgetState extends State<APIWidget> {
         ),
         const SizedBox(height: 16),
         Expanded(
-          child: ListView.builder(
-            itemCount: apis.length,
-            itemBuilder: (context, index) {
-              return Card.filled(
-                child: ListTile(
-                  title: Text(
-                    apis[index].key,
-                    overflow: TextOverflow.ellipsis,
+          child: Consumer(builder: (context, ref, child) {
+            ref.watch(apisNotifierProvider);
+            final apis = Config.apis.entries.toList();
+
+            return ListView.builder(
+              itemCount: apis.length,
+              itemBuilder: (context, index) {
+                return Card.filled(
+                  child: ListTile(
+                    title: Text(
+                      apis[index].key,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    leading: const Icon(Icons.api),
+                    contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () async {
+                        final changed = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => ApiInfoWidget(entry: apis[index]),
+                        );
+                        if (changed ?? false) {
+                          await Config.save();
+                        }
+                      },
+                    ),
                   ),
-                  leading: const Icon(Icons.api),
-                  contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () async {
-                      final changed = await showDialog<bool>(
-                        context: context,
-                        builder: (_) => ApiInfoWidget(
-                            parentSetState: parentSetState, entry: apis[index]),
-                      );
-                      if (changed != null && changed) {
-                        await Config.save();
-                      }
-                    },
-                  ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            );
+          }),
         ),
       ],
     );
@@ -89,7 +102,6 @@ class _APIWidgetState extends State<APIWidget> {
 
 class ApiInfoWidget extends StatelessWidget {
   final MapEntry<String, ApiConfig>? entry;
-  final void Function(VoidCallback) parentSetState;
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _modelsCtrl = TextEditingController();
   final TextEditingController _apiUrlCtrl = TextEditingController();
@@ -98,7 +110,6 @@ class ApiInfoWidget extends StatelessWidget {
   ApiInfoWidget({
     super.key,
     this.entry,
-    required this.parentSetState,
   });
 
   void fix() {
@@ -118,7 +129,7 @@ class ApiInfoWidget extends StatelessWidget {
     }
   }
 
-  bool save(BuildContext context) {
+  bool save(BuildContext context, WidgetRef ref) {
     final name = _nameCtrl.text;
     final models = _modelsCtrl.text;
     final apiUrl = _apiUrlCtrl.text;
@@ -142,19 +153,18 @@ class ApiInfoWidget extends StatelessWidget {
     }
 
     if (entry != null) {
-      parentSetState(() => Config.apis.remove(entry!.key));
+      Config.apis.remove(entry!.key);
     }
 
     final modelList = models.split(",").map((e) => e.trim()).toList();
-    parentSetState(() {
-      Config.apis[name] = ApiConfig(
-        url: apiUrl,
-        key: apiKey,
-        models: modelList,
-      );
-      fix();
-    });
+    Config.apis[name] = ApiConfig(
+      url: apiUrl,
+      key: apiKey,
+      models: modelList,
+    );
+    fix();
 
+    ref.read(apisNotifierProvider.notifier).notify();
     return true;
   }
 
@@ -349,52 +359,54 @@ class ApiInfoWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: FilledButton.tonal(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text(S.of(context).cancel),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Visibility(
-                  visible: entry != null,
-                  child: Expanded(
+            Consumer(builder: (context, ref, child) {
+              return Row(
+                children: [
+                  Expanded(
                     flex: 1,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor: Theme.of(context).colorScheme.onError,
-                      ),
+                    child: FilledButton.tonal(
                       onPressed: () {
-                        parentSetState(() {
-                          Config.apis.remove(entry!.key);
-                          fix();
-                        });
-                        Navigator.of(context).pop(true);
+                        Navigator.of(context).pop(false);
                       },
-                      child: Text(S.of(context).delete),
+                      child: Text(S.of(context).cancel),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 1,
-                  child: FilledButton(
-                    child: Text(S.of(context).save),
-                    onPressed: () {
-                      if (save(context)) {
-                        Navigator.of(context).pop(true);
-                      }
-                    },
+                  const SizedBox(width: 8),
+                  Visibility(
+                    visible: entry != null,
+                    child: Expanded(
+                      flex: 1,
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onError,
+                        ),
+                        onPressed: () {
+                          Config.apis.remove(entry!.key);
+                          fix();
+                          ref.read(apisNotifierProvider.notifier).notify();
+                          Navigator.of(context).pop(true);
+                        },
+                        child: Text(S.of(context).delete),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 1,
+                    child: FilledButton(
+                      child: Text(S.of(context).save),
+                      onPressed: () {
+                        if (save(context, ref)) {
+                          Navigator.of(context).pop(true);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }),
           ],
         ),
       ),

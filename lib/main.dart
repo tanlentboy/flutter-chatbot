@@ -19,11 +19,12 @@ import "chat/chat.dart";
 import "settings/settings.dart";
 
 import "package:flutter/material.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_localizations/flutter_localizations.dart";
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Config.initialize().then((_) => runApp(const App()));
+  Config.initialize().then((_) => runApp(ProviderScope(child: const App())));
 }
 
 class App extends StatelessWidget {
