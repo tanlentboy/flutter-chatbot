@@ -33,11 +33,14 @@
     "model_list": "Model List",
     "select_models": "Select Models",
 
+    "enter_a_title": "Please enter a title",
     "duplicate_api_name": "Duplicate API name",
     "complete_all_fields": "Please complete all fields",
 
     "no_model": "no model",
     "all_chats": "All Chats",
+    "chat_title": "Chat Title",
+    "chat_settings": "Chat Settings",
 
     "saved_successfully": "Saved Successfully",
     "copied_successfully": "Copied Successfully",
@@ -48,5 +51,6 @@
 
     "enter_your_message": "Enter your message",
     "image_compress_failed": "Failed to comprese image",
-    "setup_bot_api_first": "Set up the Bot and API first"
+    "setup_bot_api_first": "Set up the Bot and API first",
+    "use_default_settings": "Empty fields indicate the use of default setttings"
 }

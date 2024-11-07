@@ -30,6 +30,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "bot": MessageLookupByLibrary.simpleMessage("Bot"),
         "camera": MessageLookupByLibrary.simpleMessage("camera"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
+        "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "complete_all_fields":
             MessageLookupByLibrary.simpleMessage("Please complete all fields"),
@@ -40,6 +42,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
         "edit": MessageLookupByLibrary.simpleMessage("edit"),
+        "enter_a_title":
+            MessageLookupByLibrary.simpleMessage("Please enter a title"),
         "enter_your_message":
             MessageLookupByLibrary.simpleMessage("Enter your message"),
         "gallery": MessageLookupByLibrary.simpleMessage("gallery"),
@@ -72,6 +76,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "system_prompts":
             MessageLookupByLibrary.simpleMessage("System Prompts"),
         "temperature": MessageLookupByLibrary.simpleMessage("Temperature"),
-        "title": MessageLookupByLibrary.simpleMessage("ChatBot")
+        "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "use_default_settings": MessageLookupByLibrary.simpleMessage(
+            "Empty fields indicate the use of default setttings")
       };
 }

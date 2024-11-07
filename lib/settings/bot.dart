@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:chatbot/chat/current.dart";
+
 import "api.dart";
 import "../util.dart";
 import "../config.dart";
@@ -20,19 +22,6 @@ import "../gen/l10n.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
-final botProvider = NotifierProvider<BotNotifier, BotConfig>(BotNotifier.new);
-
-class BotNotifier extends Notifier<BotConfig> {
-  @override
-  BotConfig build() {
-    return Config.bot;
-  }
-
-  void notify() {
-    ref.notifyListeners();
-  }
-}
 
 class BotWidget extends StatefulWidget {
   const BotWidget({super.key});
@@ -231,16 +220,18 @@ class _BotWidgetState extends State<BotWidget> {
             const SizedBox(width: 8),
             Expanded(
               flex: 1,
-              child: Consumer(builder: (context, ref, child) {
-                return FilledButton(
-                  child: Text(S.of(context).save),
-                  onPressed: () async {
-                    if (await save(context)) {
-                      ref.read(botProvider.notifier).notify();
-                    }
-                  },
-                );
-              }),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  return FilledButton(
+                    child: Text(S.of(context).save),
+                    onPressed: () async {
+                      if (await save(context)) {
+                        ref.read(currentProvider.notifier).notify();
+                      }
+                    },
+                  );
+                },
+              ),
             ),
           ],
         )

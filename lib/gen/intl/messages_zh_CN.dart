@@ -30,6 +30,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "bot": MessageLookupByLibrary.simpleMessage("参数"),
         "camera": MessageLookupByLibrary.simpleMessage("相机"),
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
+        "chat_settings": MessageLookupByLibrary.simpleMessage("聊天配置"),
+        "chat_title": MessageLookupByLibrary.simpleMessage("聊天标题"),
         "clear": MessageLookupByLibrary.simpleMessage("清除"),
         "complete_all_fields": MessageLookupByLibrary.simpleMessage("请填写所有字段"),
         "copied_successfully": MessageLookupByLibrary.simpleMessage("拷贝成功"),
@@ -37,6 +39,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "duplicate_api_name": MessageLookupByLibrary.simpleMessage("名称重复"),
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),
+        "enter_a_title": MessageLookupByLibrary.simpleMessage("请输入标题"),
         "enter_your_message": MessageLookupByLibrary.simpleMessage("输入你的消息"),
         "gallery": MessageLookupByLibrary.simpleMessage("图库"),
         "image_compress_failed": MessageLookupByLibrary.simpleMessage("图片压缩失败"),
@@ -61,6 +64,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "streaming_response": MessageLookupByLibrary.simpleMessage("流式响应"),
         "system_prompts": MessageLookupByLibrary.simpleMessage("系统提示词"),
         "temperature": MessageLookupByLibrary.simpleMessage("温度"),
-        "title": MessageLookupByLibrary.simpleMessage("ChatBot")
+        "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "use_default_settings":
+            MessageLookupByLibrary.simpleMessage("空白字段代表使用默认配置")
       };
 }

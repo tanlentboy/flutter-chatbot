@@ -19,7 +19,6 @@ import "current.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../settings/bot.dart";
 
 import "dart:io";
 import "dart:convert";
@@ -125,7 +124,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
       );
 
-      if (Config.bot.stream ?? true) {
+      if (Current.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(messages));
         await for (final chunk in stream) {
           final content = chunk.output.content;
@@ -269,36 +268,42 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: Config.chats.length,
-            itemBuilder: (context, index) {
-              final chat = Config.chats[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                leading: const Icon(Icons.article),
-                selected: Current.chat == chat,
-                title: Text(
-                  chat.title,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(chat.time),
-                onTap: () async {
-                  if (Current.chat == chat) return;
-                  await Current.load(chat);
-                  setState(() {});
+          child: Consumer(
+            builder: (context, ref, child) {
+              ref.watch(currentProvider);
+
+              return ListView.builder(
+                itemCount: Config.chats.length,
+                itemBuilder: (context, index) {
+                  final chat = Config.chats[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                    leading: const Icon(Icons.article),
+                    selected: Current.chat == chat,
+                    title: Text(
+                      chat.title,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(chat.time),
+                    onTap: () async {
+                      if (Current.chat == chat) return;
+                      await Current.load(chat);
+                      setState(() {});
+                    },
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        if (Current.chat == chat) Current.clear();
+                        await File(Config.chatFilePath(chat.fileName)).delete();
+                        Config.chats.removeAt(index);
+                        await Config.save();
+                        setState(() {});
+                      },
+                    ),
+                  );
                 },
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () async {
-                    if (Current.chat == chat) Current.clear();
-                    await File(Config.chatFilePath(chat.fileName)).delete();
-                    Config.chats.removeAt(index);
-                    await Config.save();
-                    setState(() {});
-                  },
-                ),
               );
             },
           ),
@@ -319,7 +324,7 @@ class _ChatPageState extends State<ChatPage> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Consumer(builder: (context, ref, child) {
-                  ref.watch(botProvider);
+                  ref.watch(currentProvider);
                   return Text(
                     Current.model ?? S.of(context).no_model,
                     overflow: TextOverflow.ellipsis,
@@ -332,7 +337,17 @@ class _ChatPageState extends State<ChatPage> {
           IconButton(
             icon: const Icon(Icons.swap_vert),
             iconSize: 20,
-            onPressed: () {},
+            onPressed: () async {
+              final changed = await showDialog(
+                context: context,
+                builder: (context) => CurrentWidget(),
+              );
+              if (changed ?? false) {
+                if (Current.chat != null && Current.file != null) {
+                  await Current.save();
+                }
+              }
+            },
           ),
         ]),
         actions: [

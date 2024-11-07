@@ -135,23 +135,21 @@ class Config {
   static String chatFilePath(String fileName) =>
       "${_directory.path}${Platform.pathSeparator}$fileName";
 
-  static bool fixBot() {
+  static void fixBot() {
     final api = bot.api;
     final model = bot.model;
 
-    if (api == null) return false;
+    if (api == null) return;
     final models = apis[api]?.models;
 
     if (models == null) {
       bot.model = null;
       bot.api = null;
-      return true;
+      return;
     } else if (!models.contains(model)) {
       bot.model = null;
-      return true;
+      return;
     }
-
-    return false;
   }
 
   static Map<String, dynamic> toJson() => {

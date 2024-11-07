@@ -320,6 +320,16 @@ class S {
     );
   }
 
+  /// `Please enter a title`
+  String get enter_a_title {
+    return Intl.message(
+      'Please enter a title',
+      name: 'enter_a_title',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Duplicate API name`
   String get duplicate_api_name {
     return Intl.message(
@@ -355,6 +365,26 @@ class S {
     return Intl.message(
       'All Chats',
       name: 'all_chats',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat Title`
+  String get chat_title {
+    return Intl.message(
+      'Chat Title',
+      name: 'chat_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat Settings`
+  String get chat_settings {
+    return Intl.message(
+      'Chat Settings',
+      name: 'chat_settings',
       desc: '',
       args: [],
     );
@@ -435,6 +465,16 @@ class S {
     return Intl.message(
       'Set up the Bot and API first',
       name: 'setup_bot_api_first',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Empty fields indicate the use of default setttings`
+  String get use_default_settings {
+    return Intl.message(
+      'Empty fields indicate the use of default setttings',
+      name: 'use_default_settings',
       desc: '',
       args: [],
     );

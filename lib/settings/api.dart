@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "bot.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../chat/current.dart";
 
 import "dart:convert";
 import "package:flutter/material.dart";
@@ -142,9 +142,13 @@ class ApiInfoWidget extends StatelessWidget {
       key: apiKey,
       models: modelList,
     );
-    if (Config.fixBot()) ref.read(botProvider.notifier).notify();
 
     ref.read(apisProvider.notifier).notify();
+
+    Config.fixBot();
+    Current.fixBot();
+    ref.read(currentProvider.notifier).notify();
+
     return true;
   }
 
@@ -364,10 +368,12 @@ class ApiInfoWidget extends StatelessWidget {
                         ),
                         onPressed: () {
                           Config.apis.remove(entry!.key);
-                          if (Config.fixBot()) {
-                            ref.read(botProvider.notifier).notify();
-                          }
                           ref.read(apisProvider.notifier).notify();
+
+                          Config.fixBot();
+                          Current.fixBot();
+                          ref.read(currentProvider.notifier).notify();
+
                           Navigator.of(context).pop(true);
                         },
                         child: Text(S.of(context).delete),

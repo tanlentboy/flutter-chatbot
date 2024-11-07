@@ -33,11 +33,14 @@
     "model_list": "模型列表",
     "select_models": "选择模型",
 
+    "enter_a_title": "请输入标题",
     "duplicate_api_name": "名称重复",
     "complete_all_fields": "请填写所有字段",
 
     "no_model": "无模型",
     "all_chats": "所有聊天",
+    "chat_title": "聊天标题",
+    "chat_settings": "聊天配置",
 
     "saved_successfully": "保存成功",
     "copied_successfully": "拷贝成功",
@@ -48,5 +51,6 @@
 
     "enter_your_message": "输入你的消息",
     "image_compress_failed": "图片压缩失败",
-    "setup_bot_api_first": "请先配置参数和接口"
+    "setup_bot_api_first": "请先配置参数和接口",
+    "use_default_settings": "空白字段代表使用默认配置"
 }
