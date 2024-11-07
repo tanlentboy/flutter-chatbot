@@ -106,48 +106,8 @@ class ChatConfig {
 
 class Config {
   static BotConfig bot = BotConfig();
-  static Map<String, ApiConfig> apis = {};
   static List<ChatConfig> chats = [];
-
-  static String? get apiUrl {
-    if (bot.api == null) return null;
-    return apis[bot.api]!.url;
-  }
-
-  static String? get apiKey {
-    if (bot.api == null) return null;
-    return apis[bot.api]!.key;
-  }
-
-  static bool get isOk {
-    return bot.model != null && apiUrl != null && apiKey != null;
-  }
-
-  static bool get isNotOk {
-    return bot.model == null || apiUrl == null || apiKey == null;
-  }
-
-  static void fromJson(Map<String, dynamic> json) {
-    final botJson = json["bot"] ?? {};
-    final apisJson = json["apis"] ?? {};
-    final chatsJson = json["chats"] ?? [];
-
-    bot = BotConfig.fromJson(botJson);
-
-    for (final pair in apisJson.entries) {
-      apis[pair.key] = ApiConfig.fromJson(pair.value);
-    }
-
-    for (final chat in chatsJson) {
-      chats.add(ChatConfig.fromJson(chat));
-    }
-  }
-
-  static Map<String, dynamic> toJson() => {
-        "bot": bot,
-        "apis": apis,
-        "chats": chats,
-      };
+  static Map<String, ApiConfig> apis = {};
 
   static late final File _file;
   static late final String _filePath;
@@ -167,12 +127,53 @@ class Config {
     }
   }
 
-  static Future<void> save() async {
-    await _file.writeAsString(jsonEncode(toJson()));
+  static String? get apiUrl => apis[bot.api]?.url;
+  static String? get apiKey => apis[bot.api]?.key;
+
+  static Future<void> save() async =>
+      await _file.writeAsString(jsonEncode(toJson()));
+  static String chatFilePath(String fileName) =>
+      "${_directory.path}${Platform.pathSeparator}$fileName";
+
+  static bool fixBot() {
+    final api = bot.api;
+    final model = bot.model;
+
+    if (api == null) return false;
+    final models = apis[api]?.models;
+
+    if (models == null) {
+      bot.model = null;
+      bot.api = null;
+      return true;
+    } else if (!models.contains(model)) {
+      bot.model = null;
+      return true;
+    }
+
+    return false;
   }
 
-  static String chatFilePath(String fileName) {
-    return "${_directory.path}${Platform.pathSeparator}$fileName";
+  static Map<String, dynamic> toJson() => {
+        "bot": bot,
+        "apis": apis,
+        "chats": chats,
+      };
+
+  static void fromJson(Map<String, dynamic> json) {
+    final botJson = json["bot"] ?? {};
+    final apisJson = json["apis"] ?? {};
+    final chatsJson = json["chats"] ?? [];
+
+    bot = BotConfig.fromJson(botJson);
+
+    for (final pair in apisJson.entries) {
+      apis[pair.key] = ApiConfig.fromJson(pair.value);
+    }
+
+    for (final chat in chatsJson) {
+      chats.add(ChatConfig.fromJson(chat));
+    }
   }
 }
 

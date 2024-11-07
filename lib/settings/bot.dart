@@ -21,6 +21,19 @@ import "../gen/l10n.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+final botProvider = NotifierProvider<BotNotifier, BotConfig>(BotNotifier.new);
+
+class BotNotifier extends Notifier<BotConfig> {
+  @override
+  BotConfig build() {
+    return Config.bot;
+  }
+
+  void notify() {
+    ref.notifyListeners();
+  }
+}
+
 class BotWidget extends StatefulWidget {
   const BotWidget({super.key});
 
@@ -40,7 +53,8 @@ class _BotWidgetState extends State<BotWidget> {
   final TextEditingController _systemPromptsCtrl =
       TextEditingController(text: Config.bot.systemPrompts?.toString());
 
-  Future<void> save(BuildContext context) async {
+  Future<bool> save(BuildContext context) async {
+    final changed = Config.bot.model != _model;
     final maxTokens = int.tryParse(_maxTokensCtrl.text);
     final temperature = double.tryParse(_temperatureCtrl.text);
 
@@ -49,7 +63,7 @@ class _BotWidgetState extends State<BotWidget> {
         context: context,
         content: Text(S.of(context).invalid_max_tokens),
       );
-      return;
+      return false;
     }
 
     if (_temperatureCtrl.text.isNotEmpty && temperature == null) {
@@ -57,7 +71,7 @@ class _BotWidgetState extends State<BotWidget> {
         context: context,
         content: Text(S.of(context).invalid_temperature),
       );
-      return;
+      return false;
     }
 
     Config.bot.api = _api;
@@ -74,6 +88,7 @@ class _BotWidgetState extends State<BotWidget> {
     );
 
     await Config.save();
+    return changed;
   }
 
   @override
@@ -81,7 +96,7 @@ class _BotWidgetState extends State<BotWidget> {
     return ListView(
       children: [
         Consumer(builder: (context, ref, child) {
-          ref.watch(apisNotifierProvider);
+          ref.watch(apisProvider);
 
           final apiList = <DropdownMenuItem<String>>[];
           final modelList = <DropdownMenuItem<String>>[];
@@ -216,10 +231,16 @@ class _BotWidgetState extends State<BotWidget> {
             const SizedBox(width: 8),
             Expanded(
               flex: 1,
-              child: FilledButton(
-                child: Text(S.of(context).save),
-                onPressed: () async => save(context),
-              ),
+              child: Consumer(builder: (context, ref, child) {
+                return FilledButton(
+                  child: Text(S.of(context).save),
+                  onPressed: () async {
+                    if (await save(context)) {
+                      ref.read(botProvider.notifier).notify();
+                    }
+                  },
+                );
+              }),
             ),
           ],
         )

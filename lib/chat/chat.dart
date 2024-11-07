@@ -19,7 +19,7 @@ import "current.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../settings/api.dart";
+import "../settings/bot.dart";
 
 import "dart:io";
 import "dart:convert";
@@ -319,9 +319,9 @@ class _ChatPageState extends State<ChatPage> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Consumer(builder: (context, ref, child) {
-                  ref.watch(apisNotifierProvider);
+                  ref.watch(botProvider);
                   return Text(
-                    Config.bot.model ?? S.of(context).no_model,
+                    Current.model ?? S.of(context).no_model,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall,
                   );

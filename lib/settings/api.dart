@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "bot.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
@@ -22,7 +23,7 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-final apisNotifierProvider =
+final apisProvider =
     NotifierProvider<ApisNotifier, Map<String, ApiConfig>>(ApisNotifier.new);
 
 class ApisNotifier extends Notifier<Map<String, ApiConfig>> {
@@ -55,15 +56,13 @@ class _APIWidgetState extends State<APIWidget> {
               context: context,
               builder: (context) => ApiInfoWidget(),
             );
-            if (changed != null && changed) {
-              await Config.save();
-            }
+            if (changed ?? false) await Config.save();
           },
         ),
         const SizedBox(height: 16),
         Expanded(
           child: Consumer(builder: (context, ref, child) {
-            ref.watch(apisNotifierProvider);
+            ref.watch(apisProvider);
             final apis = Config.apis.entries.toList();
 
             return ListView.builder(
@@ -84,9 +83,7 @@ class _APIWidgetState extends State<APIWidget> {
                           context: context,
                           builder: (_) => ApiInfoWidget(entry: apis[index]),
                         );
-                        if (changed ?? false) {
-                          await Config.save();
-                        }
+                        if (changed ?? false) await Config.save();
                       },
                     ),
                   ),
@@ -111,23 +108,6 @@ class ApiInfoWidget extends StatelessWidget {
     super.key,
     this.entry,
   });
-
-  void fix() {
-    final api = Config.bot.api;
-    final model = Config.bot.model;
-
-    if (api != null) {
-      final apis = Config.apis[api];
-      if (apis == null) {
-        Config.bot.api = null;
-        Config.bot.model = null;
-      } else if (!apis.models.contains(model)) {
-        Config.bot.model = null;
-      }
-    } else if (model != null) {
-      Config.bot.model = null;
-    }
-  }
 
   bool save(BuildContext context, WidgetRef ref) {
     final name = _nameCtrl.text;
@@ -162,9 +142,9 @@ class ApiInfoWidget extends StatelessWidget {
       key: apiKey,
       models: modelList,
     );
-    fix();
+    if (Config.fixBot()) ref.read(botProvider.notifier).notify();
 
-    ref.read(apisNotifierProvider.notifier).notify();
+    ref.read(apisProvider.notifier).notify();
     return true;
   }
 
@@ -384,8 +364,10 @@ class ApiInfoWidget extends StatelessWidget {
                         ),
                         onPressed: () {
                           Config.apis.remove(entry!.key);
-                          fix();
-                          ref.read(apisNotifierProvider.notifier).notify();
+                          if (Config.fixBot()) {
+                            ref.read(botProvider.notifier).notify();
+                          }
+                          ref.read(apisProvider.notifier).notify();
                           Navigator.of(context).pop(true);
                         },
                         child: Text(S.of(context).delete),
