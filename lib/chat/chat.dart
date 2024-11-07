@@ -15,6 +15,7 @@
 
 import "input.dart";
 import "message.dart";
+import "current.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
@@ -40,10 +41,6 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   String? _image;
   bool _sendable = true;
-
-  File? _currentFile;
-  ChatConfig? _currentChat;
-  final List<Message> _messages = [];
 
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollCtrl = ScrollController();
@@ -93,34 +90,15 @@ class _ChatPageState extends State<ChatPage> {
     setState(() => _image = base64);
   }
 
-  Future<void> _saveChat() async {
-    if (_currentChat == null) {
-      final now = DateTime.now();
-      final timestamp = now.millisecondsSinceEpoch.toString();
-
-      final time = Util.formatDateTime(now);
-      final title = _messages.first.text;
-      final fileName = "$timestamp.json";
-
-      final chat = ChatConfig(
-        time: time,
-        title: title,
-        fileName: fileName,
-      );
-      _currentChat = chat;
-
-      final filePath = Config.chatFilePath(fileName);
-      _currentFile = File(filePath);
-
-      setState(() => Config.chats.add(chat));
-      Config.save();
-    }
-
-    await _currentFile!.writeAsString(jsonEncode(_messages));
-  }
-
   Future<void> _sendMessage(BuildContext context) async {
-    if (Config.isNotOk) {
+    final text = _editCtrl.text;
+    if (text.isEmpty) return;
+
+    final apiUrl = Current.apiUrl;
+    final apiKey = Current.apiKey;
+    final model = Current.model;
+
+    if (apiUrl == null || apiKey == null || model == null) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).setup_bot_api_first),
@@ -128,24 +106,22 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
-    final text = _editCtrl.text;
-    if (text.isEmpty) return;
+    Current.messages
+        .add(Message(role: MessageRole.user, text: text, image: _image));
+    final message = Message(role: MessageRole.assistant, text: "");
+    final messages = _buildContext(Current.messages);
+    Current.messages.add(message);
 
     setState(() => _sendable = false);
 
-    _messages.add(Message(role: MessageRole.user, text: text, image: _image));
-    final message = Message(role: MessageRole.assistant, text: "");
-    final messages = _buildContext(_messages);
-    _messages.add(message);
-
     try {
       final llm = ChatOpenAI(
-        apiKey: Config.apiKey!,
-        baseUrl: Config.apiUrl!,
+        apiKey: apiKey,
+        baseUrl: apiUrl,
         defaultOptions: ChatOpenAIOptions(
-          model: Config.bot.model,
-          maxTokens: Config.bot.maxTokens,
-          temperature: Config.bot.temperature,
+          model: model,
+          maxTokens: Current.maxTokens,
+          temperature: Current.temperature,
         ),
       );
 
@@ -164,7 +140,7 @@ class _ChatPageState extends State<ChatPage> {
 
       _image = null;
       _editCtrl.clear();
-      await _saveChat();
+      await Current.save();
     } catch (e) {
       if (context.mounted) {
         Util.showSnackBar(
@@ -173,7 +149,7 @@ class _ChatPageState extends State<ChatPage> {
           duration: const Duration(milliseconds: 1500),
         );
       }
-      _messages.length -= 2;
+      Current.messages.length -= 2;
     }
 
     setState(() => _sendable = true);
@@ -182,7 +158,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _longPress(BuildContext context, int index) async {
     if (!_sendable) return;
 
-    final message = _messages[index];
+    final message = Current.messages[index];
     final children = [
       ListTile(
         title: Text(S.of(context).copy),
@@ -231,8 +207,8 @@ class _ChatPageState extends State<ChatPage> {
         break;
 
       case MessageEvent.delete:
-        setState(() => _messages.removeRange(index, index + 2));
-        await _saveChat();
+        setState(() => Current.messages.removeRange(index, index + 2));
+        await Current.save();
         break;
 
       default:
@@ -253,10 +229,10 @@ class _ChatPageState extends State<ChatPage> {
         Expanded(
           child: ListView.builder(
             controller: _scrollCtrl,
-            itemCount: _messages.length,
             padding: const EdgeInsets.all(8),
+            itemCount: Current.messages.length,
             itemBuilder: (context, index) {
-              final message = _messages[index];
+              final message = Current.messages[index];
               return MessageWidget(
                 message: message,
                 longPress: () async => await _longPress(context, index),
@@ -300,7 +276,7 @@ class _ChatPageState extends State<ChatPage> {
               return ListTile(
                 contentPadding: const EdgeInsets.only(left: 16, right: 8),
                 leading: const Icon(Icons.article),
-                selected: _currentChat == chat,
+                selected: Current.chat == chat,
                 title: Text(
                   chat.title,
                   maxLines: 1,
@@ -309,33 +285,18 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 subtitle: Text(chat.time),
                 onTap: () async {
-                  if (_currentChat == chat) return;
-                  _messages.clear();
-
-                  final file = File(Config.chatFilePath(chat.fileName));
-                  _currentFile = file;
-                  _currentChat = chat;
-
-                  final json = jsonDecode(await file.readAsString());
-                  for (final message in json) {
-                    _messages.add(Message.fromJson(message));
-                  }
-
-                  setState(() => _image = null);
+                  if (Current.chat == chat) return;
+                  await Current.load(chat);
+                  setState(() {});
                 },
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () async {
-                    if (_currentChat == chat) {
-                      _currentChat = null;
-                      _currentFile = null;
-                      _messages.clear();
-                      _image = null;
-                    }
-
+                    if (Current.chat == chat) Current.clear();
                     await File(Config.chatFilePath(chat.fileName)).delete();
-                    setState(() => Config.chats.removeAt(index));
+                    Config.chats.removeAt(index);
                     await Config.save();
+                    setState(() {});
                   },
                 ),
               );
@@ -378,10 +339,8 @@ class _ChatPageState extends State<ChatPage> {
           IconButton(
               icon: const Icon(Icons.note_add_outlined),
               onPressed: () {
-                _messages.clear();
-                _currentChat = null;
-                _currentFile = null;
-                setState(() => _image = null);
+                Current.clear();
+                setState(() {});
               }),
           IconButton(
             icon: const Icon(Icons.settings_outlined),

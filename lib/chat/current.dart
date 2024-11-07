@@ -1,17 +1,19 @@
-import 'message.dart';
+import "message.dart";
 import "../util.dart";
-import '../config.dart';
+import "../config.dart";
 
-import 'dart:io';
-import 'dart:convert';
+import "dart:io";
+import "dart:convert";
 
 class Current {
   static File? _file;
   static BotConfig? _bot;
   static ChatConfig? _chat;
-  static final List<Message> messages = [];
+  static final List<Message> _messages = [];
 
   static Future<void> load(ChatConfig chat) async {
+    clear();
+
     _chat = chat;
     _file = File(Config.chatFilePath(chat.fileName));
 
@@ -20,20 +22,21 @@ class Current {
     final botJson = json["bot"];
 
     if (messagesJson != null) {
-      messages.clear();
       for (final message in messagesJson) {
-        messages.add(Message.fromJson(message));
+        _messages.add(Message.fromJson(message));
       }
     }
     if (botJson != null) _bot = BotConfig.fromJson(botJson);
   }
 
-  void clear() {
+  static void clear() {
+    _bot = null;
     _chat = null;
     _file = null;
+    _messages.clear();
   }
 
-  void initChat(String title) {
+  static void initChat(String title) {
     final now = DateTime.now();
     final timestamp = now.millisecondsSinceEpoch.toString();
 
@@ -48,45 +51,37 @@ class Current {
     _chat = chat;
   }
 
-  Future<void> save() async {
+  static Future<void> save() async {
     if (_chat == null) {
-      final now = DateTime.now();
-      final timestamp = now.millisecondsSinceEpoch.toString();
+      initChat(_messages.first.text);
+    }
 
-      final time = Util.formatDateTime(now);
-      final title = messages.first.text;
-      final fileName = "$timestamp.json";
-
-      final chat = ChatConfig(
-        time: time,
-        title: title,
-        fileName: fileName,
-      );
-
-      final filePath = Config.chatFilePath(fileName);
+    if (_file == null) {
+      final filePath = Config.chatFilePath(_chat!.fileName);
       _file = File(filePath);
-      _chat = chat;
 
-      Config.chats.add(chat);
-      Config.save();
+      Config.chats.add(_chat!);
+      await Config.save();
     }
 
     await _file!.writeAsString(jsonEncode({
       "bot": _bot,
-      "messages": messages,
+      "messages": _messages,
     }));
   }
 
-  static String? get api {
-    return _bot?.api ?? Config.bot.api;
-  }
+  static BotConfig? get bot => _bot;
+  static ChatConfig? get chat => _chat;
+  static List<Message> get messages => _messages;
 
-  static (String url, String key)? get urlKey {
-    final config = Config.apis[api];
-    return config != null ? (config.url, config.key) : null;
-  }
+  static String? get apiUrl => Config.apis[api]?.url;
+  static String? get apiKey => Config.apis[api]?.key;
+  static String? get api => _bot?.api ?? Config.bot.api;
 
-  static String? get model {
-    return _bot?.model ?? Config.bot.model;
-  }
+  static String? get model => _bot?.model ?? Config.bot.model;
+  static bool? get stream => _bot?.stream ?? Config.bot.stream;
+  static int? get maxTokens => _bot?.maxTokens ?? Config.bot.maxTokens;
+  static double? get temperature => _bot?.temperature ?? Config.bot.temperature;
+  static String? get systemPrompts =>
+      _bot?.systemPrompts ?? Config.bot.systemPrompts;
 }
