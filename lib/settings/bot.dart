@@ -13,12 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:chatbot/chat/current.dart";
-
 import "api.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../chat/current.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -217,7 +216,7 @@ class _BotWidgetState extends State<BotWidget> {
                 },
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 16),
             Expanded(
               flex: 1,
               child: Consumer(

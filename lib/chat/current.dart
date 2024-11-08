@@ -378,7 +378,7 @@ class CurrentWidgetState extends State<CurrentWidget> {
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 16),
                 Expanded(
                   flex: 1,
                   child: Consumer(builder: (context, ref, child) {
