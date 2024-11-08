@@ -23,13 +23,12 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-final apisProvider =
-    NotifierProvider<ApisNotifier, Map<String, ApiConfig>>(ApisNotifier.new);
+final apisProvider = NotifierProvider<ApisNotifier, bool>(ApisNotifier.new);
 
-class ApisNotifier extends Notifier<Map<String, ApiConfig>> {
+class ApisNotifier extends Notifier<bool> {
   @override
-  Map<String, ApiConfig> build() {
-    return Config.apis;
+  bool build() {
+    return true;
   }
 
   void notify() {

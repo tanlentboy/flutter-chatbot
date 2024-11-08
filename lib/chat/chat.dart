@@ -183,11 +183,11 @@ class _ChatPageState extends State<ChatPage> {
         leading: const Icon(Icons.copy_all),
         onTap: () => Navigator.pop(context, MessageEvent.copy),
       ),
-      // ListTile(
-      //   title: Text(S.of(context).source),
-      //   leading: const Icon(Icons.code_outlined),
-      //   onTap: () => Navigator.pop(context, MessageEvent.source),
-      // ),
+      ListTile(
+        title: Text(S.of(context).source),
+        leading: const Icon(Icons.code_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.source),
+      ),
       // ListTile(
       //   title: Text(S.of(context).edit),
       //   leading: const Icon(Icons.edit_outlined),
@@ -232,6 +232,31 @@ class _ChatPageState extends State<ChatPage> {
         await Current.save();
         break;
 
+      case MessageEvent.source:
+        if (!context.mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) {
+            return Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                title: Text(S.of(context).source),
+              ),
+              body: Padding(
+                padding: EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: SelectableText(message.text),
+                ),
+              ),
+            );
+          },
+        );
+
+        break;
+
       default:
         if (context.mounted) {
           Util.showSnackBar(
@@ -256,7 +281,7 @@ class _ChatPageState extends State<ChatPage> {
               final message = Current.messages[index];
               return MessageWidget(
                 message: message,
-                longPress: () async => await _longPress(context, index),
+                longPress: (context) async => await _longPress(context, index),
               );
             },
           ),

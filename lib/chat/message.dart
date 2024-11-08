@@ -17,8 +17,8 @@ import "../config.dart";
 
 import "package:flutter/material.dart";
 import "package:markdown/markdown.dart" as md;
-import "package:markdown/markdown.dart" hide Element;
 import "package:flutter_markdown/flutter_markdown.dart";
+import "package:markdown/markdown.dart" hide Element, Text;
 import "package:flutter_highlighter/flutter_highlighter.dart";
 import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
 
@@ -60,13 +60,7 @@ enum MessageEvent {
 
 class MessageWidget extends StatelessWidget {
   final Message message;
-  final VoidCallback longPress;
-
-  const MessageWidget({
-    super.key,
-    required this.message,
-    required this.longPress,
-  });
+  final Future<void> Function(BuildContext) longPress;
 
   static final extensionSet = ExtensionSet(
     <BlockSyntax>[
@@ -84,6 +78,12 @@ class MessageWidget extends StatelessWidget {
       AutolinkExtensionSyntax()
     ],
   );
+
+  const MessageWidget({
+    super.key,
+    required this.message,
+    required this.longPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -120,12 +120,20 @@ class MessageWidget extends StatelessWidget {
       alignment: alignment,
       margin: const EdgeInsets.all(8),
       child: GestureDetector(
-        onLongPress: longPress,
+        onLongPress: () async => await longPress(context),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-              color: background,
-              borderRadius: const BorderRadius.all(Radius.circular(8))),
+            color: background,
+            borderRadius: BorderRadius.only(
+              bottomLeft: const Radius.circular(16),
+              bottomRight: const Radius.circular(16),
+              topLeft: Radius.circular(
+                  message.role == MessageRole.assistant ? 0 : 16),
+              topRight:
+                  Radius.circular(message.role == MessageRole.user ? 0 : 16),
+            ),
+          ),
           child: MarkdownBody(
             data: content,
             shrinkWrap: true,
