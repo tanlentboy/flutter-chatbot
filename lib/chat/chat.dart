@@ -54,7 +54,17 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return Wrap(
+          alignment: WrapAlignment.center,
           children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 16, bottom: 8),
+              decoration: const BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.all(Radius.circular(2)),
+              ),
+            ),
             ListTile(
               leading: const Icon(Icons.camera),
               title: Text(S.of(context).camera),
@@ -159,6 +169,15 @@ class _ChatPageState extends State<ChatPage> {
 
     final message = Current.messages[index];
     final children = [
+      Container(
+        width: 40,
+        height: 4,
+        margin: const EdgeInsets.only(top: 16, bottom: 8),
+        decoration: const BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.all(Radius.circular(2)),
+        ),
+      ),
       ListTile(
         title: Text(S.of(context).copy),
         leading: const Icon(Icons.copy_all),
@@ -189,7 +208,10 @@ class _ChatPageState extends State<ChatPage> {
     final event = await showModalBottomSheet<MessageEvent>(
       context: context,
       builder: (BuildContext context) {
-        return Wrap(children: children);
+        return Wrap(
+          alignment: WrapAlignment.center,
+          children: children,
+        );
       },
     );
     if (event == null) return;
@@ -260,7 +282,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
         Divider(),
         Container(
-          alignment: Alignment.topLeft,
+          alignment: Alignment.centerLeft,
           padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
           child: Text(
             S.of(context).all_chats,

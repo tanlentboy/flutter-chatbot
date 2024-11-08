@@ -82,7 +82,7 @@ class Current {
     if (_file == null) {
       initFile();
 
-      Config.chats.add(_chat!);
+      Config.chats.insert(0, _chat!);
       await Config.save();
     }
 
@@ -147,10 +147,10 @@ class CurrentWidget extends StatefulWidget {
   const CurrentWidget({super.key});
 
   @override
-  State<CurrentWidget> createState() => CurrentWidgetState();
+  State<CurrentWidget> createState() => _CurrentWidgetState();
 }
 
-class CurrentWidgetState extends State<CurrentWidget> {
+class _CurrentWidgetState extends State<CurrentWidget> {
   String? _api = Current.bot?.api;
   String? _model = Current.bot?.model;
   bool? _stream = Current.bot?.stream;
