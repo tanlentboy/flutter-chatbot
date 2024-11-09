@@ -46,11 +46,11 @@ class SettingsPageState extends State<SettingsPage> {
           children: [
             Container(
               margin: const EdgeInsets.all(16),
-              child: const BotWidget(),
+              child: const BotTab(),
             ),
             Container(
               margin: const EdgeInsets.all(16),
-              child: const APIWidget(),
+              child: const ApisTab(),
             ),
             Center(child: Text(S.of(context).other)),
           ],

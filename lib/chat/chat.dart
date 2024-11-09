@@ -19,6 +19,7 @@ import "current.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../providers.dart";
 
 import "dart:io";
 import "dart:convert";
@@ -103,9 +104,9 @@ class _ChatPageState extends State<ChatPage> {
     final text = _editCtrl.text;
     if (text.isEmpty) return;
 
-    final apiUrl = Current.apiUrl;
-    final apiKey = Current.apiKey;
-    final model = Current.model;
+    final apiUrl = CurrentChat.apiUrl;
+    final apiKey = CurrentChat.apiKey;
+    final model = CurrentChat.model;
 
     if (apiUrl == null || apiKey == null || model == null) {
       Util.showSnackBar(
@@ -115,11 +116,11 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
-    Current.messages
+    CurrentChat.messages
         .add(Message(role: MessageRole.user, text: text, image: _image));
     final message = Message(role: MessageRole.assistant, text: "");
-    final messages = _buildContext(Current.messages);
-    Current.messages.add(message);
+    final messages = _buildContext(CurrentChat.messages);
+    CurrentChat.messages.add(message);
 
     setState(() => _sendable = false);
 
@@ -129,12 +130,12 @@ class _ChatPageState extends State<ChatPage> {
         baseUrl: apiUrl,
         defaultOptions: ChatOpenAIOptions(
           model: model,
-          maxTokens: Current.maxTokens,
-          temperature: Current.temperature,
+          maxTokens: CurrentChat.maxTokens,
+          temperature: CurrentChat.temperature,
         ),
       );
 
-      if (Current.stream ?? true) {
+      if (CurrentChat.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(messages));
         await for (final chunk in stream) {
           final content = chunk.output.content;
@@ -149,7 +150,7 @@ class _ChatPageState extends State<ChatPage> {
 
       _image = null;
       _editCtrl.clear();
-      await Current.save();
+      await CurrentChat.save();
     } catch (e) {
       if (context.mounted) {
         Util.showSnackBar(
@@ -158,7 +159,7 @@ class _ChatPageState extends State<ChatPage> {
           duration: const Duration(milliseconds: 1500),
         );
       }
-      Current.messages.length -= 2;
+      CurrentChat.messages.length -= 2;
     }
 
     setState(() => _sendable = true);
@@ -167,7 +168,7 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _longPress(BuildContext context, int index) async {
     if (!_sendable) return;
 
-    final message = Current.messages[index];
+    final message = CurrentChat.messages[index];
     final children = [
       Container(
         width: 40,
@@ -228,8 +229,8 @@ class _ChatPageState extends State<ChatPage> {
         break;
 
       case MessageEvent.delete:
-        setState(() => Current.messages.removeRange(index, index + 2));
-        await Current.save();
+        setState(() => CurrentChat.messages.removeRange(index, index + 2));
+        await CurrentChat.save();
         break;
 
       case MessageEvent.source:
@@ -270,32 +271,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final body = Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollCtrl,
-            padding: const EdgeInsets.all(8),
-            itemCount: Current.messages.length,
-            itemBuilder: (context, index) {
-              final message = Current.messages[index];
-              return MessageWidget(
-                message: message,
-                longPress: (context) async => await _longPress(context, index),
-              );
-            },
-          ),
-        ),
-        InputWidget(
-          editable: _sendable,
-          controller: _editCtrl,
-          files: _image != null ? 1 : 0,
-          addImage: _sendable ? _addImage : null,
-          sendMessage: _sendable ? _sendMessage : null,
-        ),
-      ],
-    );
-
     final drawer = Column(
       children: [
         ListTile(
@@ -317,7 +292,7 @@ class _ChatPageState extends State<ChatPage> {
         Expanded(
           child: Consumer(
             builder: (context, ref, child) {
-              ref.watch(currentProvider);
+              ref.watch(currentChatProvider);
 
               return ListView.builder(
                 itemCount: Config.chats.length,
@@ -326,7 +301,7 @@ class _ChatPageState extends State<ChatPage> {
                   return ListTile(
                     contentPadding: const EdgeInsets.only(left: 16, right: 8),
                     leading: const Icon(Icons.article),
-                    selected: Current.chat == chat,
+                    selected: CurrentChat.chat == chat,
                     title: Text(
                       chat.title,
                       maxLines: 1,
@@ -335,14 +310,14 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     subtitle: Text(chat.time),
                     onTap: () async {
-                      if (Current.chat == chat) return;
-                      await Current.load(chat);
+                      if (CurrentChat.chat == chat) return;
+                      await CurrentChat.load(chat);
                       setState(() {});
                     },
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () async {
-                        if (Current.chat == chat) Current.clear();
+                        if (CurrentChat.chat == chat) CurrentChat.clear();
                         await File(Config.chatFilePath(chat.fileName)).delete();
                         Config.chats.removeAt(index);
                         await Config.save();
@@ -371,9 +346,9 @@ class _ChatPageState extends State<ChatPage> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Consumer(builder: (context, ref, child) {
-                  ref.watch(currentProvider);
+                  ref.watch(currentChatProvider);
                   return Text(
-                    Current.model ?? S.of(context).no_model,
+                    CurrentChat.model ?? S.of(context).no_model,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall,
                   );
@@ -385,15 +360,10 @@ class _ChatPageState extends State<ChatPage> {
             icon: const Icon(Icons.swap_vert),
             iconSize: 20,
             onPressed: () async {
-              final changed = await showDialog(
+              await showDialog(
                 context: context,
-                builder: (context) => CurrentWidget(),
+                builder: (context) => CurrentChatSettings(),
               );
-              if (changed ?? false) {
-                if (Current.chat != null && Current.file != null) {
-                  await Current.save();
-                }
-              }
             },
           ),
         ]),
@@ -401,7 +371,7 @@ class _ChatPageState extends State<ChatPage> {
           IconButton(
               icon: const Icon(Icons.note_add_outlined),
               onPressed: () {
-                Current.clear();
+                CurrentChat.clear();
                 setState(() {});
               }),
           IconButton(
@@ -414,7 +384,32 @@ class _ChatPageState extends State<ChatPage> {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         child: SafeArea(child: drawer),
       ),
-      body: body,
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollCtrl,
+              padding: const EdgeInsets.all(8),
+              itemCount: CurrentChat.messages.length,
+              itemBuilder: (context, index) {
+                final message = CurrentChat.messages[index];
+                return MessageWidget(
+                  message: message,
+                  longPress: (context) async =>
+                      await _longPress(context, index),
+                );
+              },
+            ),
+          ),
+          InputWidget(
+            editable: _sendable,
+            controller: _editCtrl,
+            files: _image != null ? 1 : 0,
+            addImage: _sendable ? _addImage : null,
+            sendMessage: _sendable ? _sendMessage : null,
+          ),
+        ],
+      ),
     );
   }
 }

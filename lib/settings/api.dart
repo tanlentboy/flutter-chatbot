@@ -16,6 +16,7 @@
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../providers.dart";
 import "../chat/current.dart";
 
 import "dart:convert";
@@ -23,39 +24,29 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-final apisProvider = NotifierProvider<ApisNotifier, bool>(ApisNotifier.new);
+class ApisTab extends StatelessWidget {
+  const ApisTab({super.key});
 
-class ApisNotifier extends Notifier<bool> {
-  @override
-  bool build() {
-    return true;
-  }
-
-  void notify() {
-    ref.notifyListeners();
-  }
-}
-
-class APIWidget extends StatefulWidget {
-  const APIWidget({super.key});
-
-  @override
-  State<APIWidget> createState() => _APIWidgetState();
-}
-
-class _APIWidgetState extends State<APIWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FilledButton(
-          child: Text(S.of(context).new_api),
-          onPressed: () async {
-            final changed = await showDialog<bool>(
-              context: context,
-              builder: (context) => ApiInfoWidget(),
+        Consumer(
+          builder: (context, ref, child) {
+            return FilledButton(
+              child: Text(S.of(context).new_api),
+              onPressed: () async {
+                final changed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => ApiSettings(),
+                );
+                if (!(changed ?? false)) return;
+
+                ref.read(apisProvider.notifier).notify();
+
+                await Config.save();
+              },
             );
-            if (changed ?? false) await Config.save();
           },
         ),
         const SizedBox(height: 8),
@@ -81,9 +72,17 @@ class _APIWidgetState extends State<APIWidget> {
                       onPressed: () async {
                         final changed = await showDialog<bool>(
                           context: context,
-                          builder: (_) => ApiInfoWidget(entry: apis[index]),
+                          builder: (context) =>
+                              ApiSettings(apiPair: apis[index]),
                         );
-                        if (changed ?? false) await Config.save();
+                        if (!(changed ?? false)) return;
+
+                        Config.fixBot();
+                        CurrentChat.fixBot();
+                        ref.read(apisProvider.notifier).notify();
+                        ref.read(currentChatProvider.notifier).notify();
+
+                        await Config.save();
                       },
                     ),
                   ),
@@ -98,59 +97,55 @@ class _APIWidgetState extends State<APIWidget> {
   }
 }
 
-class ApiInfoWidget extends StatelessWidget {
-  final MapEntry<String, ApiConfig>? entry;
+class ApiSettings extends StatelessWidget {
+  final MapEntry<String, ApiConfig>? apiPair;
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _modelsCtrl = TextEditingController();
   final TextEditingController _apiUrlCtrl = TextEditingController();
   final TextEditingController _apiKeyCtrl = TextEditingController();
 
-  ApiInfoWidget({
+  ApiSettings({
     super.key,
-    this.entry,
+    this.apiPair,
   });
 
-  bool save(BuildContext context, WidgetRef ref) {
-    final name = _nameCtrl.text;
-    final models = _modelsCtrl.text;
-    final apiUrl = _apiUrlCtrl.text;
-    final apiKey = _apiKeyCtrl.text;
+  Future<void> _fetchModels(BuildContext context) async {
+    final url = _apiUrlCtrl.text;
+    final key = _apiKeyCtrl.text;
 
-    if (name.isEmpty || models.isEmpty || apiUrl.isEmpty || apiKey.isEmpty) {
+    if (url.isEmpty || key.isEmpty) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).complete_all_fields),
       );
-      return false;
+      return;
     }
 
-    if (Config.apis.containsKey(name) &&
-        (entry == null || name != entry!.key)) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).duplicate_api_name),
+    final modelsEndpoint = "$url/models";
+
+    try {
+      final response = await http.get(
+        Uri.parse(modelsEndpoint),
+        headers: {"Authorization": "Bearer $key"},
       );
-      return false;
+
+      if (response.statusCode != 200) {
+        throw "${response.statusCode} ${response.body}";
+      }
+
+      final json = jsonDecode(response.body);
+      final models = <String>[for (final cell in json["data"]) cell["id"]];
+
+      _modelsCtrl.text = models.join(", ");
+    } catch (e) {
+      if (context.mounted) {
+        Util.showSnackBar(
+          context: context,
+          content: Text("$e"),
+          duration: const Duration(milliseconds: 1500),
+        );
+      }
     }
-
-    if (entry != null) {
-      Config.apis.remove(entry!.key);
-    }
-
-    final modelList = models.split(",").map((e) => e.trim()).toList();
-    Config.apis[name] = ApiConfig(
-      url: apiUrl,
-      key: apiKey,
-      models: modelList,
-    );
-
-    ref.read(apisProvider.notifier).notify();
-
-    Config.fixBot();
-    Current.fixBot();
-    ref.read(currentProvider.notifier).notify();
-
-    return true;
   }
 
   Future<void> _editModels(BuildContext context) async {
@@ -208,52 +203,48 @@ class ApiInfoWidget extends StatelessWidget {
     ].join(", ");
   }
 
-  Future<void> _fetchModels(BuildContext context) async {
-    final url = _apiUrlCtrl.text;
-    final key = _apiKeyCtrl.text;
+  bool _save(BuildContext context) {
+    final name = _nameCtrl.text;
+    final models = _modelsCtrl.text;
+    final apiUrl = _apiUrlCtrl.text;
+    final apiKey = _apiKeyCtrl.text;
 
-    if (url.isEmpty || key.isEmpty) {
+    if (name.isEmpty || models.isEmpty || apiUrl.isEmpty || apiKey.isEmpty) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).complete_all_fields),
       );
-      return;
+      return false;
     }
 
-    final modelsEndpoint = "$url/models";
-
-    try {
-      final response = await http.get(
-        Uri.parse(modelsEndpoint),
-        headers: {"Authorization": "Bearer $key"},
+    if (Config.apis.containsKey(name) &&
+        (apiPair == null || name != apiPair!.key)) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).duplicate_api_name),
       );
-
-      if (response.statusCode != 200) {
-        throw "${response.statusCode} ${response.body}";
-      }
-
-      final json = jsonDecode(response.body);
-      final models = <String>[for (final cell in json["data"]) cell["id"]];
-
-      _modelsCtrl.text = models.join(", ");
-    } catch (e) {
-      if (context.mounted) {
-        Util.showSnackBar(
-          context: context,
-          content: Text("$e"),
-          duration: const Duration(milliseconds: 1500),
-        );
-      }
+      return false;
     }
+
+    if (apiPair != null) Config.apis.remove(apiPair!.key);
+
+    final modelList = models.split(",").map((e) => e.trim()).toList();
+    Config.apis[name] = ApiConfig(
+      url: apiUrl,
+      key: apiKey,
+      models: modelList,
+    );
+
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (entry != null) {
-      _nameCtrl.text = entry!.key;
-      _apiUrlCtrl.text = entry!.value.url;
-      _apiKeyCtrl.text = entry!.value.key;
-      _modelsCtrl.text = entry!.value.models.join(", ");
+    if (apiPair != null) {
+      _nameCtrl.text = apiPair!.key;
+      _apiUrlCtrl.text = apiPair!.value.url;
+      _apiKeyCtrl.text = apiPair!.value.key;
+      _modelsCtrl.text = apiPair!.value.models.join(", ");
     }
 
     return Scaffold(
@@ -344,58 +335,45 @@ class ApiInfoWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Consumer(builder: (context, ref, child) {
-              return Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: FilledButton.tonal(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                      child: Text(S.of(context).cancel),
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: FilledButton.tonal(
+                    child: Text(S.of(context).cancel),
+                    onPressed: () => Navigator.of(context).pop(false),
                   ),
-                  const SizedBox(width: 8),
-                  Visibility(
-                    visible: entry != null,
-                    child: Expanded(
-                      flex: 1,
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                          foregroundColor:
-                              Theme.of(context).colorScheme.onError,
-                        ),
-                        onPressed: () {
-                          Config.apis.remove(entry!.key);
-                          ref.read(apisProvider.notifier).notify();
-
-                          Config.fixBot();
-                          Current.fixBot();
-                          ref.read(currentProvider.notifier).notify();
-
-                          Navigator.of(context).pop(true);
-                        },
-                        child: Text(S.of(context).delete),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                ),
+                const SizedBox(width: 8),
+                Visibility(
+                  visible: apiPair != null,
+                  child: Expanded(
                     flex: 1,
                     child: FilledButton(
-                      child: Text(S.of(context).save),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor: Theme.of(context).colorScheme.onError,
+                      ),
+                      child: Text(S.of(context).delete),
                       onPressed: () {
-                        if (save(context, ref)) {
-                          Navigator.of(context).pop(true);
-                        }
+                        Config.apis.remove(apiPair!.key);
+                        Navigator.of(context).pop(true);
                       },
                     ),
                   ),
-                ],
-              );
-            }),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    child: Text(S.of(context).save),
+                    onPressed: () {
+                      if (_save(context)) Navigator.of(context).pop(true);
+                    },
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

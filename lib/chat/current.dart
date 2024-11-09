@@ -17,14 +17,14 @@ import "message.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../settings/api.dart";
+import "../providers.dart";
 
 import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-class Current {
+class CurrentChat {
   static File? _file;
   static BotConfig? _bot;
   static ChatConfig? _chat;
@@ -129,42 +129,28 @@ class Current {
       _bot?.systemPrompts ?? Config.bot.systemPrompts;
 }
 
-final currentProvider =
-    NotifierProvider<CurrentNotifier, bool>(CurrentNotifier.new);
-
-class CurrentNotifier extends Notifier<bool> {
-  @override
-  bool build() {
-    return true;
-  }
-
-  void notify() {
-    ref.notifyListeners();
-  }
-}
-
-class CurrentWidget extends StatefulWidget {
-  const CurrentWidget({super.key});
+class CurrentChatSettings extends StatefulWidget {
+  const CurrentChatSettings({super.key});
 
   @override
-  State<CurrentWidget> createState() => _CurrentWidgetState();
+  State<CurrentChatSettings> createState() => _CurrentChatSettingsState();
 }
 
-class _CurrentWidgetState extends State<CurrentWidget> {
-  String? _api = Current.bot?.api;
-  String? _model = Current.bot?.model;
-  bool? _stream = Current.bot?.stream;
+class _CurrentChatSettingsState extends State<CurrentChatSettings> {
+  String? _api = CurrentChat.bot?.api;
+  String? _model = CurrentChat.bot?.model;
+  bool? _stream = CurrentChat.bot?.stream;
 
   final TextEditingController _titleCtrl =
-      TextEditingController(text: Current.chat?.title.toString());
+      TextEditingController(text: CurrentChat.chat?.title.toString());
   final TextEditingController _maxTokensCtrl =
-      TextEditingController(text: Current.bot?.maxTokens?.toString());
+      TextEditingController(text: CurrentChat.bot?.maxTokens?.toString());
   final TextEditingController _temperatureCtrl =
-      TextEditingController(text: Current.bot?.temperature?.toString());
+      TextEditingController(text: CurrentChat.bot?.temperature?.toString());
   final TextEditingController _systemPromptsCtrl =
-      TextEditingController(text: Current.bot?.systemPrompts?.toString());
+      TextEditingController(text: CurrentChat.bot?.systemPrompts?.toString());
 
-  bool save(BuildContext context) {
+  bool _save(BuildContext context) {
     final title = _titleCtrl.text;
     final maxTokens = int.tryParse(_maxTokensCtrl.text);
     final temperature = double.tryParse(_temperatureCtrl.text);
@@ -185,7 +171,7 @@ class _CurrentWidgetState extends State<CurrentWidget> {
       return false;
     }
 
-    if (Current.file != null && title.isEmpty) {
+    if (CurrentChat.file != null && title.isEmpty) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).enter_a_title),
@@ -193,14 +179,14 @@ class _CurrentWidgetState extends State<CurrentWidget> {
       return false;
     }
 
-    if (Current.chat != null) {
-      Current.chat!.title = title;
-    } else if (Current.chat == null && title.isNotEmpty) {
-      Current.initChat(title);
+    if (CurrentChat.chat != null) {
+      CurrentChat.chat!.title = title;
+    } else if (CurrentChat.chat == null && title.isNotEmpty) {
+      CurrentChat.initChat(title);
     }
 
-    Current.initBot();
-    final bot = Current.bot!;
+    if (CurrentChat.bot == null) CurrentChat.initBot();
+    final bot = CurrentChat.bot!;
 
     bot.api = _api;
     bot.model = _model;
@@ -224,7 +210,7 @@ class _CurrentWidgetState extends State<CurrentWidget> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(S.of(context).chat_settings),
       ),
@@ -250,17 +236,23 @@ class _CurrentWidgetState extends State<CurrentWidget> {
               final modelList = <DropdownMenuItem<String>>[];
 
               final apis = Config.apis.keys;
+              final models = Config.apis[_api]?.models ?? [];
+
+              if (!apis.contains(_api)) _api = null;
+              if (!models.contains(_model)) _model = null;
+
               for (final api in apis) {
                 apiList.add(DropdownMenuItem(
-                    value: api,
-                    child: Text(api, overflow: TextOverflow.ellipsis)));
+                  value: api,
+                  child: Text(api, overflow: TextOverflow.ellipsis),
+                ));
               }
 
-              final models = Config.apis[_api]?.models ?? [];
               for (final model in models) {
                 modelList.add(DropdownMenuItem(
-                    value: model,
-                    child: Text(model, overflow: TextOverflow.ellipsis)));
+                  value: model,
+                  child: Text(model, overflow: TextOverflow.ellipsis),
+                ));
               }
 
               return Row(
@@ -384,10 +376,16 @@ class _CurrentWidgetState extends State<CurrentWidget> {
                   child: Consumer(builder: (context, ref, child) {
                     return FilledButton(
                       child: Text(S.of(context).save),
-                      onPressed: () {
-                        if (save(context)) {
-                          ref.read(currentProvider.notifier).notify();
-                          Navigator.of(context).pop(true);
+                      onPressed: () async {
+                        if (!_save(context)) return;
+
+                        ref.read(currentChatProvider.notifier).notify();
+                        Navigator.of(context).pop();
+
+                        if (CurrentChat.chat != null &&
+                            CurrentChat.file != null) {
+                          await Config.save();
+                          await CurrentChat.save();
                         }
                       },
                     );
