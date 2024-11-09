@@ -61,6 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "setup_bot_api_first":
             MessageLookupByLibrary.simpleMessage("请先配置参数和接口"),
         "source": MessageLookupByLibrary.simpleMessage("源码"),
+        "stopped_by_user": MessageLookupByLibrary.simpleMessage("被用户终止"),
         "streaming_response": MessageLookupByLibrary.simpleMessage("流式响应"),
         "system_prompts": MessageLookupByLibrary.simpleMessage("系统提示词"),
         "temperature": MessageLookupByLibrary.simpleMessage("温度"),

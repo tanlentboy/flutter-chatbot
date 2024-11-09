@@ -39,18 +39,11 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  String? _image;
-  bool _sendable = true;
-
   final ImagePicker _picker = ImagePicker();
   final ScrollController _scrollCtrl = ScrollController();
-  final TextEditingController _editCtrl = TextEditingController();
+  final TextEditingController _inputCtrl = TextEditingController();
 
   Future<void> _addImage(BuildContext context) async {
-    if (_image != null) {
-      return setState(() => _image = null);
-    }
-
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (BuildContext context) {
@@ -97,11 +90,15 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     final base64 = base64Encode(bytes);
-    setState(() => _image = base64);
+    setState(() => CurrentChat.image = base64);
+  }
+
+  void _clearImage(BuildContext context) {
+    setState(() => CurrentChat.image = null);
   }
 
   Future<void> _sendMessage(BuildContext context) async {
-    final text = _editCtrl.text;
+    final text = _inputCtrl.text;
     if (text.isEmpty) return;
 
     final apiUrl = CurrentChat.apiUrl;
@@ -116,13 +113,20 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
-    CurrentChat.messages
-        .add(Message(role: MessageRole.user, text: text, image: _image));
-    final message = Message(role: MessageRole.assistant, text: "");
-    final messages = _buildContext(CurrentChat.messages);
-    CurrentChat.messages.add(message);
+    final messages = CurrentChat.messages;
+    final length = messages.length;
 
-    setState(() => _sendable = false);
+    messages.add(Message(
+      text: text,
+      role: MessageRole.user,
+      image: CurrentChat.image,
+    ));
+    final message = Message(role: MessageRole.assistant, text: "");
+    final chatContext = _buildContext(messages);
+    messages.add(message);
+
+    _inputCtrl.clear();
+    setState(() => CurrentChat.status = CurrentChatStatus.responding);
 
     try {
       final llm = ChatOpenAI(
@@ -136,38 +140,58 @@ class _ChatPageState extends State<ChatPage> {
       );
 
       if (CurrentChat.stream ?? true) {
-        final stream = llm.stream(PromptValue.chat(messages));
+        final stream = llm.stream(PromptValue.chat(chatContext));
         await for (final chunk in stream) {
+          if (CurrentChat.isNothing) {
+            break;
+          }
           final content = chunk.output.content;
           setState(() => message.text += content);
           _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
         }
       } else {
-        final result = await llm.invoke(PromptValue.chat(messages));
-        setState(() => message.text += result.output.content);
-        _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
+        final result = await llm.invoke(PromptValue.chat(chatContext));
+        if (!CurrentChat.isNothing) {
+          setState(() => message.text += result.output.content);
+          _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
+        }
       }
 
-      _image = null;
-      _editCtrl.clear();
-      await CurrentChat.save();
+      CurrentChat.image = null;
+      if (messages.length == length + 2) await CurrentChat.save();
     } catch (e) {
-      if (context.mounted) {
+      if (messages.length == length + 2 && context.mounted) {
         Util.showSnackBar(
           context: context,
           content: Text("$e"),
           duration: const Duration(milliseconds: 1500),
         );
       }
-      CurrentChat.messages.length -= 2;
+      _inputCtrl.text = text;
+      if (messages.length == length + 2 && messages.last.text.isEmpty) {
+        messages.length -= 2;
+      }
     }
 
-    setState(() => _sendable = true);
+    setState(() => CurrentChat.status = CurrentChatStatus.nothing);
+  }
+
+  void _stopResponding(BuildContext context) {
+    CurrentChat.status = CurrentChatStatus.nothing;
+    final list = CurrentChat.messages;
+
+    setState(() {
+      final user = list[list.length - 2];
+      final assistant = list.last;
+
+      if (assistant.text.isEmpty) {
+        list.removeRange(list.length - 2, list.length);
+        _inputCtrl.text = user.text;
+      }
+    });
   }
 
   Future<void> _longPress(BuildContext context, int index) async {
-    if (!_sendable) return;
-
     final message = CurrentChat.messages[index];
     final children = [
       Container(
@@ -402,11 +426,11 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           InputWidget(
-            editable: _sendable,
-            controller: _editCtrl,
-            files: _image != null ? 1 : 0,
-            addImage: _sendable ? _addImage : null,
-            sendMessage: _sendable ? _sendMessage : null,
+            controller: _inputCtrl,
+            addImage: _addImage,
+            clearImage: _clearImage,
+            sendMessage: _sendMessage,
+            stopResponding: _stopResponding,
           ),
         ],
       ),

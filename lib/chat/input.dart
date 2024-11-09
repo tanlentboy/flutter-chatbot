@@ -14,51 +14,46 @@
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
 import "../gen/l10n.dart";
+import "../chat/current.dart";
 import "package:flutter/material.dart";
 
 class InputWidget extends StatelessWidget {
-  final int files;
-  final bool editable;
   final TextEditingController controller;
-  final void Function(BuildContext context)? addImage;
-  final void Function(BuildContext context)? sendMessage;
+  final Future<void> Function(BuildContext context) addImage;
+  final void Function(BuildContext context) clearImage;
+  final Future<void> Function(BuildContext context) sendMessage;
+  final void Function(BuildContext context) stopResponding;
 
   const InputWidget({
     super.key,
-    this.files = 0,
-    this.editable = true,
-    required this.addImage,
     required this.controller,
+    required this.addImage,
+    required this.clearImage,
     required this.sendMessage,
+    required this.stopResponding,
   });
 
   @override
   Widget build(BuildContext context) {
-    void Function()? add;
-    void Function()? send;
-
-    if (addImage != null) {
-      add = () {
-        addImage!(context);
-      };
-    }
-
-    if (sendMessage != null) {
-      send = () {
-        sendMessage!(context);
-      };
-    }
+    final hasImage = CurrentChat.image != null;
+    final isResponding = CurrentChat.isResponding;
 
     final child = Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Badge(
-          isLabelVisible: files != 0,
+          isLabelVisible: hasImage,
+          label: const Text("1"),
           alignment: Alignment.topLeft,
-          label: Text(files.toString()),
           child: IconButton(
-            onPressed: add,
-            icon: Icon(files == 0 ? Icons.add_photo_alternate : Icons.delete),
+            onPressed: () async {
+              if (hasImage) {
+                clearImage(context);
+              } else {
+                await addImage(context);
+              }
+            },
+            icon: Icon(hasImage ? Icons.delete : Icons.add_photo_alternate),
           ),
         ),
         Expanded(
@@ -66,7 +61,6 @@ class InputWidget extends StatelessWidget {
             constraints: const BoxConstraints(maxHeight: 120),
             child: TextField(
               maxLines: null,
-              enabled: editable,
               controller: controller,
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
@@ -77,8 +71,14 @@ class InputWidget extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: send,
-          icon: const Icon(Icons.send),
+          onPressed: () async {
+            if (isResponding) {
+              stopResponding(context);
+            } else {
+              await sendMessage(context);
+            }
+          },
+          icon: Icon(isResponding ? Icons.stop_circle : Icons.send),
         ),
       ],
     );

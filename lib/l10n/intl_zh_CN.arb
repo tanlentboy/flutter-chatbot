@@ -33,6 +33,7 @@
     "model_list": "模型列表",
     "select_models": "选择模型",
 
+    "stopped_by_user": "被用户终止",
     "enter_a_title": "请输入标题",
     "duplicate_api_name": "名称重复",
     "complete_all_fields": "请填写所有字段",

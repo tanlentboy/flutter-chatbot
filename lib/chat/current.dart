@@ -24,11 +24,19 @@ import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+enum CurrentChatStatus {
+  nothing,
+  responding,
+}
+
 class CurrentChat {
   static File? _file;
   static BotConfig? _bot;
   static ChatConfig? _chat;
   static final List<Message> _messages = [];
+
+  static String? image;
+  static CurrentChatStatus status = CurrentChatStatus.nothing;
 
   static Future<void> load(ChatConfig chat) async {
     clear();
@@ -127,6 +135,9 @@ class CurrentChat {
   static double? get temperature => _bot?.temperature ?? Config.bot.temperature;
   static String? get systemPrompts =>
       _bot?.systemPrompts ?? Config.bot.systemPrompts;
+
+  static bool get isNothing => status == CurrentChatStatus.nothing;
+  static bool get isResponding => status == CurrentChatStatus.responding;
 }
 
 class CurrentChatSettings extends StatefulWidget {

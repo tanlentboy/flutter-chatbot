@@ -71,6 +71,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "setup_bot_api_first": MessageLookupByLibrary.simpleMessage(
             "Set up the Bot and API first"),
         "source": MessageLookupByLibrary.simpleMessage("source"),
+        "stopped_by_user":
+            MessageLookupByLibrary.simpleMessage("Stopped By User"),
         "streaming_response":
             MessageLookupByLibrary.simpleMessage("Streaming Response"),
         "system_prompts":

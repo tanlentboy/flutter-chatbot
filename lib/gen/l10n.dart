@@ -320,6 +320,16 @@ class S {
     );
   }
 
+  /// `Stopped By User`
+  String get stopped_by_user {
+    return Intl.message(
+      'Stopped By User',
+      name: 'stopped_by_user',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please enter a title`
   String get enter_a_title {
     return Intl.message(

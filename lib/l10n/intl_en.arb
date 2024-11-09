@@ -33,6 +33,7 @@
     "model_list": "Model List",
     "select_models": "Select Models",
 
+    "stopped_by_user": "Stopped By User",
     "enter_a_title": "Please enter a title",
     "duplicate_api_name": "Duplicate API name",
     "complete_all_fields": "Please complete all fields",

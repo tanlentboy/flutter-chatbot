@@ -126,12 +126,11 @@ class MessageWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: background,
             borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(16),
               bottomLeft: const Radius.circular(16),
               bottomRight: const Radius.circular(16),
-              topLeft: Radius.circular(
-                  message.role == MessageRole.assistant ? 0 : 16),
               topRight:
-                  Radius.circular(message.role == MessageRole.user ? 0 : 16),
+                  Radius.circular(message.role == MessageRole.user ? 4 : 16),
             ),
           ),
           child: MarkdownBody(
