@@ -142,9 +142,7 @@ class _ChatPageState extends State<ChatPage> {
       if (CurrentChat.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(chatContext));
         await for (final chunk in stream) {
-          if (CurrentChat.isNothing) {
-            break;
-          }
+          if (CurrentChat.isNothing) break;
           final content = chunk.output.content;
           setState(() => message.text += content);
           _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
@@ -157,19 +155,23 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
 
-      CurrentChat.image = null;
-      if (messages.length == length + 2) await CurrentChat.save();
-    } catch (e) {
-      if (messages.length == length + 2 && context.mounted) {
-        Util.showSnackBar(
-          context: context,
-          content: Text("$e"),
-          duration: const Duration(milliseconds: 1500),
-        );
+      if (messages.length == length + 2) {
+        CurrentChat.image = null;
+        await CurrentChat.save();
       }
-      _inputCtrl.text = text;
-      if (messages.length == length + 2 && messages.last.text.isEmpty) {
-        messages.length -= 2;
+    } catch (e) {
+      if (messages.length == length + 2 && !CurrentChat.isNothing) {
+        if (context.mounted) {
+          Util.showSnackBar(
+            context: context,
+            content: Text("$e"),
+            duration: const Duration(milliseconds: 1500),
+          );
+        }
+        if (messages.last.text.isEmpty) {
+          _inputCtrl.text = text;
+          messages.length -= 2;
+        }
       }
     }
 
