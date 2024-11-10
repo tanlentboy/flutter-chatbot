@@ -443,8 +443,8 @@ class _ChatPageState extends State<ChatPage> {
 List<ChatMessage> _buildContext(List<Message> list) {
   final context = <ChatMessage>[];
 
-  if (Config.bot.systemPrompts != null) {
-    context.add(ChatMessage.system(Config.bot.systemPrompts!));
+  if (CurrentChat.systemPrompts != null) {
+    context.add(ChatMessage.system(CurrentChat.systemPrompts!));
   }
 
   for (final item in list) {
