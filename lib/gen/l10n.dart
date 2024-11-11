@@ -160,6 +160,16 @@ class S {
     );
   }
 
+  /// `Open`
+  String get open {
+    return Intl.message(
+      'Open',
+      name: 'open',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Save`
   String get save {
     return Intl.message(
@@ -195,6 +205,16 @@ class S {
     return Intl.message(
       'Cancel',
       name: 'cancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reanswer`
+  String get reanswer {
+    return Intl.message(
+      'Reanswer',
+      name: 'reanswer',
       desc: '',
       args: [],
     );
@@ -255,6 +275,16 @@ class S {
     return Intl.message(
       'Streaming Response',
       name: 'streaming_response',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link`
+  String get link {
+    return Intl.message(
+      'Link',
+      name: 'link',
       desc: '',
       args: [],
     );
@@ -425,6 +455,26 @@ class S {
     return Intl.message(
       'Not implemented yet',
       name: 'not_implemented_yet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Empty Link`
+  String get empty_link {
+    return Intl.message(
+      'Empty Link',
+      name: 'empty_link',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cannot Open`
+  String get cannot_open {
+    return Intl.message(
+      'Cannot Open',
+      name: 'cannot_open',
       desc: '',
       args: [],
     );

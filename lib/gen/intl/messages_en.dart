@@ -30,6 +30,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "bot": MessageLookupByLibrary.simpleMessage("Bot"),
         "camera": MessageLookupByLibrary.simpleMessage("camera"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "cannot_open": MessageLookupByLibrary.simpleMessage("Cannot Open"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
@@ -42,6 +43,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
         "edit": MessageLookupByLibrary.simpleMessage("edit"),
+        "empty_link": MessageLookupByLibrary.simpleMessage("Empty Link"),
         "enter_a_title":
             MessageLookupByLibrary.simpleMessage("Please enter a title"),
         "enter_your_message":
@@ -53,6 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Invalid Max Tokens"),
         "invalid_temperature":
             MessageLookupByLibrary.simpleMessage("Invalid Temperature"),
+        "link": MessageLookupByLibrary.simpleMessage("Link"),
         "max_tokens": MessageLookupByLibrary.simpleMessage("Max Tokens"),
         "model": MessageLookupByLibrary.simpleMessage("Model"),
         "model_list": MessageLookupByLibrary.simpleMessage("Model List"),
@@ -61,7 +64,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "no_model": MessageLookupByLibrary.simpleMessage("no model"),
         "not_implemented_yet":
             MessageLookupByLibrary.simpleMessage("Not implemented yet"),
+        "open": MessageLookupByLibrary.simpleMessage("Open"),
         "other": MessageLookupByLibrary.simpleMessage("Other"),
+        "reanswer": MessageLookupByLibrary.simpleMessage("Reanswer"),
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saved_successfully":

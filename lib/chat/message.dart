@@ -13,10 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "../util.dart";
 import "../config.dart";
+import "../gen/l10n.dart";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:markdown/markdown.dart" as md;
+import "package:url_launcher/url_launcher.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:markdown/markdown.dart" hide Element, Text;
@@ -95,6 +99,72 @@ class MessageWidget extends ConsumerWidget {
     required this.longPress,
   });
 
+  Future<void> _onTapLink(
+      BuildContext context, String text, String? href, String title) async {
+    if (href == null) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).empty_link),
+      );
+      return;
+    }
+
+    if (!context.mounted) return;
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(S.of(context).link),
+          content: Text(href),
+          actions: [
+            TextButton(
+              child: Text(S.of(context).cancel),
+              onPressed: () => Navigator.of(context).pop(0),
+            ),
+            TextButton(
+              child: Text(S.of(context).copy),
+              onPressed: () => Navigator.of(context).pop(1),
+            ),
+            TextButton(
+              child: Text(S.of(context).open),
+              onPressed: () => Navigator.of(context).pop(2),
+            ),
+          ],
+        );
+      },
+    );
+
+    switch (result) {
+      case null:
+      case 0:
+        return;
+
+      case 1:
+        await Clipboard.setData(ClipboardData(text: href));
+        if (context.mounted) {
+          Util.showSnackBar(
+            context: context,
+            content: Text(S.of(context).copied_successfully),
+          );
+        }
+        break;
+
+      case 2:
+        final uri = Uri.parse(href);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.platformDefault);
+        } else {
+          if (context.mounted) {
+            Util.showSnackBar(
+              context: context,
+              content: Text(S.of(context).cannot_open),
+            );
+          }
+        }
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(messageProvider(message));
@@ -148,6 +218,8 @@ class MessageWidget extends ConsumerWidget {
             data: content,
             shrinkWrap: true,
             extensionSet: extensionSet,
+            onTapLink: (text, href, title) async =>
+                await _onTapLink(context, text, href, title),
             builders: {
               "code": CodeElementBuilder(context: context),
               "latex": LatexElementBuilder(textScaleFactor: 1.2),

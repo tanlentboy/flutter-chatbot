@@ -240,6 +240,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 constraints: const BoxConstraints(maxHeight: 120),
                 child: TextField(
                   maxLines: null,
+                  autofocus: false,
                   controller: inputCtrl,
                   keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(

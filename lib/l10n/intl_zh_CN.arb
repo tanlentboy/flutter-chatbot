@@ -14,10 +14,12 @@
     "apis": "接口",
     "other": "其他",
 
+    "open": "打开",
     "save": "保存",
     "reset": "重置",
     "clear": "清除",
     "cancel": "取消",
+    "reanswer": "重新回答",
 
     "api": "接口",
     "model": "模型",
@@ -26,6 +28,7 @@
     "system_prompts": "系统提示词",
     "streaming_response": "流式响应",
 
+    "link": "链接",
     "name": "名称",
     "new_api": "新接口",
     "api_url": "接口地址",
@@ -39,14 +42,16 @@
     "complete_all_fields": "请填写所有字段",
 
     "no_model": "无模型",
-    "all_chats": "所有聊天",
-    "chat_title": "聊天标题",
-    "chat_settings": "聊天配置",
+    "all_chats": "所有对话",
+    "chat_title": "对话标题",
+    "chat_settings": "对话配置",
 
     "saved_successfully": "保存成功",
     "copied_successfully": "拷贝成功",
     "not_implemented_yet": "还未实现",
 
+    "empty_link": "空链接",
+    "cannot_open": "无法打开",
     "invalid_max_tokens": "非法的最大输出",
     "invalid_temperature": "非法的温度",
 

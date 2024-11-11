@@ -14,10 +14,12 @@
     "apis": "APIs",
     "other": "Other",
 
+    "open": "Open",
     "save": "Save",
     "reset": "Reset",
     "clear": "Clear",
     "cancel": "Cancel",
+    "reanswer": "Reanswer",
 
     "api": "API",
     "model": "Model",
@@ -26,6 +28,7 @@
     "system_prompts": "System Prompts",
     "streaming_response": "Streaming Response",
 
+    "link": "Link",
     "name": "Name",
     "new_api": "New API",
     "api_url": "API Url",
@@ -47,6 +50,8 @@
     "copied_successfully": "Copied Successfully",
     "not_implemented_yet": "Not implemented yet",
 
+    "empty_link": "Empty Link",
+    "cannot_open": "Cannot Open",
     "invalid_max_tokens": "Invalid Max Tokens",
     "invalid_temperature": "Invalid Temperature",
 
