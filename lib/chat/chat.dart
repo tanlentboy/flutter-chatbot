@@ -203,6 +203,7 @@ class ChatPage extends ConsumerWidget {
                       if (CurrentChat.chat == chat) return;
 
                       await CurrentChat.load(chat);
+                      ref.read(modelProvider.notifier).notify();
                       ref.read(chatsProvider.notifier).notify();
                       ref.read(messagesProvider.notifier).notify();
                     },
@@ -211,6 +212,7 @@ class ChatPage extends ConsumerWidget {
                       onPressed: () async {
                         if (CurrentChat.chat == chat) {
                           CurrentChat.clear();
+                          ref.read(modelProvider.notifier).notify();
                           ref.read(messagesProvider.notifier).notify();
                         }
 
@@ -271,6 +273,7 @@ class ChatPage extends ConsumerWidget {
               icon: const Icon(Icons.note_add_outlined),
               onPressed: () {
                 CurrentChat.clear();
+                ref.read(modelProvider.notifier).notify();
                 ref.read(messagesProvider.notifier).notify();
               }),
           IconButton(
