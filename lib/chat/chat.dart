@@ -23,7 +23,6 @@ import "../settings/api.dart";
 
 import "dart:io";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final modelProvider =
@@ -108,13 +107,8 @@ class ChatPage extends ConsumerWidget {
 
     switch (event) {
       case MessageEvent.copy:
-        await Clipboard.setData(ClipboardData(text: message.text));
-        if (context.mounted) {
-          Util.showSnackBar(
-            context: context,
-            content: Text(S.of(context).copied_successfully),
-          );
-        }
+        if (!context.mounted) return;
+        await Util.copyText(context: context, text: message.text);
         break;
 
       case MessageEvent.delete:
@@ -149,12 +143,11 @@ class ChatPage extends ConsumerWidget {
         break;
 
       default:
-        if (context.mounted) {
-          Util.showSnackBar(
-            context: context,
-            content: Text(S.of(context).not_implemented_yet),
-          );
-        }
+        if (!context.mounted) return;
+        Util.showSnackBar(
+          context: context,
+          content: Text(S.of(context).not_implemented_yet),
+        );
         break;
     }
   }
