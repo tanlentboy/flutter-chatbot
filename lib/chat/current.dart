@@ -83,14 +83,16 @@ class CurrentChat {
 
   static void initFile() => _file = File(Config.chatFilePath(_chat!.fileName));
 
-  static Future<void> save() async {
+  static Future<bool> save() async {
+    var isNew = false;
+
     if (_chat == null) {
       initChat(_messages.first.text);
     }
 
     if (_file == null) {
       initFile();
-
+      isNew = true;
       Config.chats.insert(0, _chat!);
       await Config.save();
     }
@@ -99,6 +101,7 @@ class CurrentChat {
       "bot": _bot,
       "messages": _messages,
     }));
+    return isNew;
   }
 
   static void fixBot() {

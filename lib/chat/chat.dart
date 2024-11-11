@@ -60,6 +60,8 @@ class ChatPage extends ConsumerWidget {
 
   Future<void> _longPress(
       BuildContext context, WidgetRef ref, int index) async {
+    if (!CurrentChat.isNothing) return;
+
     final message = CurrentChat.messages[index];
     final children = [
       Container(
@@ -81,22 +83,17 @@ class ChatPage extends ConsumerWidget {
         leading: const Icon(Icons.code_outlined),
         onTap: () => Navigator.pop(context, MessageEvent.source),
       ),
+      ListTile(
+        title: Text(S.of(context).delete),
+        leading: const Icon(Icons.delete_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.delete),
+      ),
       // ListTile(
       //   title: Text(S.of(context).edit),
       //   leading: const Icon(Icons.edit_outlined),
       //   onTap: () => Navigator.pop(context, MessageEvent.edit),
       // ),
     ];
-
-    if (message.role == MessageRole.user) {
-      children.add(
-        ListTile(
-          title: Text(S.of(context).delete),
-          leading: const Icon(Icons.delete_outlined),
-          onTap: () => Navigator.pop(context, MessageEvent.delete),
-        ),
-      );
-    }
 
     final event = await showModalBottomSheet<MessageEvent>(
       context: context,
@@ -121,7 +118,7 @@ class ChatPage extends ConsumerWidget {
         break;
 
       case MessageEvent.delete:
-        CurrentChat.messages.removeRange(index, index + 2);
+        CurrentChat.messages.removeAt(index);
         ref.read(messagesProvider.notifier).notify();
         await CurrentChat.save();
         break;

@@ -42,6 +42,7 @@ class InputWidget extends ConsumerStatefulWidget {
 }
 
 class _InputWidgetState extends ConsumerState<InputWidget> {
+  static int sendTimes = 0;
   static final ImagePicker imagePicker = ImagePicker();
   final TextEditingController inputCtrl = TextEditingController();
 
@@ -103,6 +104,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     final text = inputCtrl.text;
     if (text.isEmpty) return;
 
+    final messages = CurrentChat.messages;
     final apiUrl = CurrentChat.apiUrl;
     final apiKey = CurrentChat.apiKey;
     final model = CurrentChat.model;
@@ -115,21 +117,26 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       return;
     }
 
-    final messages = CurrentChat.messages;
-    final length = messages.length;
-
     messages.add(Message(
       text: text,
       role: MessageRole.user,
       image: CurrentChat.image,
     ));
-    final chatContext = _buildContext(messages);
-    final message = Message(text: "", role: MessageRole.assistant);
-    messages.add(message);
 
-    inputCtrl.clear();
+    final chatContext = _buildContext(messages);
+    final assistant = Message(text: "", role: MessageRole.assistant);
+
+    messages.add(assistant);
     ref.read(messagesProvider.notifier).notify();
-    setState(() => CurrentChat.status = CurrentChatStatus.responding);
+
+    setState(() {
+      inputCtrl.clear();
+      CurrentChat.image = null;
+      CurrentChat.status = CurrentChatStatus.responding;
+    });
+
+    final times = ++sendTimes;
+    final scrollCtrl = widget.scrollCtrl;
 
     try {
       final llm = ChatOpenAI(
@@ -142,56 +149,44 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
         ),
       );
 
-      final scrollCtrl = widget.scrollCtrl;
       if (CurrentChat.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(chatContext));
         await for (final chunk in stream) {
-          if (CurrentChat.isNothing) break;
-
-          message.text += chunk.output.content;
-          ref.read(messageProvider(message).notifier).notify();
-
+          if (!CurrentChat.isResponding || times != sendTimes) return;
+          assistant.text += chunk.output.content;
+          ref.read(messageProvider(assistant).notifier).notify();
           scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
         }
       } else {
         final result = await llm.invoke(PromptValue.chat(chatContext));
-        if (!CurrentChat.isNothing) {
-          message.text += result.output.content;
-          ref.read(messageProvider(message).notifier).notify();
-
-          scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
-        }
-      }
-
-      if (messages.length == length + 2) {
-        if (CurrentChat.image != null) {
-          setState(() => CurrentChat.image = null);
-        }
-        await CurrentChat.save();
+        if (!CurrentChat.isResponding || times != sendTimes) return;
+        assistant.text += result.output.content;
+        ref.read(messageProvider(assistant).notifier).notify();
+        scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
       }
     } catch (e) {
-      if (messages.length == length + 2 && !CurrentChat.isNothing) {
-        if (context.mounted) {
-          Util.showSnackBar(
-            context: context,
-            content: Text("$e"),
-            duration: const Duration(milliseconds: 1500),
-          );
-        }
-        if (messages.last.text.isEmpty) {
-          inputCtrl.text = text;
-          messages.length -= 2;
-          ref.read(messagesProvider.notifier).notify();
-        }
+      if (!CurrentChat.isResponding || times != sendTimes) return;
+      if (context.mounted) {
+        Util.showSnackBar(
+          context: context,
+          content: Text("$e"),
+          duration: const Duration(milliseconds: 1500),
+        );
+      }
+      if (assistant.text.isEmpty) {
+        messages.length -= 2;
+        inputCtrl.text = text;
+        ref.read(messagesProvider.notifier).notify();
       }
     }
 
-    if (messages.length <= length + 2) {
-      setState(() => CurrentChat.status = CurrentChatStatus.nothing);
+    if (await CurrentChat.save()) {
+      ref.read(chatsProvider.notifier).notify();
     }
+    setState(() => CurrentChat.status = CurrentChatStatus.nothing);
   }
 
-  void _stopResponding(BuildContext context) {
+  Future<void> _stopResponding(BuildContext context) async {
     setState(() => CurrentChat.status = CurrentChatStatus.nothing);
     final list = CurrentChat.messages;
 
@@ -202,6 +197,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       list.removeRange(list.length - 2, list.length);
       ref.read(messagesProvider.notifier).notify();
       inputCtrl.text = user.text;
+    } else if (await CurrentChat.save()) {
+      ref.read(chatsProvider.notifier).notify();
     }
   }
 
@@ -255,7 +252,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
             IconButton(
               onPressed: () async {
                 if (isResponding) {
-                  _stopResponding(context);
+                  await _stopResponding(context);
                 } else {
                   await _sendMessage(context);
                 }
