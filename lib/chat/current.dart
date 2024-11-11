@@ -13,11 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "chat.dart";
 import "message.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../providers.dart";
+import "../settings/api.dart";
 
 import "dart:io";
 import "dart:convert";
@@ -140,14 +141,15 @@ class CurrentChat {
   static bool get isResponding => status == CurrentChatStatus.responding;
 }
 
-class CurrentChatSettings extends StatefulWidget {
+class CurrentChatSettings extends ConsumerStatefulWidget {
   const CurrentChatSettings({super.key});
 
   @override
-  State<CurrentChatSettings> createState() => _CurrentChatSettingsState();
+  ConsumerState<CurrentChatSettings> createState() =>
+      _CurrentChatSettingsState();
 }
 
-class _CurrentChatSettingsState extends State<CurrentChatSettings> {
+class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
   String? _api = CurrentChat.bot?.api;
   String? _model = CurrentChat.bot?.model;
   bool? _stream = CurrentChat.bot?.stream;
@@ -384,23 +386,22 @@ class _CurrentChatSettingsState extends State<CurrentChatSettings> {
                 const SizedBox(width: 16),
                 Expanded(
                   flex: 1,
-                  child: Consumer(builder: (context, ref, child) {
-                    return FilledButton(
-                      child: Text(S.of(context).save),
-                      onPressed: () async {
-                        if (!_save(context)) return;
+                  child: FilledButton(
+                    child: Text(S.of(context).save),
+                    onPressed: () async {
+                      if (!_save(context)) return;
 
-                        ref.read(currentChatProvider.notifier).notify();
-                        Navigator.of(context).pop();
+                      ref.read(modelProvider.notifier).notify();
+                      Navigator.of(context).pop();
 
-                        if (CurrentChat.chat != null &&
-                            CurrentChat.file != null) {
-                          await Config.save();
-                          await CurrentChat.save();
-                        }
-                      },
-                    );
-                  }),
+                      if (CurrentChat.chat != null &&
+                          CurrentChat.file != null) {
+                        await Config.save();
+                        await CurrentChat.save();
+                        ref.read(chatsProvider.notifier).notify();
+                      }
+                    },
+                  ),
                 ),
               ],
             ),

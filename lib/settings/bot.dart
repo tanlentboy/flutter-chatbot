@@ -16,19 +16,20 @@
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../providers.dart";
+import "api.dart" show apisProvider;
+import "../chat/chat.dart" show modelProvider;
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-class BotTab extends StatefulWidget {
+class BotTab extends ConsumerStatefulWidget {
   const BotTab({super.key});
 
   @override
-  State<BotTab> createState() => _BotTabState();
+  ConsumerState<BotTab> createState() => _BotTabState();
 }
 
-class _BotTabState extends State<BotTab> {
+class _BotTabState extends ConsumerState<BotTab> {
   String? _api = Config.bot.api;
   String? _model = Config.bot.model;
   bool? _stream = Config.bot.stream;
@@ -40,7 +41,7 @@ class _BotTabState extends State<BotTab> {
   final TextEditingController _systemPromptsCtrl =
       TextEditingController(text: Config.bot.systemPrompts?.toString());
 
-  bool save(BuildContext context) {
+  bool _save(BuildContext context) {
     final changed = Config.bot.model != _model;
     final maxTokens = int.tryParse(_maxTokensCtrl.text);
     final temperature = double.tryParse(_temperatureCtrl.text);
@@ -224,16 +225,12 @@ class _BotTabState extends State<BotTab> {
             const SizedBox(width: 16),
             Expanded(
               flex: 1,
-              child: Consumer(
-                builder: (context, ref, child) {
-                  return FilledButton(
-                    child: Text(S.of(context).save),
-                    onPressed: () async {
-                      if (!save(context)) return;
-                      ref.read(currentChatProvider.notifier).notify();
-                      await Config.save();
-                    },
-                  );
+              child: FilledButton(
+                child: Text(S.of(context).save),
+                onPressed: () async {
+                  if (!_save(context)) return;
+                  ref.read(modelProvider.notifier).notify();
+                  await Config.save();
                 },
               ),
             ),

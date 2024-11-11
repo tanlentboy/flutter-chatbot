@@ -16,7 +16,6 @@
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../providers.dart";
 import "../chat/current.dart";
 
 import "dart:convert";
@@ -24,29 +23,33 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-class ApisTab extends StatelessWidget {
+final apisProvider =
+    NotifierProvider.autoDispose<ApisNotifier, void>(ApisNotifier.new);
+
+class ApisNotifier extends AutoDisposeNotifier<void> {
+  @override
+  void build() {}
+  void notify() => ref.notifyListeners();
+}
+
+class ApisTab extends ConsumerWidget {
   const ApisTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Consumer(
-          builder: (context, ref, child) {
-            return FilledButton(
-              child: Text(S.of(context).new_api),
-              onPressed: () async {
-                final changed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => ApiSettings(),
-                );
-                if (!(changed ?? false)) return;
-
-                ref.read(apisProvider.notifier).notify();
-
-                await Config.save();
-              },
+        FilledButton(
+          child: Text(S.of(context).new_api),
+          onPressed: () async {
+            final changed = await showDialog<bool>(
+              context: context,
+              builder: (context) => ApiSettings(),
             );
+            if (!(changed ?? false)) return;
+
+            ref.read(apisProvider.notifier).notify();
+            await Config.save();
           },
         ),
         const SizedBox(height: 8),
@@ -80,7 +83,6 @@ class ApisTab extends StatelessWidget {
                         Config.fixBot();
                         CurrentChat.fixBot();
                         ref.read(apisProvider.notifier).notify();
-                        ref.read(currentChatProvider.notifier).notify();
 
                         await Config.save();
                       },

@@ -17,10 +17,32 @@ import "../config.dart";
 
 import "package:flutter/material.dart";
 import "package:markdown/markdown.dart" as md;
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:markdown/markdown.dart" hide Element, Text;
 import "package:flutter_highlighter/flutter_highlighter.dart";
 import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
+
+final messageProvider = NotifierProvider.autoDispose
+    .family<MessageNotifier, void, Message>(MessageNotifier.new);
+
+class MessageNotifier extends AutoDisposeFamilyNotifier<void, Message> {
+  @override
+  void build(Message arg) {}
+  void notify() => ref.notifyListeners();
+}
+
+enum MessageRole {
+  assistant,
+  user,
+}
+
+enum MessageEvent {
+  source,
+  delete,
+  copy,
+  edit,
+}
 
 class Message {
   String text;
@@ -46,19 +68,7 @@ class Message {
       );
 }
 
-enum MessageRole {
-  assistant,
-  user,
-}
-
-enum MessageEvent {
-  source,
-  delete,
-  copy,
-  edit,
-}
-
-class MessageWidget extends StatelessWidget {
+class MessageWidget extends ConsumerWidget {
   final Message message;
   final Future<void> Function(BuildContext) longPress;
 
@@ -86,7 +96,8 @@ class MessageWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(messageProvider(message));
     String content = message.text;
     final Alignment alignment;
     final Color background;
