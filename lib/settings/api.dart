@@ -52,7 +52,6 @@ class ApisTab extends ConsumerWidget {
             await Config.save();
           },
         ),
-        const SizedBox(height: 8),
         Expanded(
           child: Consumer(builder: (context, ref, child) {
             ref.watch(apisProvider);
@@ -62,7 +61,7 @@ class ApisTab extends ConsumerWidget {
               itemCount: apis.length,
               itemBuilder: (context, index) {
                 return Card.filled(
-                  margin: const EdgeInsets.only(top: 8, bottom: 8),
+                  margin: const EdgeInsets.only(top: 12),
                   child: ListTile(
                     title: Text(
                       apis[index].key,
@@ -258,7 +257,7 @@ class ApiSettings extends StatelessWidget {
         title: Text(S.of(context).api),
       ),
       body: Container(
-        margin: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
+        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
         child: ListView(
           children: [
             const SizedBox(height: 8),

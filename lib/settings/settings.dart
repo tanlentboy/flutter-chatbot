@@ -45,11 +45,11 @@ class SettingsPageState extends State<SettingsPage> {
         body: TabBarView(
           children: [
             Container(
-              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: const BotTab(),
             ),
             Container(
-              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: const ApisTab(),
             ),
             Center(child: Text(S.of(context).other)),

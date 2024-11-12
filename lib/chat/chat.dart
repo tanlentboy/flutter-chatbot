@@ -192,7 +192,8 @@ class ChatPage extends ConsumerWidget {
 
                 return ListView.builder(
                   controller: scrollCtrl,
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.only(
+                      top: 8, left: 16, right: 16, bottom: 16),
                   itemCount: CurrentChat.messages.length,
                   itemBuilder: (context, index) {
                     final message = CurrentChat.messages[index];
