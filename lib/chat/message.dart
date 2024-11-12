@@ -38,7 +38,10 @@ class MessageNotifier extends AutoDisposeFamilyNotifier<void, Message> {
 
 enum MessageRole {
   assistant,
-  user,
+  user;
+
+  bool get isAssistant => this == MessageRole.assistant;
+  bool get isUser => this == MessageRole.user;
 }
 
 enum MessageEvent {
@@ -92,9 +95,41 @@ class MessageWidget extends ConsumerWidget {
     ],
   );
 
-  Future<void> _longPress(BuildContext context, WidgetRef ref) async {
-    if (!CurrentChat.isNothing) return;
+  Future<void> _copy(BuildContext context) async {
+    await Util.copyText(context: context, text: message.text);
+  }
 
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.isNothing) return;
+    CurrentChat.messages.remove(message);
+    ref.read(messagesProvider.notifier).notify();
+    await CurrentChat.save();
+  }
+
+  Future<void> _source(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            title: Text(S.of(context).source),
+          ),
+          body: Padding(
+            padding: EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              child: SelectableText(message.text),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _longPress(BuildContext context, WidgetRef ref) async {
     final children = [
       Container(
         width: 40,
@@ -136,47 +171,22 @@ class MessageWidget extends ConsumerWidget {
         );
       },
     );
-    if (event == null) return;
+    if (event == null || !context.mounted) return;
 
     switch (event) {
       case MessageEvent.copy:
-        if (!context.mounted) return;
-        await Util.copyText(context: context, text: message.text);
+        _copy(context);
         break;
 
       case MessageEvent.delete:
-        CurrentChat.messages.remove(message);
-        ref.read(messagesProvider.notifier).notify();
-        await CurrentChat.save();
+        _delete(context, ref);
         break;
 
       case MessageEvent.source:
-        if (!context.mounted) return;
-        await showDialog(
-          context: context,
-          builder: (context) {
-            return Scaffold(
-              appBar: AppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                title: Text(S.of(context).source),
-              ),
-              body: Padding(
-                padding: EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  child: SelectableText(message.text),
-                ),
-              ),
-            );
-          },
-        );
-
+        _source(context);
         break;
 
       default:
-        if (!context.mounted) return;
         Util.showSnackBar(
           context: context,
           content: Text(S.of(context).not_implemented_yet),
@@ -224,34 +234,94 @@ class MessageWidget extends ConsumerWidget {
 
     return Container(
       alignment: alignment,
-      margin: const EdgeInsets.all(8),
-      child: GestureDetector(
-        onLongPress: () async => await _longPress(context, ref),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(16),
-              bottomLeft: const Radius.circular(16),
-              bottomRight: const Radius.circular(16),
-              topRight:
-                  Radius.circular(message.role == MessageRole.user ? 4 : 16),
+      margin: EdgeInsets.only(top: 12),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            bottomLeft: const Radius.circular(16),
+            bottomRight: const Radius.circular(16),
+            topRight:
+                Radius.circular(message.role == MessageRole.user ? 2 : 16),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(
+                  top: 8,
+                  left: 8,
+                  right: 8,
+                  bottom: message.role.isUser ? 8 : 0),
+              child: GestureDetector(
+                onLongPress: () async {
+                  if (message.role.isAssistant) return;
+                  await _longPress(context, ref);
+                },
+                child: MarkdownBody(
+                  data: content,
+                  shrinkWrap: true,
+                  extensionSet: extensionSet,
+                  onTapLink: (text, href, title) async =>
+                      await Util.openLink(context: context, link: href),
+                  builders: {
+                    "code": CodeElementBuilder(context: context),
+                    "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                  },
+                  styleSheet: markdownStyleSheet,
+                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                ),
+              ),
             ),
-          ),
-          child: MarkdownBody(
-            data: content,
-            shrinkWrap: true,
-            extensionSet: extensionSet,
-            onTapLink: (text, href, title) async =>
-                await Util.openLink(context: context, link: href),
-            builders: {
-              "code": CodeElementBuilder(context: context),
-              "latex": LatexElementBuilder(textScaleFactor: 1.2),
-            },
-            styleSheet: markdownStyleSheet,
-            styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-          ),
+            if (message.role.isAssistant) ...[
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.paste),
+                      iconSize: 16,
+                      onPressed: () async => await _copy(context),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.code_outlined),
+                      iconSize: 18,
+                      onPressed: () async => await _source(context),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.delete_outlined),
+                      iconSize: 18,
+                      onPressed: () async => await _delete(context, ref),
+                    ),
+                  ),
+                  Expanded(child: SizedBox()),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.more_horiz),
+                      iconSize: 18,
+                      onPressed: () async => await _longPress(context, ref),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
         ),
       ),
     );
