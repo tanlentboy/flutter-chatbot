@@ -87,6 +87,7 @@ class CurrentChat {
     var isNew = false;
 
     if (_chat == null) {
+      if (_messages.isEmpty) return false;
       initChat(_messages.first.text);
     }
 
@@ -166,8 +167,9 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
   final TextEditingController _systemPromptsCtrl =
       TextEditingController(text: CurrentChat.bot?.systemPrompts?.toString());
 
-  bool _save(BuildContext context) {
+  bool _save(BuildContext context, WidgetRef ref) {
     final title = _titleCtrl.text;
+    final systemPrompts = _systemPromptsCtrl.text;
     final maxTokens = int.tryParse(_maxTokensCtrl.text);
     final temperature = double.tryParse(_temperatureCtrl.text);
 
@@ -187,7 +189,11 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
       return false;
     }
 
-    if (CurrentChat.file != null && title.isEmpty) {
+    final chat = CurrentChat.chat;
+    final file = CurrentChat.file;
+    final oldTitle = chat?.title;
+
+    if (title.isEmpty && file != null) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).enter_a_title),
@@ -195,28 +201,34 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
       return false;
     }
 
-    if (CurrentChat.chat != null) {
-      CurrentChat.chat!.title = title;
-    } else if (CurrentChat.chat == null && title.isNotEmpty) {
-      CurrentChat.initChat(title);
-    }
-
     if (CurrentChat.bot == null) CurrentChat.initBot();
     final bot = CurrentChat.bot!;
+    final oldModel = bot.model;
+
+    if (chat != null) {
+      chat.title = title;
+    } else if (title.isNotEmpty) {
+      CurrentChat.initChat(title);
+    }
 
     bot.api = _api;
     bot.model = _model;
     bot.stream = _stream;
     bot.maxTokens = maxTokens;
     bot.temperature = temperature;
-    final systemPrompts = _systemPromptsCtrl.text;
-    bot.systemPrompts = systemPrompts.isNotEmpty ? systemPrompts : null;
+    bot.systemPrompts = systemPrompts.isEmpty ? null : systemPrompts;
 
     Util.showSnackBar(
       context: context,
       content: Text(S.of(context).saved_successfully),
     );
 
+    if (title != oldTitle && file != null) {
+      ref.read(chatsProvider.notifier).notify();
+    }
+    if (_model != oldModel) {
+      ref.read(modelProvider.notifier).notify();
+    }
     return true;
   }
 
@@ -245,71 +257,73 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
               ),
             ),
             const SizedBox(height: 16),
-            Consumer(builder: (context, ref, child) {
-              ref.watch(apisProvider);
+            Consumer(
+              builder: (context, ref, child) {
+                ref.watch(apisProvider);
 
-              final apiList = <DropdownMenuItem<String>>[];
-              final modelList = <DropdownMenuItem<String>>[];
+                final apiList = <DropdownMenuItem<String>>[];
+                final modelList = <DropdownMenuItem<String>>[];
 
-              final apis = Config.apis.keys;
-              final models = Config.apis[_api]?.models ?? [];
+                final apis = Config.apis.keys;
+                final models = Config.apis[_api]?.models ?? [];
 
-              if (!apis.contains(_api)) _api = null;
-              if (!models.contains(_model)) _model = null;
+                if (!apis.contains(_api)) _api = null;
+                if (!models.contains(_model)) _model = null;
 
-              for (final api in apis) {
-                apiList.add(DropdownMenuItem(
-                  value: api,
-                  child: Text(api, overflow: TextOverflow.ellipsis),
-                ));
-              }
+                for (final api in apis) {
+                  apiList.add(DropdownMenuItem(
+                    value: api,
+                    child: Text(api, overflow: TextOverflow.ellipsis),
+                  ));
+                }
 
-              for (final model in models) {
-                modelList.add(DropdownMenuItem(
-                  value: model,
-                  child: Text(model, overflow: TextOverflow.ellipsis),
-                ));
-              }
+                for (final model in models) {
+                  modelList.add(DropdownMenuItem(
+                    value: model,
+                    child: Text(model, overflow: TextOverflow.ellipsis),
+                  ));
+                }
 
-              return Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: DropdownButtonFormField<String>(
-                      value: _api,
-                      items: apiList,
-                      isExpanded: true,
-                      hint: Text(S.of(context).api),
-                      onChanged: (it) => setState(() {
-                        _model = null;
-                        _api = it;
-                      }),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: DropdownButtonFormField<String>(
+                        value: _api,
+                        items: apiList,
+                        isExpanded: true,
+                        hint: Text(S.of(context).api),
+                        onChanged: (it) => setState(() {
+                          _model = null;
+                          _api = it;
+                        }),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      value: _model,
-                      items: modelList,
-                      isExpanded: true,
-                      hint: Text(S.of(context).model),
-                      onChanged: (it) => setState(() => _model = it),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<String>(
+                        value: _model,
+                        items: modelList,
+                        isExpanded: true,
+                        hint: Text(S.of(context).model),
+                        onChanged: (it) => setState(() => _model = it),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            }),
+                  ],
+                );
+              },
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
@@ -392,17 +406,9 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                   child: FilledButton(
                     child: Text(S.of(context).save),
                     onPressed: () async {
-                      if (!_save(context)) return;
-
-                      ref.read(modelProvider.notifier).notify();
+                      if (!_save(context, ref)) return;
                       Navigator.of(context).pop();
-
-                      if (CurrentChat.chat != null &&
-                          CurrentChat.file != null) {
-                        await Config.save();
-                        await CurrentChat.save();
-                        ref.read(chatsProvider.notifier).notify();
-                      }
+                      await CurrentChat.save();
                     },
                   ),
                 ),

@@ -123,20 +123,20 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       image: CurrentChat.image,
     ));
 
+    final times = ++sendTimes;
+    final scrollCtrl = widget.scrollCtrl;
     final chatContext = _buildContext(messages);
     final assistant = Message(text: "", role: MessageRole.assistant);
 
     messages.add(assistant);
     ref.read(messagesProvider.notifier).notify();
+    scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
 
     setState(() {
       inputCtrl.clear();
       CurrentChat.image = null;
       CurrentChat.status = CurrentChatStatus.responding;
     });
-
-    final times = ++sendTimes;
-    final scrollCtrl = widget.scrollCtrl;
 
     try {
       final llm = ChatOpenAI(

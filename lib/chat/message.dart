@@ -13,8 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "chat.dart";
+import "current.dart";
 import "../util.dart";
 import "../config.dart";
+import "../gen/l10n.dart";
 
 import "package:flutter/material.dart";
 import "package:markdown/markdown.dart" as md;
@@ -71,7 +74,6 @@ class Message {
 
 class MessageWidget extends ConsumerWidget {
   final Message message;
-  final Future<void> Function(BuildContext) longPress;
 
   static final extensionSet = ExtensionSet(
     <BlockSyntax>[
@@ -90,10 +92,102 @@ class MessageWidget extends ConsumerWidget {
     ],
   );
 
+  Future<void> _longPress(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.isNothing) return;
+
+    final children = [
+      Container(
+        width: 40,
+        height: 4,
+        margin: const EdgeInsets.only(top: 16, bottom: 8),
+        decoration: const BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.all(Radius.circular(2)),
+        ),
+      ),
+      ListTile(
+        title: Text(S.of(context).copy),
+        leading: const Icon(Icons.copy_all),
+        onTap: () => Navigator.pop(context, MessageEvent.copy),
+      ),
+      ListTile(
+        title: Text(S.of(context).source),
+        leading: const Icon(Icons.code_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.source),
+      ),
+      ListTile(
+        title: Text(S.of(context).delete),
+        leading: const Icon(Icons.delete_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.delete),
+      ),
+      // ListTile(
+      //   title: Text(S.of(context).edit),
+      //   leading: const Icon(Icons.edit_outlined),
+      //   onTap: () => Navigator.pop(context, MessageEvent.edit),
+      // ),
+    ];
+
+    final event = await showModalBottomSheet<MessageEvent>(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(
+          alignment: WrapAlignment.center,
+          children: children,
+        );
+      },
+    );
+    if (event == null) return;
+
+    switch (event) {
+      case MessageEvent.copy:
+        if (!context.mounted) return;
+        await Util.copyText(context: context, text: message.text);
+        break;
+
+      case MessageEvent.delete:
+        CurrentChat.messages.remove(message);
+        ref.read(messagesProvider.notifier).notify();
+        await CurrentChat.save();
+        break;
+
+      case MessageEvent.source:
+        if (!context.mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) {
+            return Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                title: Text(S.of(context).source),
+              ),
+              body: Padding(
+                padding: EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: SelectableText(message.text),
+                ),
+              ),
+            );
+          },
+        );
+
+        break;
+
+      default:
+        if (!context.mounted) return;
+        Util.showSnackBar(
+          context: context,
+          content: Text(S.of(context).not_implemented_yet),
+        );
+        break;
+    }
+  }
+
   const MessageWidget({
     super.key,
     required this.message,
-    required this.longPress,
   });
 
   @override
@@ -132,7 +226,7 @@ class MessageWidget extends ConsumerWidget {
       alignment: alignment,
       margin: const EdgeInsets.all(8),
       child: GestureDetector(
-        onLongPress: () async => await longPress(context),
+        onLongPress: () async => await _longPress(context, ref),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
