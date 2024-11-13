@@ -24,7 +24,7 @@ import "dart:io";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-final modelProvider =
+final chatProvider =
     NotifierProvider.autoDispose<ModelNotifier, void>(ModelNotifier.new);
 
 final chatsProvider =
@@ -75,12 +75,13 @@ class ChatPage extends ConsumerWidget {
         Container(
           margin: EdgeInsets.only(left: 8, right: 8),
           child: ListTile(
+            dense: true,
             shape: StadiumBorder(),
             title: Text(S.of(context).new_chat),
-            leading: const Icon(Icons.note_add_outlined),
+            leading: const Icon(Icons.post_add),
             onTap: () {
               CurrentChat.clear();
-              ref.read(modelProvider.notifier).notify();
+              ref.read(chatProvider.notifier).notify();
               ref.read(messagesProvider.notifier).notify();
             },
           ),
@@ -123,7 +124,7 @@ class ChatPage extends ConsumerWidget {
                           if (CurrentChat.chat == chat) return;
 
                           await CurrentChat.load(chat);
-                          ref.read(modelProvider.notifier).notify();
+                          ref.read(chatProvider.notifier).notify();
                           ref.read(chatsProvider.notifier).notify();
                           ref.read(messagesProvider.notifier).notify();
                         },
@@ -132,7 +133,7 @@ class ChatPage extends ConsumerWidget {
                           onPressed: () async {
                             if (CurrentChat.chat == chat) {
                               CurrentChat.clear();
-                              ref.read(modelProvider.notifier).notify();
+                              ref.read(chatProvider.notifier).notify();
                               ref.read(messagesProvider.notifier).notify();
                             }
 
@@ -158,26 +159,26 @@ class ChatPage extends ConsumerWidget {
       appBar: AppBar(
         title: Row(children: [
           Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "ChatBot",
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Consumer(
-                  builder: (context, ref, child) {
-                    ref.watch(modelProvider);
+            child: Consumer(
+              builder: (context, ref, child) {
+                ref.watch(chatProvider);
 
-                    return Text(
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      CurrentChat.title ?? S.of(context).new_chat,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
                       CurrentChat.model ?? S.of(context).no_model,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelSmall,
-                    );
-                  },
-                )
-              ],
+                    )
+                  ],
+                );
+              },
             ),
           ),
           IconButton(

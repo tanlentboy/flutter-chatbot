@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "api.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "api.dart" show apisProvider;
-import "../chat/chat.dart" show modelProvider;
+import "../chat/chat.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -229,7 +229,7 @@ class _BotTabState extends ConsumerState<BotTab> {
                 child: Text(S.of(context).save),
                 onPressed: () async {
                   if (!_save(context)) return;
-                  ref.read(modelProvider.notifier).notify();
+                  ref.read(chatProvider.notifier).notify();
                   await Config.save();
                 },
               ),

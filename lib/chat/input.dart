@@ -181,6 +181,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     }
 
     if (await CurrentChat.save()) {
+      ref.read(chatProvider.notifier).notify();
       ref.read(chatsProvider.notifier).notify();
     }
     setState(() => CurrentChat.status = CurrentChatStatus.nothing);

@@ -227,7 +227,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
       ref.read(chatsProvider.notifier).notify();
     }
     if (_model != oldModel) {
-      ref.read(modelProvider.notifier).notify();
+      ref.read(chatProvider.notifier).notify();
     }
     return true;
   }
