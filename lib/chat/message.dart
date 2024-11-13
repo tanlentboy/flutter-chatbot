@@ -235,38 +235,35 @@ class MessageWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        Align(
           alignment: alignment,
-          margin: EdgeInsets.only(top: 12),
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                bottomLeft: const Radius.circular(16),
-                bottomRight: const Radius.circular(16),
-                topRight:
-                    Radius.circular(message.role == MessageRole.user ? 2 : 16),
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 8),
-              child: GestureDetector(
-                onLongPress: () async => await _longPress(context, ref),
-                child: MarkdownBody(
-                  data: content,
-                  shrinkWrap: true,
-                  extensionSet: extensionSet,
-                  onTapLink: (text, href, title) async =>
-                      await Util.openLink(context: context, link: href),
-                  builders: {
-                    "code": CodeElementBuilder(context: context),
-                    "latex": LatexElementBuilder(textScaleFactor: 1.2),
-                  },
-                  styleSheet: markdownStyleSheet,
-                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+          child: GestureDetector(
+            onLongPress: () async => await _longPress(context, ref),
+            child: Container(
+              margin: EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  bottomLeft: const Radius.circular(16),
+                  bottomRight: const Radius.circular(16),
+                  topRight: Radius.circular(
+                      message.role == MessageRole.user ? 2 : 16),
                 ),
+              ),
+              child: MarkdownBody(
+                data: content,
+                shrinkWrap: true,
+                extensionSet: extensionSet,
+                onTapLink: (text, href, title) async =>
+                    await Util.openLink(context: context, link: href),
+                builders: {
+                  "code": CodeElementBuilder(context: context),
+                  "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                },
+                styleSheet: markdownStyleSheet,
+                styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
               ),
             ),
           ),
