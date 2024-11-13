@@ -187,10 +187,20 @@ class ChatPage extends ConsumerWidget {
             iconSize: 20,
           ),
         ]),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              InputWidget.unFocus();
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.more_horiz),
             onPressed: () async {
+              InputWidget.unFocus();
               await showDialog(
                 context: context,
                 builder: (context) => CurrentChatSettings(),

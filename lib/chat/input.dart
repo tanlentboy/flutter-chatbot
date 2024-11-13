@@ -31,22 +31,27 @@ import "package:flutter_image_compress/flutter_image_compress.dart";
 
 class InputWidget extends ConsumerStatefulWidget {
   final ScrollController scrollCtrl;
+  static final FocusNode focusNode = FocusNode();
 
   const InputWidget({
     super.key,
     required this.scrollCtrl,
   });
 
+  static void unFocus() => focusNode.unfocus();
+
   @override
   ConsumerState<InputWidget> createState() => _InputWidgetState();
 }
 
 class _InputWidgetState extends ConsumerState<InputWidget> {
-  static int sendTimes = 0;
-  static final ImagePicker imagePicker = ImagePicker();
-  final TextEditingController inputCtrl = TextEditingController();
+  static int _sendTimes = 0;
+  static final ImagePicker _imagePicker = ImagePicker();
+  final TextEditingController _inputCtrl = TextEditingController();
 
   Future<void> _addImage(BuildContext context) async {
+    InputWidget.unFocus();
+
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (BuildContext context) {
@@ -78,7 +83,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     );
     if (source == null) return;
 
-    final result = await imagePicker.pickImage(source: source);
+    final result = await _imagePicker.pickImage(source: source);
     if (result == null) return;
 
     final compressed = await FlutterImageCompress.compressWithFile(result.path,
@@ -101,7 +106,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   }
 
   Future<void> _sendMessage(BuildContext context) async {
-    final text = inputCtrl.text;
+    final text = _inputCtrl.text;
     if (text.isEmpty) return;
 
     final messages = CurrentChat.messages;
@@ -123,7 +128,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       image: CurrentChat.image,
     ));
 
-    final times = ++sendTimes;
+    final times = ++_sendTimes;
     final scrollCtrl = widget.scrollCtrl;
     final chatContext = _buildContext(messages);
     final assistant = Message(text: "", role: MessageRole.assistant);
@@ -133,7 +138,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
 
     setState(() {
-      inputCtrl.clear();
+      _inputCtrl.clear();
       CurrentChat.image = null;
       CurrentChat.status = CurrentChatStatus.responding;
     });
@@ -152,20 +157,20 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       if (CurrentChat.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(chatContext));
         await for (final chunk in stream) {
-          if (!CurrentChat.isResponding || times != sendTimes) return;
+          if (!CurrentChat.isResponding || times != _sendTimes) return;
           assistant.text += chunk.output.content;
           ref.read(messageProvider(assistant).notifier).notify();
           scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
         }
       } else {
         final result = await llm.invoke(PromptValue.chat(chatContext));
-        if (!CurrentChat.isResponding || times != sendTimes) return;
+        if (!CurrentChat.isResponding || times != _sendTimes) return;
         assistant.text += result.output.content;
         ref.read(messageProvider(assistant).notifier).notify();
         scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
       }
     } catch (e) {
-      if (!CurrentChat.isResponding || times != sendTimes) return;
+      if (!CurrentChat.isResponding || times != _sendTimes) return;
       if (context.mounted) {
         Util.showSnackBar(
           context: context,
@@ -175,7 +180,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       }
       if (assistant.text.isEmpty) {
         messages.length -= 2;
-        inputCtrl.text = text;
+        _inputCtrl.text = text;
         ref.read(messagesProvider.notifier).notify();
       }
     }
@@ -198,7 +203,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     if (assistant.text.isEmpty) {
       list.removeRange(list.length - 2, list.length);
       ref.read(messagesProvider.notifier).notify();
-      inputCtrl.text = user.text;
+      _inputCtrl.text = user.text;
     } else if (await CurrentChat.save()) {
       ref.read(chatsProvider.notifier).notify();
     }
@@ -243,7 +248,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 child: TextField(
                   maxLines: null,
                   autofocus: false,
-                  controller: inputCtrl,
+                  controller: _inputCtrl,
+                  focusNode: InputWidget.focusNode,
                   keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(
                     border: InputBorder.none,
