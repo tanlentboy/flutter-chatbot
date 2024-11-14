@@ -105,6 +105,33 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     setState(() => CurrentChat.image = null);
   }
 
+  Future<void> _handleError(BuildContext context, dynamic error) async {
+    final info = error.toString();
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(S.of(context).error),
+          content: Text(info),
+          actions: [
+            TextButton(
+              child: Text(S.of(context).cancel),
+              onPressed: () => Navigator.of(context).pop(0),
+            ),
+            TextButton(
+              child: Text(S.of(context).copy),
+              onPressed: () => Navigator.of(context).pop(1),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == 1 && context.mounted) {
+      Util.copyText(context: context, text: info);
+    }
+  }
+
   Future<void> _sendMessage(BuildContext context) async {
     final text = _inputCtrl.text;
     if (text.isEmpty) return;
@@ -171,13 +198,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       }
     } catch (e) {
       if (!CurrentChat.isResponding || times != _sendTimes) return;
-      if (context.mounted) {
-        Util.showSnackBar(
-          context: context,
-          content: Text("$e"),
-          duration: const Duration(milliseconds: 1500),
-        );
-      }
+      if (context.mounted) _handleError(context, e);
       if (assistant.text.isEmpty) {
         messages.length -= 2;
         _inputCtrl.text = text;

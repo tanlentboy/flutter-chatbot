@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:chatbot/chat/input.dart";
+
 import "chat.dart";
 import "current.dart";
 import "../util.dart";
@@ -130,6 +132,8 @@ class MessageWidget extends ConsumerWidget {
   }
 
   Future<void> _longPress(BuildContext context, WidgetRef ref) async {
+    InputWidget.unFocus();
+
     final children = [
       Container(
         width: 40,
@@ -203,6 +207,8 @@ class MessageWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(messageProvider(message));
+
+    final MainAxisAlignment optsAlignment;
     String content = message.text;
     final Alignment alignment;
     final Color background;
@@ -223,12 +229,14 @@ class MessageWidget extends ConsumerWidget {
     switch (message.role) {
       case MessageRole.user:
         background = colorScheme.secondaryContainer;
-        alignment = Alignment.centerRight;
+        optsAlignment = MainAxisAlignment.end;
+        alignment = Alignment.topRight;
         break;
 
       case MessageRole.assistant:
         background = colorScheme.surfaceContainerHighest;
-        alignment = Alignment.centerLeft;
+        optsAlignment = MainAxisAlignment.start;
+        alignment = Alignment.topLeft;
         break;
     }
 
@@ -268,12 +276,11 @@ class MessageWidget extends ConsumerWidget {
             ),
           ),
         ),
-        if (message.role.isAssistant &&
-            CurrentChat.isNothing &&
-            CurrentChat.messages.lastOrNull == message) ...[
+        if (CurrentChat.messages.lastOrNull == message &&
+            !CurrentChat.isResponding) ...[
           const SizedBox(height: 4),
           Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: optsAlignment,
             children: [
               SizedBox(
                 width: 36,

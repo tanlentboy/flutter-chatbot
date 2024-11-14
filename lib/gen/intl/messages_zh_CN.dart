@@ -43,6 +43,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "empty_link": MessageLookupByLibrary.simpleMessage("空链接"),
         "enter_a_title": MessageLookupByLibrary.simpleMessage("请输入标题"),
         "enter_your_message": MessageLookupByLibrary.simpleMessage("输入你的消息"),
+        "error": MessageLookupByLibrary.simpleMessage("错误"),
         "gallery": MessageLookupByLibrary.simpleMessage("图库"),
         "image_compress_failed": MessageLookupByLibrary.simpleMessage("图片压缩失败"),
         "invalid_max_tokens": MessageLookupByLibrary.simpleMessage("非法的最大输出"),

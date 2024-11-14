@@ -48,6 +48,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please enter a title"),
         "enter_your_message":
             MessageLookupByLibrary.simpleMessage("Enter your message"),
+        "error": MessageLookupByLibrary.simpleMessage("Error"),
         "gallery": MessageLookupByLibrary.simpleMessage("gallery"),
         "image_compress_failed":
             MessageLookupByLibrary.simpleMessage("Failed to comprese image"),
