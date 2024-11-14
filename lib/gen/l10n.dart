@@ -590,6 +590,16 @@ class S {
     );
   }
 
+  /// `Choose a API first`
+  String get choose_a_api_first {
+    return Intl.message(
+      'Choose a API first',
+      name: 'choose_a_api_first',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Set up the Bot and API first`
   String get setup_bot_api_first {
     return Intl.message(

@@ -64,6 +64,7 @@
 
     "enter_your_message": "输入你的消息",
     "image_compress_failed": "图片压缩失败",
-    "setup_bot_api_first": "请先配置参数和接口",
+    "choose_a_api_first": "请先选择一个接口",
+    "setup_bot_api_first": "请先配置接口和模型",
     "use_default_settings": "空白字段代表使用默认配置"
 }

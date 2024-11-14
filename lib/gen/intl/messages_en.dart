@@ -34,6 +34,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannot_open": MessageLookupByLibrary.simpleMessage("Cannot Open"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
+        "choose_a_api_first":
+            MessageLookupByLibrary.simpleMessage("Choose a API first"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "complete_all_fields":
             MessageLookupByLibrary.simpleMessage("Please complete all fields"),

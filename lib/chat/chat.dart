@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:chatbot/util.dart";
+
 import "input.dart";
 import "message.dart";
 import "current.dart";
@@ -165,8 +167,8 @@ class ChatPage extends ConsumerWidget {
             child: Consumer(
               builder: (context, ref, child) {
                 ref.watch(chatProvider);
-                final models = Config.apis[CurrentChat.api]?.models;
                 final model = CurrentChat.model;
+                final models = Config.apis[CurrentChat.api]?.models;
 
                 if (models == null || !models.contains(model)) {
                   CurrentChat.core.model = null;
@@ -190,10 +192,34 @@ class ChatPage extends ConsumerWidget {
               },
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.swap_vert),
-            onPressed: () {},
-            iconSize: 20,
+          Consumer(
+            builder: (context, ref, child) {
+              ref.watch(chatProvider);
+
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.swap_vert),
+                onSelected: (value) {
+                  CurrentChat.core = CoreConfig(
+                    bot: CurrentChat.bot,
+                    api: CurrentChat.api,
+                    model: value,
+                  );
+                  ref.read(chatProvider.notifier).notify();
+                },
+                itemBuilder: (context) {
+                  final models = Config.apis[CurrentChat.api]?.models ?? [];
+                  final modelList = <PopupMenuItem<String>>[];
+                  for (final model in models) {
+                    modelList.add(PopupMenuItem(
+                      value: model,
+                      child: Text(model),
+                    ));
+                  }
+                  return modelList;
+                },
+                iconSize: 18,
+              );
+            },
           ),
         ]),
         leading: Builder(
