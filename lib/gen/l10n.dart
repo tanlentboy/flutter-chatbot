@@ -330,6 +330,16 @@ class S {
     );
   }
 
+  /// `New Bot`
+  String get new_bot {
+    return Intl.message(
+      'New Bot',
+      name: 'new_bot',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `New API`
   String get new_api {
     return Intl.message(
@@ -400,11 +410,31 @@ class S {
     );
   }
 
+  /// `Please enter a name`
+  String get enter_a_name {
+    return Intl.message(
+      'Please enter a name',
+      name: 'enter_a_name',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please enter a title`
   String get enter_a_title {
     return Intl.message(
       'Please enter a title',
       name: 'enter_a_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Duplicate Bot name`
+  String get duplicate_bot_name {
+    return Intl.message(
+      'Duplicate Bot name',
+      name: 'duplicate_bot_name',
       desc: '',
       args: [],
     );

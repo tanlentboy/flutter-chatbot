@@ -25,7 +25,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final chatProvider =
-    NotifierProvider.autoDispose<ModelNotifier, void>(ModelNotifier.new);
+    NotifierProvider.autoDispose<ChatNotifier, void>(ChatNotifier.new);
 
 final chatsProvider =
     NotifierProvider.autoDispose<ChatsNotifier, void>(ChatsNotifier.new);
@@ -33,9 +33,12 @@ final chatsProvider =
 final messagesProvider =
     NotifierProvider.autoDispose<MessagesNotifier, void>(MessagesNotifier.new);
 
-class ModelNotifier extends AutoDisposeNotifier<void> {
+class ChatNotifier extends AutoDisposeNotifier<void> {
   @override
-  void build() => ref.listen(apisProvider, (prev, next) => notify());
+  void build() {
+    ref.listen(apisProvider, (prev, next) => notify());
+  }
+
   void notify() => ref.notifyListeners();
 }
 
@@ -162,6 +165,12 @@ class ChatPage extends ConsumerWidget {
             child: Consumer(
               builder: (context, ref, child) {
                 ref.watch(chatProvider);
+                final models = Config.apis[CurrentChat.api]?.models;
+                final model = CurrentChat.model;
+
+                if (models == null || !models.contains(model)) {
+                  CurrentChat.core.model = null;
+                }
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

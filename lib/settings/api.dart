@@ -16,7 +16,6 @@
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../chat/current.dart";
 
 import "dart:convert";
 import "package:flutter/material.dart";
@@ -41,64 +40,50 @@ class ApisTab extends ConsumerWidget {
       children: [
         FilledButton(
           child: Text(S.of(context).new_api),
-          onPressed: () async {
-            final changed = await showDialog<bool>(
-              context: context,
-              builder: (context) => ApiSettings(),
-            );
-            if (!(changed ?? false)) return;
-
-            ref.read(apisProvider.notifier).notify();
-            await Config.save();
-          },
+          onPressed: () async => await showDialog<bool>(
+            context: context,
+            builder: (context) => ApiSettings(),
+          ),
         ),
         Expanded(
-          child: Consumer(builder: (context, ref, child) {
-            ref.watch(apisProvider);
-            final apis = Config.apis.entries.toList();
+          child: Consumer(
+            builder: (context, ref, child) {
+              ref.watch(apisProvider);
+              final apis = Config.apis.entries.toList();
 
-            return ListView.builder(
-              itemCount: apis.length,
-              itemBuilder: (context, index) {
-                return Card.filled(
-                  margin: const EdgeInsets.only(top: 12),
-                  child: ListTile(
-                    title: Text(
-                      apis[index].key,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    leading: const Icon(Icons.api),
-                    contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async {
-                        final changed = await showDialog<bool>(
+              return ListView.builder(
+                itemCount: apis.length,
+                itemBuilder: (context, index) {
+                  return Card.filled(
+                    margin: const EdgeInsets.only(top: 12),
+                    child: ListTile(
+                      title: Text(
+                        apis[index].key,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      leading: const Icon(Icons.api),
+                      contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async => await showDialog(
                           context: context,
                           builder: (context) =>
                               ApiSettings(apiPair: apis[index]),
-                        );
-                        if (!(changed ?? false)) return;
-
-                        Config.fixBot();
-                        CurrentChat.fixBot();
-                        ref.read(apisProvider.notifier).notify();
-
-                        await Config.save();
-                      },
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
-            );
-          }),
+                  );
+                },
+              );
+            },
+          ),
         ),
-        const SizedBox(height: 8),
       ],
     );
   }
 }
 
-class ApiSettings extends StatelessWidget {
+class ApiSettings extends ConsumerWidget {
   final MapEntry<String, ApiConfig>? apiPair;
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _modelsCtrl = TextEditingController();
@@ -204,7 +189,7 @@ class ApiSettings extends StatelessWidget {
     ].join(", ");
   }
 
-  bool _save(BuildContext context) {
+  bool _save(BuildContext context, WidgetRef ref) {
     final name = _nameCtrl.text;
     final models = _modelsCtrl.text;
     final apiUrl = _apiUrlCtrl.text;
@@ -236,11 +221,12 @@ class ApiSettings extends StatelessWidget {
       models: modelList,
     );
 
+    ref.read(apisProvider.notifier).notify();
     return true;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (apiPair != null) {
       _nameCtrl.text = apiPair!.key;
       _apiUrlCtrl.text = apiPair!.value.url;
@@ -346,9 +332,8 @@ class ApiSettings extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Visibility(
-                  visible: apiPair != null,
-                  child: Expanded(
+                if (apiPair != null) ...[
+                  Expanded(
                     flex: 1,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
@@ -356,20 +341,24 @@ class ApiSettings extends StatelessWidget {
                         foregroundColor: Theme.of(context).colorScheme.onError,
                       ),
                       child: Text(S.of(context).delete),
-                      onPressed: () {
+                      onPressed: () async {
                         Config.apis.remove(apiPair!.key);
+                        ref.read(apisProvider.notifier).notify();
                         Navigator.of(context).pop(true);
+                        await Config.save();
                       },
                     ),
                   ),
-                ),
+                ],
                 const SizedBox(width: 8),
                 Expanded(
                   flex: 1,
                   child: FilledButton(
                     child: Text(S.of(context).save),
-                    onPressed: () {
-                      if (_save(context)) Navigator.of(context).pop(true);
+                    onPressed: () async {
+                      if (!_save(context, ref)) return;
+                      Navigator.of(context).pop(true);
+                      await Config.save();
                     },
                   ),
                 ),

@@ -13,14 +13,21 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "api.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../chat/chat.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+
+final botsProvider =
+    NotifierProvider.autoDispose<BotsNotifier, void>(BotsNotifier.new);
+
+class BotsNotifier extends AutoDisposeNotifier<void> {
+  @override
+  void build() {}
+  void notify() => ref.notifyListeners();
+}
 
 class BotsTab extends ConsumerStatefulWidget {
   const BotsTab({super.key});
@@ -30,19 +37,95 @@ class BotsTab extends ConsumerStatefulWidget {
 }
 
 class _BotsTabState extends ConsumerState<BotsTab> {
-  String? _api = Config.bot.api;
-  String? _model = Config.bot.model;
-  bool? _stream = Config.bot.stream;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FilledButton(
+          child: Text(S.of(context).new_bot),
+          onPressed: () async => await showDialog<bool>(
+            context: context,
+            builder: (context) => BotSettings(),
+          ),
+        ),
+        Expanded(
+          child: Consumer(
+            builder: (context, ref, child) {
+              ref.watch(botsProvider);
+              final bots = Config.bots.entries.toList();
 
-  final TextEditingController _maxTokensCtrl =
-      TextEditingController(text: Config.bot.maxTokens?.toString());
-  final TextEditingController _temperatureCtrl =
-      TextEditingController(text: Config.bot.temperature?.toString());
-  final TextEditingController _systemPromptsCtrl =
-      TextEditingController(text: Config.bot.systemPrompts?.toString());
+              return ListView.builder(
+                itemCount: bots.length,
+                itemBuilder: (context, index) {
+                  return Card.filled(
+                    margin: const EdgeInsets.only(top: 12),
+                    child: ListTile(
+                      title: Text(
+                        bots[index].key,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      leading: const Icon(Icons.smart_toy),
+                      contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async => await showDialog<bool>(
+                          context: context,
+                          builder: (context) =>
+                              BotSettings(botPair: bots[index]),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class BotSettings extends ConsumerStatefulWidget {
+  final MapEntry<String, BotConfig>? botPair;
+
+  const BotSettings({
+    super.key,
+    this.botPair,
+  });
+
+  @override
+  ConsumerState<BotSettings> createState() => _BotSettingsState();
+}
+
+class _BotSettingsState extends ConsumerState<BotSettings> {
+  bool? _stream;
+  final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _maxTokensCtrl = TextEditingController();
+  final TextEditingController _temperatureCtrl = TextEditingController();
+  final TextEditingController _systemPromptsCtrl = TextEditingController();
 
   bool _save(BuildContext context) {
-    final changed = Config.bot.model != _model;
+    final name = _nameCtrl.text;
+    final botPair = widget.botPair;
+
+    if (name.isEmpty) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).enter_a_name),
+      );
+      return false;
+    }
+
+    if (Config.bots.containsKey(name) &&
+        (botPair == null || name != botPair.key)) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).duplicate_bot_name),
+      );
+      return false;
+    }
+
     final maxTokens = int.tryParse(_maxTokensCtrl.text);
     final temperature = double.tryParse(_temperatureCtrl.text);
 
@@ -62,67 +145,79 @@ class _BotsTabState extends ConsumerState<BotsTab> {
       return false;
     }
 
-    Config.bot.api = _api;
-    Config.bot.model = _model;
-    Config.bot.stream = _stream;
-    Config.bot.maxTokens = maxTokens;
-    Config.bot.temperature = temperature;
+    if (botPair != null) Config.bots.remove(botPair.key);
+
     final systemPrompts = _systemPromptsCtrl.text;
-    Config.bot.systemPrompts = systemPrompts.isNotEmpty ? systemPrompts : null;
+    Config.bots[name] = BotConfig(
+      stream: _stream,
+      maxTokens: maxTokens,
+      temperature: temperature,
+      systemPrompts: systemPrompts.isEmpty ? null : systemPrompts,
+    );
 
     Util.showSnackBar(
       context: context,
       content: Text(S.of(context).saved_successfully),
     );
 
-    return changed;
+    ref.read(botsProvider.notifier).notify();
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        Consumer(
-          builder: (context, ref, child) {
-            ref.watch(apisProvider);
+    final botPair = widget.botPair;
+    final bot = botPair?.value;
 
-            final apiList = <DropdownMenuItem<String>>[];
-            final modelList = <DropdownMenuItem<String>>[];
+    final maxTokens = bot?.maxTokens;
+    final temperature = bot?.temperature;
+    final systemPrompts = bot?.systemPrompts;
 
-            final apis = Config.apis.keys;
-            final models = Config.apis[_api]?.models ?? [];
+    _stream = bot?.stream;
+    if (botPair != null) {
+      _nameCtrl.text = botPair.key;
+    }
+    if (maxTokens != null) {
+      _maxTokensCtrl.text = maxTokens.toString();
+    }
+    if (temperature != null) {
+      _temperatureCtrl.text = temperature.toString();
+    }
+    if (systemPrompts != null) {
+      _systemPromptsCtrl.text = systemPrompts.toString();
+    }
 
-            if (!apis.contains(_api)) _api = null;
-            if (!models.contains(_model)) _model = null;
-
-            for (final api in apis) {
-              apiList.add(DropdownMenuItem(
-                value: api,
-                child: Text(api, overflow: TextOverflow.ellipsis),
-              ));
-            }
-
-            for (final model in models) {
-              modelList.add(DropdownMenuItem(
-                value: model,
-                child: Text(model, overflow: TextOverflow.ellipsis),
-              ));
-            }
-
-            return Row(
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
+        title: Text(S.of(context).bot),
+      ),
+      body: Container(
+        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
+        child: ListView(
+          children: [
+            const SizedBox(height: 8),
+            TextField(
+              controller: _nameCtrl,
+              decoration: InputDecoration(
+                labelText: S.of(context).name,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
               children: [
                 Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _api,
-                    items: apiList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).api),
-                    onChanged: (it) => setState(() {
-                      _model = null;
-                      _api = it;
-                    }),
-                    decoration: const InputDecoration(
+                  child: TextField(
+                    controller: _temperatureCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).temperature,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
@@ -131,14 +226,11 @@ class _BotsTabState extends ConsumerState<BotsTab> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  flex: 2,
-                  child: DropdownButtonFormField<String>(
-                    value: _model,
-                    items: modelList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).model),
-                    onChanged: (it) => setState(() => _model = it),
-                    decoration: const InputDecoration(
+                  child: TextField(
+                    controller: _maxTokensCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).max_tokens,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
@@ -146,97 +238,82 @@ class _BotsTabState extends ConsumerState<BotsTab> {
                   ),
                 ),
               ],
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _temperatureCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: S.of(context).temperature,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              maxLines: 4,
+              controller: _systemPromptsCtrl,
+              decoration: InputDecoration(
+                alignLabelWithHint: true,
+                labelText: S.of(context).system_prompts,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _maxTokensCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: S.of(context).max_tokens,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Flexible(
+                  child: SwitchListTile(
+                    title: Text(S.of(context).streaming_response),
+                    value: _stream ?? true,
+                    onChanged: (value) => setState(() => _stream = value),
                   ),
                 ),
-              ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: FilledButton.tonal(
+                    child: Text(S.of(context).reset),
+                    onPressed: () {
+                      _maxTokensCtrl.text = "";
+                      _temperatureCtrl.text = "";
+                      _systemPromptsCtrl.text = "";
+                      setState(() => _stream = null);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (botPair != null) ...[
+                  Expanded(
+                    flex: 1,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        foregroundColor: Theme.of(context).colorScheme.onError,
+                      ),
+                      child: Text(S.of(context).delete),
+                      onPressed: () async {
+                        Config.bots.remove(botPair.key);
+                        ref.read(botsProvider.notifier).notify();
+                        Navigator.of(context).pop(true);
+                        await Config.save();
+                      },
+                    ),
+                  ),
+                ],
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    child: Text(S.of(context).save),
+                    onPressed: () async {
+                      if (!_save(context)) return;
+                      Navigator.of(context).pop(true);
+                      await Config.save();
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        TextField(
-          maxLines: 4,
-          controller: _systemPromptsCtrl,
-          decoration: InputDecoration(
-            alignLabelWithHint: true,
-            labelText: S.of(context).system_prompts,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Flexible(
-              child: SwitchListTile(
-                title: Text(S.of(context).streaming_response),
-                value: _stream ?? true,
-                onChanged: (value) => setState(() => _stream = value),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: FilledButton.tonal(
-                child: Text(S.of(context).reset),
-                onPressed: () {
-                  _maxTokensCtrl.text = "";
-                  _temperatureCtrl.text = "";
-                  _systemPromptsCtrl.text = "";
-                  setState(() {
-                    _api = null;
-                    _model = null;
-                    _stream = null;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 1,
-              child: FilledButton(
-                child: Text(S.of(context).save),
-                onPressed: () async {
-                  if (!_save(context)) return;
-                  ref.read(chatProvider.notifier).notify();
-                  await Config.save();
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 }

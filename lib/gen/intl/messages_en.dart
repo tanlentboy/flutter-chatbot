@@ -46,8 +46,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("delete"),
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
+        "duplicate_bot_name":
+            MessageLookupByLibrary.simpleMessage("Duplicate Bot name"),
         "edit": MessageLookupByLibrary.simpleMessage("edit"),
         "empty_link": MessageLookupByLibrary.simpleMessage("Empty Link"),
+        "enter_a_name":
+            MessageLookupByLibrary.simpleMessage("Please enter a name"),
         "enter_a_title":
             MessageLookupByLibrary.simpleMessage("Please enter a title"),
         "enter_your_message":
@@ -66,6 +70,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "model_list": MessageLookupByLibrary.simpleMessage("Model List"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "new_api": MessageLookupByLibrary.simpleMessage("New API"),
+        "new_bot": MessageLookupByLibrary.simpleMessage("New Bot"),
         "new_chat": MessageLookupByLibrary.simpleMessage("New Chat"),
         "no_model": MessageLookupByLibrary.simpleMessage("no model"),
         "not_implemented_yet":

@@ -33,6 +33,7 @@
 
     "link": "Link",
     "name": "Name",
+    "new_bot": "New Bot",
     "new_api": "New API",
     "new_chat": "New Chat",
     "api_url": "API Url",
@@ -41,7 +42,9 @@
     "select_models": "Select Models",
 
     "stopped_by_user": "Stopped By User",
+    "enter_a_name": "Please enter a name",
     "enter_a_title": "Please enter a title",
+    "duplicate_bot_name": "Duplicate Bot name",
     "duplicate_api_name": "Duplicate API name",
     "complete_all_fields": "Please complete all fields",
 

@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "chat/current.dart";
+
 import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
@@ -20,17 +22,61 @@ import "package:path_provider/path_provider.dart";
 import "package:flutter_highlighter/themes/atom-one-dark.dart";
 import "package:flutter_highlighter/themes/atom-one-light.dart";
 
-class BotConfig {
+class CoreConfig {
+  String? bot;
   String? api;
-  bool? stream;
   String? model;
+
+  CoreConfig({
+    this.bot,
+    this.api,
+    this.model,
+  });
+
+  Map<String, String?> toJson() => {
+        "bot": bot,
+        "api": api,
+        "model": model,
+      };
+
+  factory CoreConfig.fromJson(Map<String, dynamic> json) => CoreConfig(
+        bot: json["bot"],
+        api: json["api"],
+        model: json["model"],
+      );
+}
+
+class ChatConfig {
+  String time;
+  String title;
+  String fileName;
+
+  ChatConfig({
+    required this.time,
+    required this.title,
+    required this.fileName,
+  });
+
+  Map<String, String> toJson() => {
+        "time": time,
+        "title": title,
+        "fileName": fileName,
+      };
+
+  factory ChatConfig.fromJson(Map<String, dynamic> json) => ChatConfig(
+        time: json["time"],
+        title: json["title"],
+        fileName: json["fileName"],
+      );
+}
+
+class BotConfig {
+  bool? stream;
   int? maxTokens;
   double? temperature;
   String? systemPrompts;
 
   BotConfig({
-    this.api,
-    this.model,
     this.stream,
     this.maxTokens,
     this.temperature,
@@ -38,8 +84,6 @@ class BotConfig {
   });
 
   Map<String, dynamic> toJson() => {
-        "api": api,
-        "model": model,
         "stream": stream,
         "maxTokens": maxTokens,
         "temperature": temperature,
@@ -47,8 +91,6 @@ class BotConfig {
       };
 
   factory BotConfig.fromJson(Map<String, dynamic> json) => BotConfig(
-        api: json["api"],
-        model: json["model"],
         stream: json["stream"],
         maxTokens: json["maxTokens"],
         temperature: json["temperature"],
@@ -80,34 +122,11 @@ class ApiConfig {
       );
 }
 
-class ChatConfig {
-  String time;
-  String title;
-  String fileName;
-
-  ChatConfig({
-    required this.time,
-    required this.title,
-    required this.fileName,
-  });
-
-  Map<String, String> toJson() => {
-        "time": time,
-        "title": title,
-        "fileName": fileName,
-      };
-
-  factory ChatConfig.fromJson(Map<String, dynamic> json) => ChatConfig(
-        time: json["time"],
-        title: json["title"],
-        fileName: json["fileName"],
-      );
-}
-
 class Config {
-  static BotConfig bot = BotConfig();
-  static List<ChatConfig> chats = [];
-  static Map<String, ApiConfig> apis = {};
+  static late final CoreConfig core;
+  static final List<ChatConfig> chats = [];
+  static final Map<String, BotConfig> bots = {};
+  static final Map<String, ApiConfig> apis = {};
 
   static late final File _file;
   static late final String _filePath;
@@ -127,51 +146,40 @@ class Config {
     }
   }
 
-  static String? get apiUrl => apis[bot.api]?.url;
-  static String? get apiKey => apis[bot.api]?.key;
-
   static Future<void> save() async =>
       await _file.writeAsString(jsonEncode(toJson()));
   static String chatFilePath(String fileName) =>
       "${_directory.path}${Platform.pathSeparator}$fileName";
 
-  static void fixBot() {
-    final api = bot.api;
-    final model = bot.model;
-
-    if (api == null) return;
-    final models = apis[api]?.models;
-
-    if (models == null) {
-      bot.model = null;
-      bot.api = null;
-      return;
-    } else if (!models.contains(model)) {
-      bot.model = null;
-      return;
-    }
-  }
-
   static Map<String, dynamic> toJson() => {
-        "bot": bot,
+        "core": core,
+        "bots": bots,
         "apis": apis,
         "chats": chats,
       };
 
   static void fromJson(Map<String, dynamic> json) {
-    final botJson = json["bot"] ?? {};
+    final coreJson = json["core"];
+    final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
     final chatsJson = json["chats"] ?? [];
 
-    bot = BotConfig.fromJson(botJson);
-
+    if (coreJson != null) {
+      core = CoreConfig.fromJson(coreJson);
+    } else {
+      core = CoreConfig();
+    }
+    for (final chat in chatsJson) {
+      chats.add(ChatConfig.fromJson(chat));
+    }
+    for (final pair in botsJson.entries) {
+      bots[pair.key] = BotConfig.fromJson(pair.value);
+    }
     for (final pair in apisJson.entries) {
       apis[pair.key] = ApiConfig.fromJson(pair.value);
     }
 
-    for (final chat in chatsJson) {
-      chats.add(ChatConfig.fromJson(chat));
-    }
+    CurrentChat.core = core;
   }
 }
 
