@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:chatbot/util.dart";
-
 import "input.dart";
 import "message.dart";
 import "current.dart";
@@ -198,13 +196,14 @@ class ChatPage extends ConsumerWidget {
 
               return PopupMenuButton<String>(
                 icon: const Icon(Icons.swap_vert),
-                onSelected: (value) {
+                onSelected: (value) async {
                   CurrentChat.core = CoreConfig(
                     bot: CurrentChat.bot,
                     api: CurrentChat.api,
                     model: value,
                   );
                   ref.read(chatProvider.notifier).notify();
+                  await CurrentChat.save();
                 },
                 itemBuilder: (context) {
                   final models = Config.apis[CurrentChat.api]?.models ?? [];

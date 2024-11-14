@@ -245,7 +245,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                     items: botList,
                     isExpanded: true,
                     hint: Text(S.of(context).bot),
-                    onChanged: (it) => setState(() {}),
+                    onChanged: (it) => setState(() => _bot = it),
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
