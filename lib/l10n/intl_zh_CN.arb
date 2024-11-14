@@ -10,9 +10,11 @@
     "gallery": "图库",
     "settings": "设置",
 
-    "bot": "参数",
+    "bot": "智能体",
+    "bots": "智能体",
     "apis": "接口",
-    "other": "其他",
+    "config": "配置",
+    "default_config": "默认配置",
 
     "open": "打开",
     "save": "保存",

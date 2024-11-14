@@ -198,7 +198,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       }
     } catch (e) {
       if (!CurrentChat.isResponding || times != _sendTimes) return;
-      if (context.mounted) _handleError(context, e);
+      if (context.mounted) await _handleError(context, e);
       if (assistant.text.isEmpty) {
         messages.length -= 2;
         _inputCtrl.text = text;

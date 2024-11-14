@@ -140,6 +140,16 @@ class S {
     );
   }
 
+  /// `Bots`
+  String get bots {
+    return Intl.message(
+      'Bots',
+      name: 'bots',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `APIs`
   String get apis {
     return Intl.message(
@@ -150,11 +160,21 @@ class S {
     );
   }
 
-  /// `Other`
-  String get other {
+  /// `Config`
+  String get config {
     return Intl.message(
-      'Other',
-      name: 'other',
+      'Config',
+      name: 'config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Default Config`
+  String get default_config {
+    return Intl.message(
+      'Default Config',
+      name: 'default_config',
       desc: '',
       args: [],
     );

@@ -11,8 +11,10 @@
     "settings": "Settings",
 
     "bot": "Bot",
+    "bots": "Bots",
     "apis": "APIs",
-    "other": "Other",
+    "config": "Config",
+    "default_config": "Default Config",
 
     "open": "Open",
     "save": "Save",

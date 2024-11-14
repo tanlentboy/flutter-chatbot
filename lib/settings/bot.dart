@@ -22,14 +22,14 @@ import "../chat/chat.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-class BotTab extends ConsumerStatefulWidget {
-  const BotTab({super.key});
+class BotsTab extends ConsumerStatefulWidget {
+  const BotsTab({super.key});
 
   @override
-  ConsumerState<BotTab> createState() => _BotTabState();
+  ConsumerState<BotsTab> createState() => _BotsTabState();
 }
 
-class _BotTabState extends ConsumerState<BotTab> {
+class _BotsTabState extends ConsumerState<BotsTab> {
   String? _api = Config.bot.api;
   String? _model = Config.bot.model;
   bool? _stream = Config.bot.stream;
@@ -235,7 +235,7 @@ class _BotTabState extends ConsumerState<BotTab> {
               ),
             ),
           ],
-        )
+        ),
       ],
     );
   }

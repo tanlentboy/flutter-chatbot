@@ -28,6 +28,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "api_url": MessageLookupByLibrary.simpleMessage("API Url"),
         "apis": MessageLookupByLibrary.simpleMessage("APIs"),
         "bot": MessageLookupByLibrary.simpleMessage("Bot"),
+        "bots": MessageLookupByLibrary.simpleMessage("Bots"),
         "camera": MessageLookupByLibrary.simpleMessage("camera"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "cannot_open": MessageLookupByLibrary.simpleMessage("Cannot Open"),
@@ -36,9 +37,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "complete_all_fields":
             MessageLookupByLibrary.simpleMessage("Please complete all fields"),
+        "config": MessageLookupByLibrary.simpleMessage("Config"),
         "copied_successfully":
             MessageLookupByLibrary.simpleMessage("Copied Successfully"),
         "copy": MessageLookupByLibrary.simpleMessage("copy"),
+        "default_config":
+            MessageLookupByLibrary.simpleMessage("Default Config"),
         "delete": MessageLookupByLibrary.simpleMessage("delete"),
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
@@ -67,7 +71,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "not_implemented_yet":
             MessageLookupByLibrary.simpleMessage("Not implemented yet"),
         "open": MessageLookupByLibrary.simpleMessage("Open"),
-        "other": MessageLookupByLibrary.simpleMessage("Other"),
         "reanswer": MessageLookupByLibrary.simpleMessage("Reanswer"),
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
