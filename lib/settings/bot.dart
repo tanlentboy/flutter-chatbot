@@ -165,7 +165,9 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+
     final botPair = widget.botPair;
     final bot = botPair?.value;
 
@@ -186,6 +188,11 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
     if (systemPrompts != null) {
       _systemPromptsCtrl.text = systemPrompts.toString();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final botPair = widget.botPair;
 
     return Scaffold(
       appBar: AppBar(

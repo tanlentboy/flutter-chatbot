@@ -113,11 +113,12 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           value: _model,
           items: modelList,
           isExpanded: true,
+          menuMaxHeight: 480,
           hint: Text(S.of(context).model),
           onChanged: (it) => setState(() => _model = it),
           decoration: const InputDecoration(
