@@ -142,8 +142,11 @@ class Config {
       final data = await _file.readAsString();
       fromJson(jsonDecode(data));
     } else {
+      core = CoreConfig();
       save();
     }
+
+    CurrentChat.core = core;
   }
 
   static Future<void> save() async =>
@@ -159,16 +162,12 @@ class Config {
       };
 
   static void fromJson(Map<String, dynamic> json) {
-    final coreJson = json["core"];
+    final coreJson = json["core"] ?? {};
     final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
     final chatsJson = json["chats"] ?? [];
 
-    if (coreJson != null) {
-      core = CoreConfig.fromJson(coreJson);
-    } else {
-      core = CoreConfig();
-    }
+    core = CoreConfig.fromJson(coreJson);
     for (final chat in chatsJson) {
       chats.add(ChatConfig.fromJson(chat));
     }
@@ -178,8 +177,6 @@ class Config {
     for (final pair in apisJson.entries) {
       apis[pair.key] = ApiConfig.fromJson(pair.value);
     }
-
-    CurrentChat.core = core;
   }
 }
 
