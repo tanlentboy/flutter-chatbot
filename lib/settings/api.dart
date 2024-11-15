@@ -36,46 +36,46 @@ class ApisTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        FilledButton(
-          child: Text(S.of(context).new_api),
-          onPressed: () async => await showDialog<bool>(
-            context: context,
-            builder: (context) => ApiSettings(),
-          ),
-        ),
-        Expanded(
-          child: Consumer(
-            builder: (context, ref, child) {
-              ref.watch(apisProvider);
-              final apis = Config.apis.entries.toList();
+    ref.watch(apisProvider);
+    final apis = Config.apis.entries.toList();
 
-              return ListView.builder(
-                itemCount: apis.length,
-                itemBuilder: (context, index) {
-                  return Card.filled(
-                    margin: const EdgeInsets.only(top: 12),
-                    child: ListTile(
-                      title: Text(
-                        apis[index].key,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      leading: const Icon(Icons.api),
-                      contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () async => await showDialog(
-                          context: context,
-                          builder: (context) =>
-                              ApiSettings(apiPair: apis[index]),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+    return Stack(
+      children: [
+        ListView.builder(
+          padding:
+              const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
+          itemCount: apis.length,
+          itemBuilder: (context, index) {
+            return Card.filled(
+              margin: const EdgeInsets.only(top: 12),
+              child: ListTile(
+                title: Text(
+                  apis[index].key,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                leading: const Icon(Icons.api),
+                contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async => await showDialog(
+                    context: context,
+                    builder: (context) => ApiSettings(apiPair: apis[index]),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.extended(
+            icon: const Icon(Icons.api),
+            label: Text(S.of(context).new_api),
+            onPressed: () async => await showDialog<bool>(
+              context: context,
+              builder: (context) => ApiSettings(),
+            ),
           ),
         ),
       ],

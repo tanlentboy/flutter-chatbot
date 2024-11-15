@@ -45,18 +45,9 @@ class SettingsPageState extends State<SettingsPage> {
         ),
         body: TabBarView(
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: const ConfigTab(),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: const BotsTab(),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: const ApisTab(),
-            ),
+            const ConfigTab(),
+            const BotsTab(),
+            const ApisTab(),
           ],
         ),
       ),

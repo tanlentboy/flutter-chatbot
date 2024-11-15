@@ -74,6 +74,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
     }
 
     return ListView(
+      padding: const EdgeInsets.all(16),
       children: [
         Text(" ${S.of(context).default_config}"),
         SizedBox(height: 8),

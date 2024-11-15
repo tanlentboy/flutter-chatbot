@@ -29,56 +29,51 @@ class BotsNotifier extends AutoDisposeNotifier<void> {
   void notify() => ref.notifyListeners();
 }
 
-class BotsTab extends ConsumerStatefulWidget {
+class BotsTab extends ConsumerWidget {
   const BotsTab({super.key});
 
   @override
-  ConsumerState<BotsTab> createState() => _BotsTabState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(botsProvider);
+    final bots = Config.bots.entries.toList();
 
-class _BotsTabState extends ConsumerState<BotsTab> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        FilledButton(
-          child: Text(S.of(context).new_bot),
-          onPressed: () async => await showDialog<bool>(
-            context: context,
-            builder: (context) => BotSettings(),
-          ),
+        ListView.builder(
+          padding:
+              const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
+          itemCount: bots.length,
+          itemBuilder: (context, index) {
+            return Card.filled(
+              margin: const EdgeInsets.only(top: 12),
+              child: ListTile(
+                title: Text(
+                  bots[index].key,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                leading: const Icon(Icons.smart_toy),
+                contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async => await showDialog<bool>(
+                    context: context,
+                    builder: (context) => BotSettings(botPair: bots[index]),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
-        Expanded(
-          child: Consumer(
-            builder: (context, ref, child) {
-              ref.watch(botsProvider);
-              final bots = Config.bots.entries.toList();
-
-              return ListView.builder(
-                itemCount: bots.length,
-                itemBuilder: (context, index) {
-                  return Card.filled(
-                    margin: const EdgeInsets.only(top: 12),
-                    child: ListTile(
-                      title: Text(
-                        bots[index].key,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      leading: const Icon(Icons.smart_toy),
-                      contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () async => await showDialog<bool>(
-                          context: context,
-                          builder: (context) =>
-                              BotSettings(botPair: bots[index]),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.extended(
+            icon: const Icon(Icons.smart_toy),
+            label: Text(S.of(context).new_bot),
+            onPressed: () async => await showDialog<bool>(
+              context: context,
+              builder: (context) => BotSettings(),
+            ),
           ),
         ),
       ],

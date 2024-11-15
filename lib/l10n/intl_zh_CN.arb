@@ -10,8 +10,8 @@
     "gallery": "图库",
     "settings": "设置",
 
-    "bot": "智能体",
-    "bots": "智能体",
+    "bot": "角色",
+    "bots": "角色",
     "apis": "接口",
     "config": "配置",
     "default_config": "默认配置",
@@ -33,7 +33,7 @@
 
     "link": "链接",
     "name": "名称",
-    "new_bot": "新智能体",
+    "new_bot": "新角色",
     "new_api": "新接口",
     "new_chat": "新对话",
     "api_url": "接口地址",
@@ -44,7 +44,7 @@
     "stopped_by_user": "被用户终止",
     "enter_a_name": "请输入名称",
     "enter_a_title": "请输入标题",
-    "duplicate_bot_name": "智能体名重复",
+    "duplicate_bot_name": "角色名重复",
     "duplicate_api_name": "接口名重复",
     "complete_all_fields": "请填写所有字段",
 
