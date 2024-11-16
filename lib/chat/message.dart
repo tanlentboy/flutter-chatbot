@@ -13,9 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:chatbot/chat/input.dart";
-
 import "chat.dart";
+import "input.dart";
 import "current.dart";
 import "../util.dart";
 import "../config.dart";
@@ -250,13 +249,16 @@ class MessageWidget extends ConsumerWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final markdownStyleSheet = MarkdownStyleSheet(
+      codeblockPadding: EdgeInsets.all(0),
       codeblockDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.surfaceContainer,
       ),
       blockquoteDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-        color: colorScheme.tertiaryContainer,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.brightness == Brightness.light
+            ? Colors.blueGrey.withOpacity(0.3)
+            : Colors.black.withOpacity(0.3),
       ),
     );
 
@@ -306,7 +308,7 @@ class MessageWidget extends ConsumerWidget {
                 onTapLink: (text, href, title) async =>
                     await Util.openLink(context: context, link: href),
                 builders: {
-                  "code": CodeElementBuilder(context: context),
+                  "pre": CodeBlockBuilder(context: context),
                   "latex": LatexElementBuilder(textScaleFactor: 1.2),
                 },
                 styleSheet: markdownStyleSheet,
@@ -365,31 +367,72 @@ class MessageWidget extends ConsumerWidget {
   }
 }
 
-class CodeElementBuilder extends MarkdownElementBuilder {
+class CodeBlockBuilder extends MarkdownElementBuilder {
+  var language = "";
   final BuildContext context;
-  CodeElementBuilder({required this.context});
+
+  CodeBlockBuilder({required this.context});
 
   @override
-  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
-    final theme = switch (Theme.of(context).colorScheme.brightness) {
+  void visitElementBefore(md.Element element) {
+    final code = element.children?.first;
+    if (code is md.Element) {
+      final lang = code.attributes["class"];
+      if (lang != null) language = lang.substring(9);
+    }
+    super.visitElementBefore(element);
+  }
+
+  @override
+  Widget? visitText(md.Text text, TextStyle? preferredStyle) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final theme = switch (colorScheme.brightness) {
       Brightness.light => codeLightTheme,
       Brightness.dark => codeDarkTheme,
     };
-    var language = "";
+    final content = text.textContent.trim();
 
-    if (element.attributes["class"] != null) {
-      language = element.attributes["class"]!.substring(9);
-    }
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: HighlightView(
-        tabSize: 2,
-        theme: theme,
-        language: language,
-        element.textContent.trim(),
-        padding: const EdgeInsets.all(8),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: theme == codeDarkTheme
+                ? Colors.black.withOpacity(0.3)
+                : Colors.blueGrey.withOpacity(0.3),
+          ),
+          padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 16),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(language),
+              Expanded(child: SizedBox()),
+              GestureDetector(
+                onTap: () {
+                  Util.copyText(
+                    context: context,
+                    text: content,
+                  );
+                },
+                child: Text(
+                  S.of(context).copy,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: HighlightView(
+            content,
+            tabSize: 2,
+            theme: theme,
+            language: language,
+            padding: const EdgeInsets.all(8),
+          ),
+        ),
+      ],
     );
   }
 }

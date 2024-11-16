@@ -2,12 +2,12 @@
     "@@locale": "en",
     "title": "ChatBot",
 
-    "copy": "copy",
-    "edit": "edit",
-    "source": "source",
-    "delete": "delete",
-    "camera": "camera",
-    "gallery": "gallery",
+    "copy": "Copy",
+    "edit": "Edit",
+    "source": "Source",
+    "delete": "Delete",
+    "camera": "Camera",
+    "gallery": "Gallery",
     "settings": "Settings",
 
     "bot": "Bot",
@@ -41,7 +41,6 @@
     "model_list": "Model List",
     "select_models": "Select Models",
 
-    "stopped_by_user": "Stopped By User",
     "enter_a_name": "Please enter a name",
     "enter_a_title": "Please enter a title",
     "duplicate_bot_name": "Duplicate Bot name",
@@ -64,7 +63,5 @@
 
     "enter_your_message": "Enter your message",
     "image_compress_failed": "Failed to comprese image",
-    "choose_a_api_first": "Choose a API first",
-    "setup_bot_api_first": "Set up the Bot and API first",
-    "use_default_settings": "Empty fields indicate the use of default setttings"
+    "setup_bot_api_first": "Set up the Bot and API first"
 }

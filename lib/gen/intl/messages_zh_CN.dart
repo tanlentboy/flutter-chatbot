@@ -34,7 +34,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannot_open": MessageLookupByLibrary.simpleMessage("无法打开"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("对话配置"),
         "chat_title": MessageLookupByLibrary.simpleMessage("对话标题"),
-        "choose_a_api_first": MessageLookupByLibrary.simpleMessage("请先选择一个接口"),
         "clear": MessageLookupByLibrary.simpleMessage("清除"),
         "complete_all_fields": MessageLookupByLibrary.simpleMessage("请填写所有字段"),
         "config": MessageLookupByLibrary.simpleMessage("配置"),
@@ -74,12 +73,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setup_bot_api_first":
             MessageLookupByLibrary.simpleMessage("请先配置接口和模型"),
         "source": MessageLookupByLibrary.simpleMessage("源码"),
-        "stopped_by_user": MessageLookupByLibrary.simpleMessage("被用户终止"),
         "streaming_response": MessageLookupByLibrary.simpleMessage("流式响应"),
         "system_prompts": MessageLookupByLibrary.simpleMessage("系统提示词"),
         "temperature": MessageLookupByLibrary.simpleMessage("温度"),
-        "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
-        "use_default_settings":
-            MessageLookupByLibrary.simpleMessage("空白字段代表使用默认配置")
+        "title": MessageLookupByLibrary.simpleMessage("ChatBot")
       };
 }

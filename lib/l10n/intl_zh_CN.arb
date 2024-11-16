@@ -41,7 +41,6 @@
     "model_list": "模型列表",
     "select_models": "选择模型",
 
-    "stopped_by_user": "被用户终止",
     "enter_a_name": "请输入名称",
     "enter_a_title": "请输入标题",
     "duplicate_bot_name": "角色名重复",
@@ -64,7 +63,5 @@
 
     "enter_your_message": "输入你的消息",
     "image_compress_failed": "图片压缩失败",
-    "choose_a_api_first": "请先选择一个接口",
-    "setup_bot_api_first": "请先配置接口和模型",
-    "use_default_settings": "空白字段代表使用默认配置"
+    "setup_bot_api_first": "请先配置接口和模型"
 }

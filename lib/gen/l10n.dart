@@ -60,60 +60,60 @@ class S {
     );
   }
 
-  /// `copy`
+  /// `Copy`
   String get copy {
     return Intl.message(
-      'copy',
+      'Copy',
       name: 'copy',
       desc: '',
       args: [],
     );
   }
 
-  /// `edit`
+  /// `Edit`
   String get edit {
     return Intl.message(
-      'edit',
+      'Edit',
       name: 'edit',
       desc: '',
       args: [],
     );
   }
 
-  /// `source`
+  /// `Source`
   String get source {
     return Intl.message(
-      'source',
+      'Source',
       name: 'source',
       desc: '',
       args: [],
     );
   }
 
-  /// `delete`
+  /// `Delete`
   String get delete {
     return Intl.message(
-      'delete',
+      'Delete',
       name: 'delete',
       desc: '',
       args: [],
     );
   }
 
-  /// `camera`
+  /// `Camera`
   String get camera {
     return Intl.message(
-      'camera',
+      'Camera',
       name: 'camera',
       desc: '',
       args: [],
     );
   }
 
-  /// `gallery`
+  /// `Gallery`
   String get gallery {
     return Intl.message(
-      'gallery',
+      'Gallery',
       name: 'gallery',
       desc: '',
       args: [],
@@ -400,16 +400,6 @@ class S {
     );
   }
 
-  /// `Stopped By User`
-  String get stopped_by_user {
-    return Intl.message(
-      'Stopped By User',
-      name: 'stopped_by_user',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Please enter a name`
   String get enter_a_name {
     return Intl.message(
@@ -590,31 +580,11 @@ class S {
     );
   }
 
-  /// `Choose a API first`
-  String get choose_a_api_first {
-    return Intl.message(
-      'Choose a API first',
-      name: 'choose_a_api_first',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Set up the Bot and API first`
   String get setup_bot_api_first {
     return Intl.message(
       'Set up the Bot and API first',
       name: 'setup_bot_api_first',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Empty fields indicate the use of default setttings`
-  String get use_default_settings {
-    return Intl.message(
-      'Empty fields indicate the use of default setttings',
-      name: 'use_default_settings',
       desc: '',
       args: [],
     );

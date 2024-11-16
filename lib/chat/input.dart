@@ -329,6 +329,7 @@ List<ChatMessage> _buildContext(List<Message> list) {
             ),
           ])));
         }
+        break;
     }
   }
 

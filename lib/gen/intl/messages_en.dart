@@ -29,28 +29,26 @@ class MessageLookup extends MessageLookupByLibrary {
         "apis": MessageLookupByLibrary.simpleMessage("APIs"),
         "bot": MessageLookupByLibrary.simpleMessage("Bot"),
         "bots": MessageLookupByLibrary.simpleMessage("Bots"),
-        "camera": MessageLookupByLibrary.simpleMessage("camera"),
+        "camera": MessageLookupByLibrary.simpleMessage("Camera"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "cannot_open": MessageLookupByLibrary.simpleMessage("Cannot Open"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
-        "choose_a_api_first":
-            MessageLookupByLibrary.simpleMessage("Choose a API first"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "complete_all_fields":
             MessageLookupByLibrary.simpleMessage("Please complete all fields"),
         "config": MessageLookupByLibrary.simpleMessage("Config"),
         "copied_successfully":
             MessageLookupByLibrary.simpleMessage("Copied Successfully"),
-        "copy": MessageLookupByLibrary.simpleMessage("copy"),
+        "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "default_config":
             MessageLookupByLibrary.simpleMessage("Default Config"),
-        "delete": MessageLookupByLibrary.simpleMessage("delete"),
+        "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
         "duplicate_bot_name":
             MessageLookupByLibrary.simpleMessage("Duplicate Bot name"),
-        "edit": MessageLookupByLibrary.simpleMessage("edit"),
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "empty_link": MessageLookupByLibrary.simpleMessage("Empty Link"),
         "enter_a_name":
             MessageLookupByLibrary.simpleMessage("Please enter a name"),
@@ -59,7 +57,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enter_your_message":
             MessageLookupByLibrary.simpleMessage("Enter your message"),
         "error": MessageLookupByLibrary.simpleMessage("Error"),
-        "gallery": MessageLookupByLibrary.simpleMessage("gallery"),
+        "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "image_compress_failed":
             MessageLookupByLibrary.simpleMessage("Failed to comprese image"),
         "invalid_max_tokens":
@@ -87,16 +85,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "setup_bot_api_first": MessageLookupByLibrary.simpleMessage(
             "Set up the Bot and API first"),
-        "source": MessageLookupByLibrary.simpleMessage("source"),
-        "stopped_by_user":
-            MessageLookupByLibrary.simpleMessage("Stopped By User"),
+        "source": MessageLookupByLibrary.simpleMessage("Source"),
         "streaming_response":
             MessageLookupByLibrary.simpleMessage("Streaming Response"),
         "system_prompts":
             MessageLookupByLibrary.simpleMessage("System Prompts"),
         "temperature": MessageLookupByLibrary.simpleMessage("Temperature"),
-        "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
-        "use_default_settings": MessageLookupByLibrary.simpleMessage(
-            "Empty fields indicate the use of default setttings")
+        "title": MessageLookupByLibrary.simpleMessage("ChatBot")
       };
 }
