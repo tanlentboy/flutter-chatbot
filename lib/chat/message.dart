@@ -109,22 +109,47 @@ class MessageWidget extends ConsumerWidget {
   }
 
   Future<void> _source(BuildContext context) async {
-    await showDialog(
+    InputWidget.unFocus();
+
+    await showModalBottomSheet(
       context: context,
+      enableDrag: false,
+      useSafeArea: true,
+      isScrollControlled: false,
+      scrollControlDisabledMaxHeightRatio: 1,
       builder: (context) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            title: Text(S.of(context).source),
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height * 0.5,
           ),
-          body: Padding(
-            padding: EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              child: SelectableText(message.text),
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                title: Text(S.of(context).source),
+                backgroundColor: Theme.of(context).colorScheme.surface,
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(
+                      top: 16, left: 16, right: 16, bottom: 0),
+                  child: Column(
+                    children: [
+                      SelectableText(
+                        message.text,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -135,26 +160,33 @@ class MessageWidget extends ConsumerWidget {
     InputWidget.unFocus();
 
     final children = [
+      SizedBox(height: 8),
       Container(
-        width: 40,
+        width: 36,
         height: 4,
-        margin: const EdgeInsets.only(top: 16, bottom: 8),
         decoration: const BoxDecoration(
           color: Colors.grey,
           borderRadius: BorderRadius.all(Radius.circular(2)),
         ),
       ),
+      SizedBox(height: 8),
       ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
         title: Text(S.of(context).copy),
         leading: const Icon(Icons.copy_all),
         onTap: () => Navigator.pop(context, MessageEvent.copy),
       ),
       ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
         title: Text(S.of(context).source),
         leading: const Icon(Icons.code_outlined),
         onTap: () => Navigator.pop(context, MessageEvent.source),
       ),
       ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
         title: Text(S.of(context).delete),
         leading: const Icon(Icons.delete_outlined),
         onTap: () => Navigator.pop(context, MessageEvent.delete),
@@ -168,10 +200,13 @@ class MessageWidget extends ConsumerWidget {
 
     final event = await showModalBottomSheet<MessageEvent>(
       context: context,
-      builder: (BuildContext context) {
-        return Wrap(
-          alignment: WrapAlignment.center,
-          children: children,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
         );
       },
     );
@@ -216,8 +251,12 @@ class MessageWidget extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final markdownStyleSheet = MarkdownStyleSheet(
       codeblockDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
         color: colorScheme.surfaceContainer,
+      ),
+      blockquoteDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        color: colorScheme.tertiaryContainer,
       ),
     );
 

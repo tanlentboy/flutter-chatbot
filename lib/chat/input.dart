@@ -54,30 +54,38 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      builder: (BuildContext context) {
-        return Wrap(
-          alignment: WrapAlignment.center,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(top: 16, bottom: 8),
-              decoration: const BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.all(Radius.circular(2)),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 8),
+              Container(
+                width: 36,
+                height: 4,
+                decoration: const BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.all(Radius.circular(2)),
+                ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera),
-              title: Text(S.of(context).camera),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: Text(S.of(context).gallery),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-          ],
+              SizedBox(height: 8),
+              ListTile(
+                minTileHeight: 48,
+                shape: StadiumBorder(),
+                title: Text(S.of(context).camera),
+                leading: const Icon(Icons.camera_outlined),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+              ListTile(
+                minTileHeight: 48,
+                shape: StadiumBorder(),
+                title: Text(S.of(context).gallery),
+                leading: const Icon(Icons.photo_library_outlined),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -209,9 +209,11 @@ final lightTheme = ThemeData.light(useMaterial3: true).copyWith(
 );
 
 final codeDarkTheme = Map.of(atomOneDarkTheme)
-  ..["root"] =
-      TextStyle(color: Color(0xffabb2bf), backgroundColor: Colors.transparent);
+  ..["root"] = TextStyle(
+      color: Colors.white.withOpacity(0.7),
+      backgroundColor: Colors.transparent);
 
 final codeLightTheme = Map.of(atomOneLightTheme)
-  ..["root"] =
-      TextStyle(color: Color(0xffabb2bf), backgroundColor: Colors.transparent);
+  ..["root"] = TextStyle(
+      color: Colors.black.withOpacity(0.7),
+      backgroundColor: Colors.transparent);

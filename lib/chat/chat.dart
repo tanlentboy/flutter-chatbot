@@ -76,22 +76,23 @@ class ChatPage extends ConsumerWidget {
         ),
         Divider(),
         Container(
-          margin: EdgeInsets.only(left: 8, right: 8),
+          padding: EdgeInsets.only(left: 8, right: 8),
           child: ListTile(
-            dense: true,
+            minTileHeight: 48,
             shape: StadiumBorder(),
             title: Text(S.of(context).new_chat),
             leading: const Icon(Icons.post_add),
             onTap: () {
               CurrentChat.clear();
               ref.read(chatProvider.notifier).notify();
+              ref.read(chatsProvider.notifier).notify();
               ref.read(messagesProvider.notifier).notify();
             },
           ),
         ),
         Container(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+          alignment: Alignment.topLeft,
+          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
           child: Text(
             S.of(context).all_chats,
             style: Theme.of(context).textTheme.labelSmall,
@@ -107,48 +108,47 @@ class ChatPage extends ConsumerWidget {
                 itemCount: Config.chats.length,
                 itemBuilder: (context, index) {
                   final chat = Config.chats[index];
-                  return Column(
-                    children: [
-                      ListTile(
-                        dense: true,
-                        shape: StadiumBorder(),
-                        leading: const Icon(Icons.article),
-                        selected: CurrentChat.chat == chat,
-                        contentPadding:
-                            const EdgeInsets.only(left: 16, right: 8),
-                        title: Text(
-                          chat.title,
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(chat.time),
-                        onTap: () async {
-                          if (CurrentChat.chat == chat) return;
-
-                          await CurrentChat.load(chat);
-                          ref.read(chatProvider.notifier).notify();
-                          ref.read(chatsProvider.notifier).notify();
-                          ref.read(messagesProvider.notifier).notify();
-                        },
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () async {
-                            if (CurrentChat.chat == chat) {
-                              CurrentChat.clear();
-                              ref.read(chatProvider.notifier).notify();
-                              ref.read(messagesProvider.notifier).notify();
-                            }
-
-                            await File(Config.chatFilePath(chat.fileName))
-                                .delete();
-                            ref.read(chatsProvider.notifier).notify();
-                            Config.chats.removeAt(index);
-                            await Config.save();
-                          },
-                        ),
+                  return Container(
+                    margin: EdgeInsets.only(top: 4),
+                    child: ListTile(
+                      dense: true,
+                      minTileHeight: 48,
+                      shape: StadiumBorder(),
+                      leading: const Icon(Icons.article),
+                      selected: CurrentChat.chat == chat,
+                      contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                      title: Text(
+                        chat.title,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
+                      subtitle: Text(chat.time),
+                      onTap: () async {
+                        if (CurrentChat.chat == chat) return;
+
+                        await CurrentChat.load(chat);
+                        ref.read(chatProvider.notifier).notify();
+                        ref.read(chatsProvider.notifier).notify();
+                        ref.read(messagesProvider.notifier).notify();
+                      },
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          if (CurrentChat.chat == chat) {
+                            CurrentChat.clear();
+                            ref.read(chatProvider.notifier).notify();
+                            ref.read(messagesProvider.notifier).notify();
+                          }
+
+                          await File(Config.chatFilePath(chat.fileName))
+                              .delete();
+                          ref.read(chatsProvider.notifier).notify();
+                          Config.chats.removeAt(index);
+                          await Config.save();
+                        },
+                      ),
+                    ),
                   );
                 },
               );
