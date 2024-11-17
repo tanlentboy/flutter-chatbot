@@ -83,6 +83,7 @@ class ChatPage extends ConsumerWidget {
             title: Text(S.of(context).new_chat),
             leading: const Icon(Icons.post_add),
             onTap: () {
+              if (CurrentChat.chatStatus.isResponding) return;
               CurrentChat.clear();
               ref.read(chatProvider.notifier).notify();
               ref.read(chatsProvider.notifier).notify();
@@ -250,24 +251,56 @@ class ChatPage extends ConsumerWidget {
       body: Column(
         children: [
           Expanded(
-            child: Consumer(
-              builder: (context, ref, child) {
-                ref.watch(messagesProvider);
+            child: Stack(
+              children: [
+                Consumer(
+                  builder: (context, ref, child) {
+                    ref.watch(messagesProvider);
 
-                return ListView.builder(
-                  controller: scrollCtrl,
-                  padding: const EdgeInsets.only(
-                      top: 4, left: 16, right: 16, bottom: 16),
-                  itemCount: CurrentChat.messages.length,
-                  itemBuilder: (context, index) {
-                    final message = CurrentChat.messages[index];
-                    return MessageWidget(
-                      message: message,
-                      key: ValueKey(message),
+                    return ListView.builder(
+                      controller: scrollCtrl,
+                      padding: const EdgeInsets.only(
+                          top: 4, left: 16, right: 16, bottom: 16),
+                      itemCount: CurrentChat.messages.length,
+                      itemBuilder: (context, index) {
+                        final message = CurrentChat.messages[index];
+                        return MessageWidget(
+                          message: message,
+                          key: ValueKey(message),
+                        );
+                      },
                     );
                   },
-                );
-              },
+                ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    ref.watch(ttsProvider);
+                    final status = CurrentChat.ttsStatus;
+
+                    return Positioned(
+                      right: 16,
+                      bottom: 16,
+                      child: switch (status) {
+                        TtsStatus.nothing => const SizedBox(),
+                        _ => FloatingActionButton(
+                            child: status.isPlaying
+                                ? const Icon(Icons.pause_sharp)
+                                : Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 3),
+                                  ),
+                            onPressed: () async {
+                              CurrentChat.ttsStatus = TtsStatus.nothing;
+                              ref.read(ttsProvider.notifier).notify();
+                              await audioPlayer.stop();
+                            },
+                          ),
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
           ),
           InputWidget(scrollCtrl: scrollCtrl),

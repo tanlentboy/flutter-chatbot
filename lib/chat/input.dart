@@ -114,6 +114,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   }
 
   Future<void> _sendMessage(BuildContext context) async {
+    if (!CurrentChat.chatStatus.isNothing) return;
     final text = _inputCtrl.text;
     if (text.isEmpty) return;
 

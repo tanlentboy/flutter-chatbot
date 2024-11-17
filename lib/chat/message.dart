@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "dart:async";
+
 import "chat.dart";
 import "input.dart";
 import "current.dart";
@@ -20,7 +22,11 @@ import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
 
+import "dart:io";
+import "dart:convert";
 import "package:flutter/material.dart";
+import "package:http/http.dart" as http;
+import "package:just_audio/just_audio.dart";
 import "package:markdown/markdown.dart" as md;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
@@ -28,12 +34,23 @@ import "package:markdown/markdown.dart" hide Element, Text;
 import "package:flutter_highlighter/flutter_highlighter.dart";
 import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
 
+final audioPlayer = AudioPlayer();
+
 final messageProvider = NotifierProvider.autoDispose
     .family<MessageNotifier, void, Message>(MessageNotifier.new);
+
+final ttsProvider =
+    NotifierProvider.autoDispose<TtsNotifier, void>(TtsNotifier.new);
 
 class MessageNotifier extends AutoDisposeFamilyNotifier<void, Message> {
   @override
   void build(Message arg) {}
+  void notify() => ref.notifyListeners();
+}
+
+class TtsNotifier extends AutoDisposeNotifier<void> {
+  @override
+  void build() {}
   void notify() => ref.notifyListeners();
 }
 
@@ -50,6 +67,7 @@ enum MessageEvent {
   delete,
   copy,
   edit,
+  tts,
 }
 
 class Message {
@@ -79,6 +97,8 @@ class Message {
 class MessageWidget extends ConsumerWidget {
   final Message message;
 
+  static int _ttsTimes = 0;
+  static StreamSubscription? _subscription;
   static final extensionSet = ExtensionSet(
     <BlockSyntax>[
       LatexBlockSyntax(),
@@ -157,7 +177,7 @@ class MessageWidget extends ConsumerWidget {
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
-    if (!CurrentChat.isNothing) return;
+    if (!CurrentChat.chatStatus.isNothing) return;
     CurrentChat.messages.remove(message);
     ref.read(messagesProvider.notifier).notify();
     await CurrentChat.save();
@@ -235,6 +255,13 @@ class MessageWidget extends ConsumerWidget {
       ListTile(
         minTileHeight: 48,
         shape: StadiumBorder(),
+        title: Text(S.of(context).play),
+        leading: const Icon(Icons.play_circle_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.tts),
+      ),
+      ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
         title: Text(S.of(context).source),
         leading: const Icon(Icons.code_outlined),
         onTap: () => Navigator.pop(context, MessageEvent.source),
@@ -270,6 +297,10 @@ class MessageWidget extends ConsumerWidget {
     if (event == null || !context.mounted) return;
 
     switch (event) {
+      case MessageEvent.tts:
+        await _tts(context, ref);
+        break;
+
       case MessageEvent.copy:
         await _copy(context);
         break;
@@ -285,6 +316,72 @@ class MessageWidget extends ConsumerWidget {
       case MessageEvent.delete:
         await _delete(context, ref);
         break;
+    }
+  }
+
+  Future<void> _tts(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.ttsStatus.isNothing) return;
+    await _subscription?.cancel();
+
+    final apiUrl = CurrentChat.apiUrl;
+    final apiKey = CurrentChat.apiKey;
+    final endPoint = "$apiUrl/audio/speech";
+    if (apiUrl == null || apiKey == null) return;
+
+    CurrentChat.ttsStatus = TtsStatus.loading;
+    ref.read(ttsProvider.notifier).notify();
+    final times = ++_ttsTimes;
+
+    try {
+      final response = await http.post(
+        Uri.parse(endPoint),
+        headers: {
+          "Authorization": "Bearer $apiKey",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "model": "tts-1",
+          "voice": "alloy",
+          "input": message.text,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw "${response.statusCode} ${response.body}";
+      }
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final path = Config.audioFilePath("$timestamp.mp3");
+
+      final file = File(path);
+      await file.writeAsBytes(response.bodyBytes);
+      if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
+
+      audioPlayer.setUrl(path);
+      await audioPlayer.play();
+
+      CurrentChat.ttsStatus = TtsStatus.playing;
+      ref.read(ttsProvider.notifier).notify();
+
+      _subscription = audioPlayer.playerStateStream.listen(
+        (state) {
+          if (state.processingState == ProcessingState.completed) {
+            CurrentChat.ttsStatus = TtsStatus.nothing;
+            ref.read(ttsProvider.notifier).notify();
+          }
+        },
+        onError: (e) async {
+          CurrentChat.ttsStatus = TtsStatus.nothing;
+          ref.read(ttsProvider.notifier).notify();
+          if (context.mounted) {
+            await Util.handleError(context: context, error: e);
+          }
+        },
+      );
+    } catch (e) {
+      if (context.mounted) await Util.handleError(context: context, error: e);
+      CurrentChat.ttsStatus = TtsStatus.nothing;
+      ref.read(ttsProvider.notifier).notify();
     }
   }
 
@@ -373,7 +470,7 @@ class MessageWidget extends ConsumerWidget {
           ),
         ),
         if (CurrentChat.messages.lastOrNull == message &&
-            !CurrentChat.isResponding) ...[
+            CurrentChat.chatStatus.isNothing) ...[
           const SizedBox(height: 4),
           Row(
             mainAxisAlignment: optsAlignment,
@@ -385,6 +482,15 @@ class MessageWidget extends ConsumerWidget {
                   icon: const Icon(Icons.paste),
                   iconSize: 16,
                   onPressed: () async => await _copy(context),
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.play_circle_outlined),
+                  iconSize: 18,
+                  onPressed: () async => await _tts(context, ref),
                 ),
               ),
               SizedBox(
