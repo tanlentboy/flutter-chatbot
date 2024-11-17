@@ -113,33 +113,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     setState(() => CurrentChat.image = null);
   }
 
-  Future<void> _handleError(BuildContext context, dynamic error) async {
-    final info = error.toString();
-    final result = await showDialog<int>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(S.of(context).error),
-          content: Text(info),
-          actions: [
-            TextButton(
-              child: Text(S.of(context).cancel),
-              onPressed: () => Navigator.of(context).pop(0),
-            ),
-            TextButton(
-              child: Text(S.of(context).copy),
-              onPressed: () => Navigator.of(context).pop(1),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (result == 1 && context.mounted) {
-      await Util.copyText(context: context, text: info);
-    }
-  }
-
   Future<void> _sendMessage(BuildContext context) async {
     final text = _inputCtrl.text;
     if (text.isEmpty) return;
@@ -175,7 +148,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     setState(() {
       _inputCtrl.clear();
       CurrentChat.image = null;
-      CurrentChat.status = CurrentChatStatus.responding;
+      CurrentChat.chatStatus = CurrentChatStatus.responding;
     });
 
     try {
@@ -192,21 +165,21 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       if (CurrentChat.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(chatContext));
         await for (final chunk in stream) {
-          if (!CurrentChat.isResponding || times != _sendTimes) return;
+          if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
           assistant.text += chunk.output.content;
           ref.read(messageProvider(assistant).notifier).notify();
           scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
         }
       } else {
         final result = await llm.invoke(PromptValue.chat(chatContext));
-        if (!CurrentChat.isResponding || times != _sendTimes) return;
+        if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
         assistant.text += result.output.content;
         ref.read(messageProvider(assistant).notifier).notify();
         scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
       }
     } catch (e) {
-      if (!CurrentChat.isResponding || times != _sendTimes) return;
-      if (context.mounted) await _handleError(context, e);
+      if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
+      if (context.mounted) await Util.handleError(context: context, error: e);
       if (assistant.text.isEmpty) {
         messages.length -= 2;
         _inputCtrl.text = text;
@@ -218,12 +191,12 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       ref.read(chatProvider.notifier).notify();
       ref.read(chatsProvider.notifier).notify();
     }
-    setState(() => CurrentChat.status = CurrentChatStatus.nothing);
+    setState(() => CurrentChat.chatStatus = CurrentChatStatus.nothing);
     ref.read(messageProvider(assistant).notifier).notify();
   }
 
   Future<void> _stopResponding(BuildContext context) async {
-    setState(() => CurrentChat.status = CurrentChatStatus.nothing);
+    setState(() => CurrentChat.chatStatus = CurrentChatStatus.nothing);
     final list = CurrentChat.messages;
 
     final user = list[list.length - 2];
@@ -241,7 +214,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   @override
   Widget build(BuildContext context) {
     final hasImage = CurrentChat.image != null;
-    final isResponding = CurrentChat.isResponding;
+    final isResponding = CurrentChat.chatStatus.isResponding;
 
     return Container(
       decoration: BoxDecoration(

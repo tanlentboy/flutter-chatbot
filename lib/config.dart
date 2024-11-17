@@ -153,6 +153,8 @@ class Config {
       await _file.writeAsString(jsonEncode(toJson()));
   static String chatFilePath(String fileName) =>
       "${_directory.path}${Platform.pathSeparator}$fileName";
+  static String audioFilePath(String fileName) =>
+      "${_directory.path}${Platform.pathSeparator}$fileName";
 
   static Map<String, dynamic> toJson() => {
         "core": core,

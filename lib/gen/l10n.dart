@@ -80,6 +80,16 @@ class S {
     );
   }
 
+  /// `Play`
+  String get play {
+    return Intl.message(
+      'Play',
+      name: 'play',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Source`
   String get source {
     return Intl.message(

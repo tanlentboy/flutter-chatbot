@@ -26,7 +26,20 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 enum CurrentChatStatus {
   nothing,
-  responding,
+  responding;
+
+  bool get isNothing => this == CurrentChatStatus.nothing;
+  bool get isResponding => this == CurrentChatStatus.responding;
+}
+
+enum TtsStatus {
+  nothing,
+  loading,
+  playing;
+
+  bool get isNothing => this == TtsStatus.nothing;
+  bool get isLoading => this == TtsStatus.loading;
+  bool get isPlaying => this == TtsStatus.playing;
 }
 
 class CurrentChat {
@@ -36,7 +49,8 @@ class CurrentChat {
 
   static late CoreConfig core;
   static final List<Message> messages = [];
-  static CurrentChatStatus status = CurrentChatStatus.nothing;
+  static TtsStatus ttsStatus = TtsStatus.nothing;
+  static CurrentChatStatus chatStatus = CurrentChatStatus.nothing;
 
   static Future<void> load(ChatConfig chat) async {
     clear();
@@ -62,7 +76,6 @@ class CurrentChat {
     image = null;
     messages.clear();
     core = Config.core;
-    status = CurrentChatStatus.nothing;
   }
 
   static void initChat(String title) {
@@ -105,8 +118,6 @@ class CurrentChat {
 
   static bool get hasChat => chat != null;
   static bool get hasFile => _file != null;
-  static bool get isNothing => status == CurrentChatStatus.nothing;
-  static bool get isResponding => status == CurrentChatStatus.responding;
 
   static String? get bot => core.bot;
   static String? get api => core.api;

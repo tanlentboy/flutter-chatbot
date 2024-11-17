@@ -76,6 +76,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "not_implemented_yet":
             MessageLookupByLibrary.simpleMessage("Not implemented yet"),
         "open": MessageLookupByLibrary.simpleMessage("Open"),
+        "play": MessageLookupByLibrary.simpleMessage("Play"),
         "reanswer": MessageLookupByLibrary.simpleMessage("Reanswer"),
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),

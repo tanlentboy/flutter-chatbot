@@ -64,6 +64,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "no_model": MessageLookupByLibrary.simpleMessage("无模型"),
         "not_implemented_yet": MessageLookupByLibrary.simpleMessage("还未实现"),
         "open": MessageLookupByLibrary.simpleMessage("打开"),
+        "play": MessageLookupByLibrary.simpleMessage("播放"),
         "reanswer": MessageLookupByLibrary.simpleMessage("重新回答"),
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
