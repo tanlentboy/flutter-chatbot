@@ -124,10 +124,6 @@ class MessageWidget extends ConsumerWidget {
     final voice = tts.voice;
     final api = Config.apis[tts.api];
 
-    final apiUrl = api?.url;
-    final apiKey = api?.key;
-    final endPoint = "$apiUrl/audio/speech";
-
     if (model == null || voice == null || api == null) {
       if (!context.mounted) return;
       Util.showSnackBar(
@@ -138,6 +134,10 @@ class MessageWidget extends ConsumerWidget {
       );
       return;
     }
+
+    final apiUrl = api.url;
+    final apiKey = api.key;
+    final endPoint = "$apiUrl/audio/speech";
 
     CurrentChat.ttsStatus = TtsStatus.loading;
     ref.read(ttsProvider.notifier).notify();
@@ -269,43 +269,51 @@ class MessageWidget extends ConsumerWidget {
 
     await showModalBottomSheet(
       context: context,
-      enableDrag: false,
+      enableDrag: true,
       useSafeArea: true,
       isScrollControlled: false,
       scrollControlDisabledMaxHeightRatio: 1,
       builder: (context) {
         return ConstrainedBox(
           constraints: BoxConstraints(
+            minWidth: double.infinity,
             minHeight: MediaQuery.of(context).size.height * 0.5,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                title: Text(S.of(context).source),
-                backgroundColor: Theme.of(context).colorScheme.surface,
-              ),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(
-                      top: 0, left: 16, right: 16, bottom: 0),
-                  child: Column(
-                    children: [
-                      SelectableText(
-                        message.text,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 48),
-                    ],
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 8),
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: const BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 16),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(
+                        top: 0, left: 16, right: 16, bottom: 0),
+                    child: Column(
+                      children: [
+                        SelectableText(
+                          message.text,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

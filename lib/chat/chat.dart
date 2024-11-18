@@ -288,7 +288,8 @@ class ChatPage extends ConsumerWidget {
                                 : Padding(
                                     padding: EdgeInsets.all(16),
                                     child: CircularProgressIndicator(
-                                        strokeWidth: 3),
+                                      strokeWidth: 3,
+                                    ),
                                   ),
                             onPressed: () async {
                               CurrentChat.ttsStatus = TtsStatus.nothing;

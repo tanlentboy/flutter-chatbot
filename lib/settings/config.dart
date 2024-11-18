@@ -47,18 +47,19 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
 
     final bots = Config.bots.keys;
     final apis = Config.apis.keys;
-    final botList = <DropdownMenuItem<String>>[];
-    final apiList = <DropdownMenuItem<String>>[];
-
-    final chatModels = Config.apis[_chatApi]?.models ?? [];
     final ttsModels = Config.apis[_ttsApi]?.models ?? [];
-    final chatModelList = <DropdownMenuItem<String>>[];
-    final ttsModelList = <DropdownMenuItem<String>>[];
+    final chatModels = Config.apis[_chatApi]?.models ?? [];
 
     if (!bots.contains(_bot)) _bot = null;
+    if (!apis.contains(_ttsApi)) _ttsApi = null;
     if (!apis.contains(_chatApi)) _chatApi = null;
     if (!ttsModels.contains(_ttsModel)) _ttsModel = null;
     if (!chatModels.contains(_chatModel)) _chatModel = null;
+
+    final botList = <DropdownMenuItem<String>>[];
+    final apiList = <DropdownMenuItem<String>>[];
+    final ttsModelList = <DropdownMenuItem<String>>[];
+    final chatModelList = <DropdownMenuItem<String>>[];
 
     for (final bot in bots) {
       botList.add(DropdownMenuItem(
