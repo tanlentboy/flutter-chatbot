@@ -32,25 +32,33 @@ class ConfigTab extends ConsumerStatefulWidget {
 
 class _ConfigTabState extends ConsumerState<ConfigTab> {
   String? _bot = Config.core.bot;
-  String? _api = Config.core.api;
-  String? _model = Config.core.model;
+  String? _chatApi = Config.core.api;
+  String? _chatModel = Config.core.model;
+
+  String? _ttsApi = Config.tts.api;
+  String? _ttsModel = Config.tts.model;
+  final TextEditingController _ttsVoice =
+      TextEditingController(text: Config.tts.voice);
 
   @override
   Widget build(BuildContext context) {
     ref.watch(botsProvider);
     ref.watch(apisProvider);
 
-    final botList = <DropdownMenuItem<String>>[];
-    final apiList = <DropdownMenuItem<String>>[];
-    final modelList = <DropdownMenuItem<String>>[];
-
     final bots = Config.bots.keys;
     final apis = Config.apis.keys;
-    final models = Config.apis[_api]?.models ?? [];
+    final botList = <DropdownMenuItem<String>>[];
+    final apiList = <DropdownMenuItem<String>>[];
+
+    final chatModels = Config.apis[_chatApi]?.models ?? [];
+    final ttsModels = Config.apis[_ttsApi]?.models ?? [];
+    final chatModelList = <DropdownMenuItem<String>>[];
+    final ttsModelList = <DropdownMenuItem<String>>[];
 
     if (!bots.contains(_bot)) _bot = null;
-    if (!apis.contains(_api)) _api = null;
-    if (!models.contains(_model)) _model = null;
+    if (!apis.contains(_chatApi)) _chatApi = null;
+    if (!ttsModels.contains(_ttsModel)) _ttsModel = null;
+    if (!chatModels.contains(_chatModel)) _chatModel = null;
 
     for (final bot in bots) {
       botList.add(DropdownMenuItem(
@@ -58,7 +66,6 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         child: Text(bot, overflow: TextOverflow.ellipsis),
       ));
     }
-
     for (final api in apis) {
       apiList.add(DropdownMenuItem(
         value: api,
@@ -66,8 +73,14 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
       ));
     }
 
-    for (final model in models) {
-      modelList.add(DropdownMenuItem(
+    for (final model in ttsModels) {
+      ttsModelList.add(DropdownMenuItem(
+        value: model,
+        child: Text(model, overflow: TextOverflow.ellipsis),
+      ));
+    }
+    for (final model in chatModels) {
+      chatModelList.add(DropdownMenuItem(
         value: model,
         child: Text(model, overflow: TextOverflow.ellipsis),
       ));
@@ -97,13 +110,13 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             const SizedBox(width: 8),
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: _api,
+                value: _chatApi,
                 items: apiList,
                 isExpanded: true,
                 hint: Text(S.of(context).api),
                 onChanged: (it) => setState(() {
-                  _model = null;
-                  _api = it;
+                  _chatModel = null;
+                  _chatApi = it;
                 }),
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
@@ -116,12 +129,62 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
-          value: _model,
-          items: modelList,
+          value: _chatModel,
+          items: chatModelList,
           isExpanded: true,
           menuMaxHeight: 480,
           hint: Text(S.of(context).model),
-          onChanged: (it) => setState(() => _model = it),
+          onChanged: (it) => setState(() => _chatModel = it),
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(" ${S.of(context).text_to_speech}"),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _ttsVoice,
+                decoration: InputDecoration(
+                  hintText: S.of(context).voice,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _ttsApi,
+                items: apiList,
+                isExpanded: true,
+                hint: Text(S.of(context).api),
+                onChanged: (it) => setState(() {
+                  _ttsModel = null;
+                  _ttsApi = it;
+                }),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          value: _ttsModel,
+          items: ttsModelList,
+          isExpanded: true,
+          menuMaxHeight: 480,
+          hint: Text(S.of(context).model),
+          onChanged: (it) => setState(() => _ttsModel = it),
           decoration: const InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -137,8 +200,11 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
                 child: Text(S.of(context).reset),
                 onPressed: () => setState(() {
                   _bot = null;
-                  _api = null;
-                  _model = null;
+                  _chatApi = null;
+                  _chatModel = null;
+                  _ttsApi = null;
+                  _ttsModel = null;
+                  _ttsVoice.text = "";
                 }),
               ),
             ),
@@ -149,12 +215,19 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
                 child: Text(S.of(context).save),
                 onPressed: () async {
                   Config.core.bot = _bot;
-                  Config.core.api = _api;
-                  Config.core.model = _model;
+                  Config.core.api = _chatApi;
+                  Config.core.model = _chatModel;
+
+                  Config.tts.api = _ttsApi;
+                  Config.tts.model = _ttsModel;
+                  final voice = _ttsVoice.text;
+                  Config.tts.voice = voice.isEmpty ? null : voice;
+
                   Util.showSnackBar(
                     context: context,
                     content: Text(S.of(context).saved_successfully),
                   );
+
                   ref.read(chatProvider.notifier).notify();
                   await Config.save();
                 },

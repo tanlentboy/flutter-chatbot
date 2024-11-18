@@ -180,16 +180,6 @@ class S {
     );
   }
 
-  /// `Default Config`
-  String get default_config {
-    return Intl.message(
-      'Default Config',
-      name: 'default_config',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Open`
   String get open {
     return Intl.message(
@@ -275,6 +265,16 @@ class S {
     return Intl.message(
       'Model',
       name: 'model',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Voice`
+  String get voice {
+    return Intl.message(
+      'Voice',
+      name: 'voice',
       desc: '',
       args: [],
     );
@@ -500,6 +500,26 @@ class S {
     );
   }
 
+  /// `Default Config`
+  String get default_config {
+    return Intl.message(
+      'Default Config',
+      name: 'default_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Text To Speech`
+  String get text_to_speech {
+    return Intl.message(
+      'Text To Speech',
+      name: 'text_to_speech',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Saved Successfully`
   String get saved_successfully {
     return Intl.message(
@@ -585,6 +605,16 @@ class S {
     return Intl.message(
       'Failed to comprese image',
       name: 'image_compress_failed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set up the TTS first`
+  String get setup_tts_first {
+    return Intl.message(
+      'Set up the TTS first',
+      name: 'setup_tts_first',
       desc: '',
       args: [],
     );

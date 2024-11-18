@@ -73,10 +73,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "settings": MessageLookupByLibrary.simpleMessage("设置"),
         "setup_bot_api_first":
             MessageLookupByLibrary.simpleMessage("请先配置接口和模型"),
+        "setup_tts_first": MessageLookupByLibrary.simpleMessage("请先配置文本转语音"),
         "source": MessageLookupByLibrary.simpleMessage("源码"),
         "streaming_response": MessageLookupByLibrary.simpleMessage("流式响应"),
         "system_prompts": MessageLookupByLibrary.simpleMessage("系统提示词"),
         "temperature": MessageLookupByLibrary.simpleMessage("温度"),
-        "title": MessageLookupByLibrary.simpleMessage("ChatBot")
+        "text_to_speech": MessageLookupByLibrary.simpleMessage("文本转语音"),
+        "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "voice": MessageLookupByLibrary.simpleMessage("音色")
       };
 }

@@ -31,16 +31,40 @@ class CoreConfig {
     this.model,
   });
 
-  Map<String, String?> toJson() => {
+  Map toJson() => {
         "bot": bot,
         "api": api,
         "model": model,
       };
 
-  factory CoreConfig.fromJson(Map<String, dynamic> json) => CoreConfig(
+  factory CoreConfig.fromJson(Map json) => CoreConfig(
         bot: json["bot"],
         api: json["api"],
         model: json["model"],
+      );
+}
+
+class TtsConfig {
+  String? api;
+  String? model;
+  String? voice;
+
+  TtsConfig({
+    this.api,
+    this.model,
+    this.voice,
+  });
+
+  Map toJson() => {
+        "api": api,
+        "model": model,
+        "voice": voice,
+      };
+
+  factory TtsConfig.fromJson(Map json) => TtsConfig(
+        api: json["api"],
+        model: json["model"],
+        voice: json["voice"],
       );
 }
 
@@ -55,13 +79,13 @@ class ChatConfig {
     required this.fileName,
   });
 
-  Map<String, String> toJson() => {
+  Map toJson() => {
         "time": time,
         "title": title,
         "fileName": fileName,
       };
 
-  factory ChatConfig.fromJson(Map<String, dynamic> json) => ChatConfig(
+  factory ChatConfig.fromJson(Map json) => ChatConfig(
         time: json["time"],
         title: json["title"],
         fileName: json["fileName"],
@@ -81,14 +105,14 @@ class BotConfig {
     this.systemPrompts,
   });
 
-  Map<String, dynamic> toJson() => {
+  Map toJson() => {
         "stream": stream,
         "maxTokens": maxTokens,
         "temperature": temperature,
         "systemPrompts": systemPrompts,
       };
 
-  factory BotConfig.fromJson(Map<String, dynamic> json) => BotConfig(
+  factory BotConfig.fromJson(Map json) => BotConfig(
         stream: json["stream"],
         maxTokens: json["maxTokens"],
         temperature: json["temperature"],
@@ -107,13 +131,13 @@ class ApiConfig {
     required this.models,
   });
 
-  Map<String, Object> toJson() => {
+  Map toJson() => {
         "url": url,
         "key": key,
         "models": models,
       };
 
-  factory ApiConfig.fromJson(Map<String, dynamic> json) => ApiConfig(
+  factory ApiConfig.fromJson(Map json) => ApiConfig(
         url: json["url"],
         key: json["key"],
         models: json["models"].cast<String>(),
@@ -121,6 +145,7 @@ class ApiConfig {
 }
 
 class Config {
+  static late final TtsConfig tts;
   static late final CoreConfig core;
   static final List<ChatConfig> chats = [];
   static final Map<String, BotConfig> bots = {};
@@ -156,20 +181,24 @@ class Config {
   static String audioFilePath(String fileName) =>
       "$_dir$_sep$_audioDir$_sep$fileName";
 
-  static Map<String, dynamic> toJson() => {
+  static Map toJson() => {
+        "tts": tts,
         "core": core,
         "bots": bots,
         "apis": apis,
         "chats": chats,
       };
 
-  static void fromJson(Map<String, dynamic> json) {
+  static void fromJson(Map json) {
+    final ttsJson = json["tts"] ?? {};
     final coreJson = json["core"] ?? {};
     final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
     final chatsJson = json["chats"] ?? [];
 
+    tts = TtsConfig.fromJson(ttsJson);
     core = CoreConfig.fromJson(coreJson);
+
     for (final chat in chatsJson) {
       chats.add(ChatConfig.fromJson(chat));
     }
@@ -204,6 +233,7 @@ class Config {
       fromJson(jsonDecode(data));
     } else {
       core = CoreConfig();
+      tts = TtsConfig();
       save();
     }
   }

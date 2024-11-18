@@ -15,7 +15,6 @@
     "bots": "角色",
     "apis": "接口",
     "config": "配置",
-    "default_config": "默认配置",
 
     "open": "打开",
     "save": "保存",
@@ -27,6 +26,7 @@
 
     "api": "接口",
     "model": "模型",
+    "voice": "音色",
     "max_tokens": "最大输出",
     "temperature": "温度",
     "system_prompts": "系统提示词",
@@ -52,6 +52,8 @@
     "all_chats": "所有对话",
     "chat_title": "对话标题",
     "chat_settings": "对话配置",
+    "default_config": "默认配置",
+    "text_to_speech": "文本转语音",
 
     "saved_successfully": "保存成功",
     "copied_successfully": "拷贝成功",
@@ -64,5 +66,6 @@
 
     "enter_your_message": "输入你的消息",
     "image_compress_failed": "图片压缩失败",
+    "setup_tts_first": "请先配置文本转语音",
     "setup_bot_api_first": "请先配置接口和模型"
 }

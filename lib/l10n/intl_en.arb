@@ -15,7 +15,6 @@
     "bots": "Bots",
     "apis": "APIs",
     "config": "Config",
-    "default_config": "Default Config",
 
     "open": "Open",
     "save": "Save",
@@ -27,6 +26,7 @@
 
     "api": "API",
     "model": "Model",
+    "voice": "Voice",
     "max_tokens": "Max Tokens",
     "temperature": "Temperature",
     "system_prompts": "System Prompts",
@@ -52,6 +52,8 @@
     "all_chats": "All Chats",
     "chat_title": "Chat Title",
     "chat_settings": "Chat Settings",
+    "default_config": "Default Config",
+    "text_to_speech": "Text To Speech",
 
     "saved_successfully": "Saved Successfully",
     "copied_successfully": "Copied Successfully",
@@ -64,5 +66,6 @@
 
     "enter_your_message": "Enter your message",
     "image_compress_failed": "Failed to comprese image",
+    "setup_tts_first": "Set up the TTS first",
     "setup_bot_api_first": "Set up the Bot and API first"
 }

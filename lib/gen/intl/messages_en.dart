@@ -86,12 +86,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "setup_bot_api_first": MessageLookupByLibrary.simpleMessage(
             "Set up the Bot and API first"),
+        "setup_tts_first":
+            MessageLookupByLibrary.simpleMessage("Set up the TTS first"),
         "source": MessageLookupByLibrary.simpleMessage("Source"),
         "streaming_response":
             MessageLookupByLibrary.simpleMessage("Streaming Response"),
         "system_prompts":
             MessageLookupByLibrary.simpleMessage("System Prompts"),
         "temperature": MessageLookupByLibrary.simpleMessage("Temperature"),
-        "title": MessageLookupByLibrary.simpleMessage("ChatBot")
+        "text_to_speech":
+            MessageLookupByLibrary.simpleMessage("Text To Speech"),
+        "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "voice": MessageLookupByLibrary.simpleMessage("Voice")
       };
 }

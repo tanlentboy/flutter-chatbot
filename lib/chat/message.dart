@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "dart:async";
-
 import "chat.dart";
 import "input.dart";
 import "current.dart";
@@ -23,11 +21,12 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "dart:io";
+import "dart:async";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
-import "package:just_audio/just_audio.dart";
 import "package:markdown/markdown.dart" as md;
+import "package:audioplayers/audioplayers.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:markdown/markdown.dart" hide Element, Text;
@@ -116,11 +115,92 @@ class MessageWidget extends ConsumerWidget {
     ],
   );
 
+  Future<void> _tts(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.ttsStatus.isNothing) return;
+    await _subscription?.cancel();
+
+    final tts = Config.tts;
+    final model = tts.model;
+    final voice = tts.voice;
+    final api = Config.apis[tts.api];
+
+    final apiUrl = api?.url;
+    final apiKey = api?.key;
+    final endPoint = "$apiUrl/audio/speech";
+
+    if (model == null || voice == null || api == null) {
+      if (!context.mounted) return;
+      Util.showSnackBar(
+        context: context,
+        content: Text(
+          S.of(context).setup_tts_first,
+        ),
+      );
+      return;
+    }
+
+    CurrentChat.ttsStatus = TtsStatus.loading;
+    ref.read(ttsProvider.notifier).notify();
+    final times = ++_ttsTimes;
+
+    try {
+      final response = await http.post(
+        Uri.parse(endPoint),
+        headers: {
+          "Authorization": "Bearer $apiKey",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "model": model,
+          "voice": voice,
+          "stream": false,
+          "input": message.text,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw "${response.statusCode} ${response.body}";
+      }
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final path = Config.audioFilePath("$timestamp.mp3");
+
+      final file = File(path);
+      await file.writeAsBytes(response.bodyBytes);
+      if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
+
+      await audioPlayer.play(DeviceFileSource(path));
+      CurrentChat.ttsStatus = TtsStatus.playing;
+      ref.read(ttsProvider.notifier).notify();
+
+      _subscription = audioPlayer.onPlayerComplete.listen(
+        (event) {
+          CurrentChat.ttsStatus = TtsStatus.nothing;
+          ref.read(ttsProvider.notifier).notify();
+        },
+        onError: (e) async {
+          CurrentChat.ttsStatus = TtsStatus.nothing;
+          ref.read(ttsProvider.notifier).notify();
+          if (context.mounted) {
+            await Util.handleError(context: context, error: e);
+          }
+        },
+      );
+    } catch (e) {
+      if (context.mounted) await Util.handleError(context: context, error: e);
+      CurrentChat.ttsStatus = TtsStatus.nothing;
+      ref.read(ttsProvider.notifier).notify();
+    }
+  }
+
   Future<void> _copy(BuildContext context) async {
     await Util.copyText(context: context, text: message.text);
   }
 
   Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.chatStatus.isNothing) return;
+    if (!CurrentChat.ttsStatus.isNothing) return;
+
     InputWidget.unFocus();
     final undo = UndoHistoryController();
     final ctrl = TextEditingController(text: message.text);
@@ -178,6 +258,7 @@ class MessageWidget extends ConsumerWidget {
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     if (!CurrentChat.chatStatus.isNothing) return;
+    if (!CurrentChat.ttsStatus.isNothing) return;
     CurrentChat.messages.remove(message);
     ref.read(messagesProvider.notifier).notify();
     await CurrentChat.save();
@@ -316,72 +397,6 @@ class MessageWidget extends ConsumerWidget {
       case MessageEvent.delete:
         await _delete(context, ref);
         break;
-    }
-  }
-
-  Future<void> _tts(BuildContext context, WidgetRef ref) async {
-    if (!CurrentChat.ttsStatus.isNothing) return;
-    await _subscription?.cancel();
-
-    final apiUrl = CurrentChat.apiUrl;
-    final apiKey = CurrentChat.apiKey;
-    final endPoint = "$apiUrl/audio/speech";
-    if (apiUrl == null || apiKey == null) return;
-
-    CurrentChat.ttsStatus = TtsStatus.loading;
-    ref.read(ttsProvider.notifier).notify();
-    final times = ++_ttsTimes;
-
-    try {
-      final response = await http.post(
-        Uri.parse(endPoint),
-        headers: {
-          "Authorization": "Bearer $apiKey",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "model": "tts-1",
-          "voice": "alloy",
-          "input": message.text,
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        throw "${response.statusCode} ${response.body}";
-      }
-
-      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      final path = Config.audioFilePath("$timestamp.mp3");
-
-      final file = File(path);
-      await file.writeAsBytes(response.bodyBytes);
-      if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
-
-      audioPlayer.setUrl(path);
-      await audioPlayer.play();
-
-      CurrentChat.ttsStatus = TtsStatus.playing;
-      ref.read(ttsProvider.notifier).notify();
-
-      _subscription = audioPlayer.playerStateStream.listen(
-        (state) {
-          if (state.processingState == ProcessingState.completed) {
-            CurrentChat.ttsStatus = TtsStatus.nothing;
-            ref.read(ttsProvider.notifier).notify();
-          }
-        },
-        onError: (e) async {
-          CurrentChat.ttsStatus = TtsStatus.nothing;
-          ref.read(ttsProvider.notifier).notify();
-          if (context.mounted) {
-            await Util.handleError(context: context, error: e);
-          }
-        },
-      );
-    } catch (e) {
-      if (context.mounted) await Util.handleError(context: context, error: e);
-      CurrentChat.ttsStatus = TtsStatus.nothing;
-      ref.read(ttsProvider.notifier).notify();
     }
   }
 
