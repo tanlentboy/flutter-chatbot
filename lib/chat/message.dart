@@ -95,25 +95,8 @@ class Message {
 
 class MessageWidget extends ConsumerWidget {
   final Message message;
-
   static int _ttsTimes = 0;
   static StreamSubscription? _subscription;
-  static final extensionSet = ExtensionSet(
-    <BlockSyntax>[
-      LatexBlockSyntax(),
-      const TableSyntax(),
-      const FootnoteDefSyntax(),
-      const FencedCodeBlockSyntax(),
-      const OrderedListWithCheckboxSyntax(),
-      const UnorderedListWithCheckboxSyntax(),
-    ],
-    <InlineSyntax>[
-      InlineHtmlSyntax(),
-      LatexInlineSyntax(),
-      StrikethroughSyntax(),
-      AutolinkExtensionSyntax()
-    ],
-  );
 
   Future<void> _tts(BuildContext context, WidgetRef ref) async {
     if (!CurrentChat.ttsStatus.isNothing) return;
@@ -154,7 +137,7 @@ class MessageWidget extends ConsumerWidget {
           "model": model,
           "voice": voice,
           "stream": false,
-          "input": message.text,
+          "input": _markdownToText(message.text),
         }),
       );
 
@@ -479,7 +462,7 @@ class MessageWidget extends ConsumerWidget {
               child: MarkdownBody(
                 data: content,
                 shrinkWrap: true,
-                extensionSet: extensionSet,
+                extensionSet: _extensionSet,
                 onTapLink: (text, href, title) async =>
                     await Util.openLink(context: context, link: href),
                 builders: {
@@ -628,4 +611,72 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
       ],
     );
   }
+}
+
+final _extensionSet = ExtensionSet(
+  <BlockSyntax>[
+    LatexBlockSyntax(),
+    const TableSyntax(),
+    const FootnoteDefSyntax(),
+    const FencedCodeBlockSyntax(),
+    const OrderedListWithCheckboxSyntax(),
+    const UnorderedListWithCheckboxSyntax(),
+  ],
+  <InlineSyntax>[
+    InlineHtmlSyntax(),
+    LatexInlineSyntax(),
+    StrikethroughSyntax(),
+    AutolinkExtensionSyntax()
+  ],
+);
+
+String _elementToText(md.Element element) {
+  final buff = StringBuffer();
+  final nodes = element.children ?? [];
+
+  if (element.tag == "ul") {
+    for (final node in nodes) {
+      if (node is md.Element && node.tag == "li") {
+        buff.write(_elementToText(node));
+      }
+    }
+  } else if (element.tag == "ol") {
+    int index = 1;
+    for (final node in nodes) {
+      if (node is md.Element && node.tag == "li") {
+        buff.write("${index++}. ${_elementToText(node)}");
+      }
+    }
+  } else {
+    for (final node in nodes) {
+      if (node is md.Text) {
+        buff.write(node.text);
+      } else if (node is md.Element) {
+        final tag = node.tag;
+        if (tag == "code") continue;
+        if (tag == "latex") continue;
+        if (tag == "th" || tag == "td") continue;
+        buff.write(_elementToText(node));
+      }
+      buff.write("\n");
+    }
+  }
+
+  return buff.toString();
+}
+
+String _markdownToText(String markdown) {
+  final doc = md.Document(
+    extensionSet: _extensionSet,
+  );
+  final buff = StringBuffer();
+  final nodes = doc.parse(markdown);
+
+  for (final node in nodes) {
+    if (node is md.Element) {
+      buff.write(_elementToText(node));
+    }
+  }
+
+  return buff.toString().trim();
 }
