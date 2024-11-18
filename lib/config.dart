@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "chat/current.dart";
-
 import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
@@ -129,32 +127,34 @@ class Config {
   static final Map<String, ApiConfig> apis = {};
 
   static late final File _file;
-  static late final String _filePath;
-  static late final Directory _directory;
-  static const String _fileName = "settings.json";
+  static late final String _dir;
+  static late final String _sep;
 
-  static Future<void> initialize() async {
-    _directory = (await getExternalStorageDirectory())!;
-    _filePath = "${_directory.path}${Platform.pathSeparator}$_fileName";
+  static const String _chatDir = "chat";
+  static const String _audioDir = "audio";
+  static const String _settingsFile = "settings.json";
 
-    _file = File(_filePath);
-    if (await _file.exists()) {
-      final data = await _file.readAsString();
-      fromJson(jsonDecode(data));
+  static Future<void> init() async {
+    _sep = Platform.pathSeparator;
+    if (Platform.isAndroid) {
+      _dir = (await getExternalStorageDirectory())!.path;
     } else {
-      core = CoreConfig();
-      save();
+      _dir = (await getApplicationDocumentsDirectory()).path;
     }
 
-    CurrentChat.core = core;
+    await _initDir();
+    await _initFile();
+    await _fixChatFile();
   }
 
-  static Future<void> save() async =>
-      await _file.writeAsString(jsonEncode(toJson()));
+  static Future<void> save() async {
+    await _file.writeAsString(jsonEncode(toJson()));
+  }
+
   static String chatFilePath(String fileName) =>
-      "${_directory.path}${Platform.pathSeparator}$fileName";
+      "$_dir$_sep$_chatDir$_sep$fileName";
   static String audioFilePath(String fileName) =>
-      "${_directory.path}${Platform.pathSeparator}$fileName";
+      "$_dir$_sep$_audioDir$_sep$fileName";
 
   static Map<String, dynamic> toJson() => {
         "core": core,
@@ -178,6 +178,46 @@ class Config {
     }
     for (final pair in apisJson.entries) {
       apis[pair.key] = ApiConfig.fromJson(pair.value);
+    }
+  }
+
+  static Future<void> _initDir() async {
+    final audioPath = "$_dir$_sep$_audioDir";
+    final audioDir = Directory(audioPath);
+    if (!(await audioDir.exists())) {
+      await audioDir.create();
+    }
+
+    final chatPath = "$_dir$_sep$_chatDir";
+    final chatDir = Directory(chatPath);
+    if (!(await chatDir.exists())) {
+      await chatDir.create();
+    }
+  }
+
+  static Future<void> _initFile() async {
+    final path = "$_dir$_sep$_settingsFile";
+    _file = File(path);
+
+    if (await _file.exists()) {
+      final data = await _file.readAsString();
+      fromJson(jsonDecode(data));
+    } else {
+      core = CoreConfig();
+      save();
+    }
+  }
+
+  static Future<void> _fixChatFile() async {
+    for (final chat in chats) {
+      final fileName = chat.fileName;
+      final oldPath = "$_dir$_sep$fileName";
+      final newPath = chatFilePath(fileName);
+
+      final file = File(oldPath);
+      if (await file.exists()) {
+        await file.rename(newPath);
+      }
     }
   }
 }

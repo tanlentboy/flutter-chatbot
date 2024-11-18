@@ -47,7 +47,7 @@ class CurrentChat {
   static String? image;
   static ChatConfig? chat;
 
-  static late CoreConfig core;
+  static CoreConfig core = Config.core;
   static final List<Message> messages = [];
   static TtsStatus ttsStatus = TtsStatus.nothing;
   static CurrentChatStatus chatStatus = CurrentChatStatus.nothing;

@@ -24,7 +24,7 @@ import "package:flutter_localizations/flutter_localizations.dart";
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Config.initialize().then((_) => runApp(ProviderScope(child: const App())));
+  Config.init().then((_) => runApp(ProviderScope(child: const App())));
 }
 
 class App extends StatelessWidget {
