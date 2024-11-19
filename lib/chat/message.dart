@@ -33,8 +33,6 @@ import "package:markdown/markdown.dart" hide Element, Text;
 import "package:flutter_highlighter/flutter_highlighter.dart";
 import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
 
-final audioPlayer = AudioPlayer();
-
 final messageProvider = NotifierProvider.autoDispose
     .family<MessageNotifier, void, Message>(MessageNotifier.new);
 
@@ -48,9 +46,35 @@ class MessageNotifier extends AutoDisposeFamilyNotifier<void, Message> {
 }
 
 class TtsNotifier extends AutoDisposeNotifier<void> {
+  static final AudioPlayer _player = AudioPlayer();
+
   @override
-  void build() {}
+  void build() {
+    final subscription = _player.onPlayerComplete.listen(
+      (e) => clear(),
+      onError: (e) => clear(),
+    );
+
+    ref.onDispose(() async => await subscription.cancel());
+  }
+
   void notify() => ref.notifyListeners();
+
+  Future<void> play(String path) async {
+    await _player.play(DeviceFileSource(path));
+    CurrentChat.ttsStatus = TtsStatus.playing;
+    notify();
+  }
+
+  Future<void> stop() async {
+    await _player.stop();
+    clear();
+  }
+
+  void clear() {
+    CurrentChat.ttsStatus = TtsStatus.nothing;
+    notify();
+  }
 }
 
 enum MessageRole {
@@ -96,11 +120,9 @@ class Message {
 class MessageWidget extends ConsumerWidget {
   final Message message;
   static int _ttsTimes = 0;
-  static StreamSubscription? _subscription;
 
   Future<void> _tts(BuildContext context, WidgetRef ref) async {
     if (!CurrentChat.ttsStatus.isNothing) return;
-    await _subscription?.cancel();
 
     final tts = Config.tts;
     final model = tts.model;
@@ -152,23 +174,7 @@ class MessageWidget extends ConsumerWidget {
       await file.writeAsBytes(response.bodyBytes);
       if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
 
-      await audioPlayer.play(DeviceFileSource(path));
-      CurrentChat.ttsStatus = TtsStatus.playing;
-      ref.read(ttsProvider.notifier).notify();
-
-      _subscription = audioPlayer.onPlayerComplete.listen(
-        (event) {
-          CurrentChat.ttsStatus = TtsStatus.nothing;
-          ref.read(ttsProvider.notifier).notify();
-        },
-        onError: (e) async {
-          CurrentChat.ttsStatus = TtsStatus.nothing;
-          ref.read(ttsProvider.notifier).notify();
-          if (context.mounted) {
-            await Util.handleError(context: context, error: e);
-          }
-        },
-      );
+      await ref.read(ttsProvider.notifier).play(path);
     } catch (e) {
       if (context.mounted) await Util.handleError(context: context, error: e);
       CurrentChat.ttsStatus = TtsStatus.nothing;

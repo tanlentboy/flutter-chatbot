@@ -291,11 +291,8 @@ class ChatPage extends ConsumerWidget {
                                       strokeWidth: 3,
                                     ),
                                   ),
-                            onPressed: () async {
-                              CurrentChat.ttsStatus = TtsStatus.nothing;
-                              ref.read(ttsProvider.notifier).notify();
-                              await audioPlayer.stop();
-                            },
+                            onPressed: () async =>
+                                await ref.read(ttsProvider.notifier).stop(),
                           ),
                       },
                     );
