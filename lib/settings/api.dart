@@ -83,156 +83,50 @@ class ApisTab extends ConsumerWidget {
   }
 }
 
-class ApiSettings extends ConsumerWidget {
+class ApiSettings extends ConsumerStatefulWidget {
   final MapEntry<String, ApiConfig>? apiPair;
+
+  const ApiSettings({
+    super.key,
+    this.apiPair,
+  });
+
+  @override
+  ConsumerState<ApiSettings> createState() => ApiSettingsState();
+}
+
+class ApiSettingsState extends ConsumerState<ApiSettings> {
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _modelsCtrl = TextEditingController();
   final TextEditingController _apiUrlCtrl = TextEditingController();
   final TextEditingController _apiKeyCtrl = TextEditingController();
 
-  ApiSettings({
-    super.key,
-    this.apiPair,
-  });
+  @override
+  void initState() {
+    super.initState();
 
-  Future<void> _fetchModels(BuildContext context) async {
-    final url = _apiUrlCtrl.text;
-    final key = _apiKeyCtrl.text;
+    final apiPair = widget.apiPair;
 
-    if (url.isEmpty || key.isEmpty) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).complete_all_fields),
-      );
-      return;
+    if (apiPair != null) {
+      _nameCtrl.text = apiPair.key;
+      _apiUrlCtrl.text = apiPair.value.url;
+      _apiKeyCtrl.text = apiPair.value.key;
+      _modelsCtrl.text = apiPair.value.models.join(", ");
     }
-
-    final modelsEndpoint = "$url/models";
-
-    try {
-      final response = await http.get(
-        Uri.parse(modelsEndpoint),
-        headers: {"Authorization": "Bearer $key"},
-      );
-
-      if (response.statusCode != 200) {
-        throw "${response.statusCode} ${response.body}";
-      }
-
-      final json = jsonDecode(response.body);
-      final models = <String>[for (final cell in json["data"]) cell["id"]];
-
-      _modelsCtrl.text = models.join(", ");
-    } catch (e) {
-      if (context.mounted) {
-        Util.showSnackBar(
-          context: context,
-          content: Text("$e"),
-          duration: const Duration(milliseconds: 1500),
-        );
-      }
-    }
-  }
-
-  Future<void> _editModels(BuildContext context) async {
-    final models = _modelsCtrl.text;
-    if (models.isEmpty) return;
-
-    final chosen = {for (final model in models.split(",")) model.trim(): true};
-    if (chosen.isEmpty) return;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(S.of(context).select_models),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: chosen.keys.map((model) {
-                    return CheckboxListTile(
-                      title: Text(model),
-                      value: chosen[model],
-                      onChanged: (value) =>
-                          setState(() => chosen[model] = value ?? false),
-                    );
-                  }).toList(),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: Text(S.of(context).cancel),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                TextButton(
-                  child: Text(S.of(context).clear),
-                  onPressed: () => setState(() =>
-                      chosen.forEach((model, _) => chosen[model] = false)),
-                ),
-                TextButton(
-                  child: Text(S.of(context).save),
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (result == null || !result) return;
-
-    _modelsCtrl.text = [
-      for (final pair in chosen.entries)
-        if (pair.value) pair.key
-    ].join(", ");
-  }
-
-  bool _save(BuildContext context, WidgetRef ref) {
-    final name = _nameCtrl.text;
-    final models = _modelsCtrl.text;
-    final apiUrl = _apiUrlCtrl.text;
-    final apiKey = _apiKeyCtrl.text;
-
-    if (name.isEmpty || models.isEmpty || apiUrl.isEmpty || apiKey.isEmpty) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).complete_all_fields),
-      );
-      return false;
-    }
-
-    if (Config.apis.containsKey(name) &&
-        (apiPair == null || name != apiPair!.key)) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).duplicate_api_name),
-      );
-      return false;
-    }
-
-    if (apiPair != null) Config.apis.remove(apiPair!.key);
-
-    final modelList = models.split(",").map((e) => e.trim()).toList();
-    Config.apis[name] = ApiConfig(
-      url: apiUrl,
-      key: apiKey,
-      models: modelList,
-    );
-
-    ref.read(apisProvider.notifier).notify();
-    return true;
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (apiPair != null) {
-      _nameCtrl.text = apiPair!.key;
-      _apiUrlCtrl.text = apiPair!.value.url;
-      _apiKeyCtrl.text = apiPair!.value.key;
-      _modelsCtrl.text = apiPair!.value.models.join(", ");
-    }
+  void dispose() {
+    _nameCtrl.dispose();
+    _apiUrlCtrl.dispose();
+    _apiKeyCtrl.dispose();
+    _modelsCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final apiPair = widget.apiPair;
 
     return Scaffold(
       appBar: AppBar(
@@ -332,7 +226,7 @@ class ApiSettings extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                if (apiPair != null) ...[
+                if (apiPair != null)
                   Expanded(
                     flex: 1,
                     child: FilledButton(
@@ -342,21 +236,20 @@ class ApiSettings extends ConsumerWidget {
                       ),
                       child: Text(S.of(context).delete),
                       onPressed: () async {
-                        Config.apis.remove(apiPair!.key);
+                        Config.apis.remove(apiPair.key);
                         ref.read(apisProvider.notifier).notify();
                         Navigator.of(context).pop(true);
                         await Config.save();
                       },
                     ),
                   ),
-                ],
                 const SizedBox(width: 8),
                 Expanded(
                   flex: 1,
                   child: FilledButton(
                     child: Text(S.of(context).save),
                     onPressed: () async {
-                      if (!_save(context, ref)) return;
+                      if (!_save(context)) return;
                       Navigator.of(context).pop(true);
                       await Config.save();
                     },
@@ -368,5 +261,136 @@ class ApiSettings extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _fetchModels(BuildContext context) async {
+    final url = _apiUrlCtrl.text;
+    final key = _apiKeyCtrl.text;
+
+    if (url.isEmpty || key.isEmpty) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).complete_all_fields),
+      );
+      return;
+    }
+
+    final modelsEndpoint = "$url/models";
+
+    try {
+      final response = await http.get(
+        Uri.parse(modelsEndpoint),
+        headers: {"Authorization": "Bearer $key"},
+      );
+
+      if (response.statusCode != 200) {
+        throw "${response.statusCode} ${response.body}";
+      }
+
+      final json = jsonDecode(response.body);
+      final models = <String>[for (final cell in json["data"]) cell["id"]];
+
+      _modelsCtrl.text = models.join(", ");
+    } catch (e) {
+      if (context.mounted) {
+        Util.showSnackBar(
+          context: context,
+          content: Text("$e"),
+          duration: const Duration(milliseconds: 1500),
+        );
+      }
+    }
+  }
+
+  Future<void> _editModels(BuildContext context) async {
+    final models = _modelsCtrl.text;
+    if (models.isEmpty) return;
+
+    final chosen = {for (final model in models.split(",")) model.trim(): true};
+    if (chosen.isEmpty) return;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(S.of(context).select_models),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: chosen.keys.map((model) {
+                    return CheckboxListTile(
+                      title: Text(model),
+                      value: chosen[model],
+                      onChanged: (value) =>
+                          setState(() => chosen[model] = value ?? false),
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: Text(S.of(context).cancel),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                TextButton(
+                  child: Text(S.of(context).clear),
+                  onPressed: () => setState(() =>
+                      chosen.forEach((model, _) => chosen[model] = false)),
+                ),
+                TextButton(
+                  child: Text(S.of(context).save),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null || !result) return;
+
+    _modelsCtrl.text = [
+      for (final pair in chosen.entries)
+        if (pair.value) pair.key
+    ].join(", ");
+  }
+
+  bool _save(BuildContext context) {
+    final name = _nameCtrl.text;
+    final models = _modelsCtrl.text;
+    final apiUrl = _apiUrlCtrl.text;
+    final apiKey = _apiKeyCtrl.text;
+
+    if (name.isEmpty || models.isEmpty || apiUrl.isEmpty || apiKey.isEmpty) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).complete_all_fields),
+      );
+      return false;
+    }
+
+    final apiPair = widget.apiPair;
+    if (Config.apis.containsKey(name) &&
+        (apiPair == null || name != apiPair.key)) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).duplicate_api_name),
+      );
+      return false;
+    }
+
+    if (apiPair != null) Config.apis.remove(apiPair.key);
+
+    final modelList = models.split(",").map((e) => e.trim()).toList();
+    Config.apis[name] = ApiConfig(
+      url: apiUrl,
+      key: apiKey,
+      models: modelList,
+    );
+
+    ref.read(apisProvider.notifier).notify();
+    return true;
   }
 }

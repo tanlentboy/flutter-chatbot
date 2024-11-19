@@ -52,6 +52,14 @@ class CurrentChat {
   static TtsStatus ttsStatus = TtsStatus.nothing;
   static CurrentChatStatus chatStatus = CurrentChatStatus.nothing;
 
+  static void clear() {
+    chat = null;
+    _file = null;
+    image = null;
+    messages.clear();
+    core = Config.core;
+  }
+
   static Future<void> load(ChatConfig chat) async {
     clear();
     CurrentChat.chat = chat;
@@ -69,30 +77,6 @@ class CurrentChat {
       messages.add(Message.fromJson(message));
     }
   }
-
-  static void clear() {
-    chat = null;
-    _file = null;
-    image = null;
-    messages.clear();
-    core = Config.core;
-  }
-
-  static void initChat(String title) {
-    final now = DateTime.now();
-    final timestamp = now.millisecondsSinceEpoch.toString();
-
-    final time = Util.formatDateTime(now);
-    final fileName = "$timestamp.json";
-
-    chat = ChatConfig(
-      time: time,
-      title: title,
-      fileName: fileName,
-    );
-  }
-
-  static void initFile() => _file = File(Config.chatFilePath(chat!.fileName));
 
   static Future<bool> save() async {
     var isNew = false;
@@ -114,6 +98,24 @@ class CurrentChat {
       "messages": messages,
     }));
     return isNew;
+  }
+
+  static void initChat(String title) {
+    final now = DateTime.now();
+    final timestamp = now.millisecondsSinceEpoch.toString();
+
+    final time = Util.formatDateTime(now);
+    final fileName = "$timestamp.json";
+
+    chat = ChatConfig(
+      time: time,
+      title: title,
+      fileName: fileName,
+    );
+  }
+
+  static void initFile() {
+    _file = File(Config.chatFilePath(chat!.fileName));
   }
 
   static bool get hasChat => chat != null;
@@ -150,44 +152,10 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
   final TextEditingController _titleCtrl =
       TextEditingController(text: CurrentChat.title);
 
-  bool _save(BuildContext context) {
-    final title = _titleCtrl.text;
-    final oldModel = CurrentChat.model;
-    final oldTitle = CurrentChat.title;
-
-    if (title.isEmpty && CurrentChat.hasChat) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).enter_a_title),
-      );
-      return false;
-    }
-
-    if (CurrentChat.hasChat) {
-      CurrentChat.chat!.title = title;
-    } else if (title.isNotEmpty) {
-      CurrentChat.initChat(title);
-    }
-
-    CurrentChat.core = CoreConfig(
-      bot: _bot,
-      api: _api,
-      model: _model,
-    );
-
-    Util.showSnackBar(
-      context: context,
-      content: Text(S.of(context).saved_successfully),
-    );
-
-    if (title != oldTitle && CurrentChat.hasFile) {
-      ref.read(chatsProvider.notifier).notify();
-    }
-    if (_model != oldModel) {
-      ref.read(chatProvider.notifier).notify();
-    }
-
-    return true;
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -330,5 +298,45 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
         ),
       ),
     );
+  }
+
+  bool _save(BuildContext context) {
+    final title = _titleCtrl.text;
+    final oldModel = CurrentChat.model;
+    final oldTitle = CurrentChat.title;
+
+    if (title.isEmpty && CurrentChat.hasChat) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).enter_a_title),
+      );
+      return false;
+    }
+
+    if (CurrentChat.hasChat) {
+      CurrentChat.chat!.title = title;
+    } else if (title.isNotEmpty) {
+      CurrentChat.initChat(title);
+    }
+
+    CurrentChat.core = CoreConfig(
+      bot: _bot,
+      api: _api,
+      model: _model,
+    );
+
+    Util.showSnackBar(
+      context: context,
+      content: Text(S.of(context).saved_successfully),
+    );
+
+    if (title != oldTitle && CurrentChat.hasFile) {
+      ref.read(chatsProvider.notifier).notify();
+    }
+    if (_model != oldModel) {
+      ref.read(chatProvider.notifier).notify();
+    }
+
+    return true;
   }
 }

@@ -35,10 +35,7 @@ final messagesProvider =
 
 class ChatNotifier extends AutoDisposeNotifier<void> {
   @override
-  void build() {
-    ref.listen(apisProvider, (prev, next) => notify());
-  }
-
+  void build() => ref.listen(apisProvider, (p, n) => notify());
   void notify() => ref.notifyListeners();
 }
 
@@ -54,13 +51,24 @@ class MessagesNotifier extends AutoDisposeNotifier<void> {
   void notify() => ref.notifyListeners();
 }
 
-class ChatPage extends ConsumerWidget {
-  final ScrollController scrollCtrl = ScrollController();
-
-  ChatPage({super.key});
+class ChatPage extends ConsumerStatefulWidget {
+  const ChatPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatPage> createState() => ChatPageState();
+}
+
+class ChatPageState extends ConsumerState<ChatPage> {
+  final ScrollController _scrollCtrl = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final drawer = Column(
       children: [
         ListTile(
@@ -258,7 +266,7 @@ class ChatPage extends ConsumerWidget {
                     ref.watch(messagesProvider);
 
                     return ListView.builder(
-                      controller: scrollCtrl,
+                      controller: _scrollCtrl,
                       padding: const EdgeInsets.only(
                           top: 4, left: 16, right: 16, bottom: 16),
                       itemCount: CurrentChat.messages.length,
@@ -291,11 +299,8 @@ class ChatPage extends ConsumerWidget {
                                       strokeWidth: 3,
                                     ),
                                   ),
-                            onPressed: () async {
-                              CurrentChat.ttsStatus = TtsStatus.nothing;
-                              ref.read(ttsProvider.notifier).notify();
-                              await audioPlayer.stop();
-                            },
+                            onPressed: () async =>
+                                await ref.read(ttsProvider.notifier).stop(),
                           ),
                       },
                     );
@@ -304,7 +309,7 @@ class ChatPage extends ConsumerWidget {
               ],
             ),
           ),
-          InputWidget(scrollCtrl: scrollCtrl),
+          InputWidget(scrollCtrl: _scrollCtrl),
         ],
       ),
     );

@@ -33,8 +33,6 @@ import "package:markdown/markdown.dart" hide Element, Text;
 import "package:flutter_highlighter/flutter_highlighter.dart";
 import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
 
-final audioPlayer = AudioPlayer();
-
 final messageProvider = NotifierProvider.autoDispose
     .family<MessageNotifier, void, Message>(MessageNotifier.new);
 
@@ -48,9 +46,35 @@ class MessageNotifier extends AutoDisposeFamilyNotifier<void, Message> {
 }
 
 class TtsNotifier extends AutoDisposeNotifier<void> {
+  static final AudioPlayer _player = AudioPlayer();
+
   @override
-  void build() {}
+  void build() {
+    final subscription = _player.onPlayerComplete.listen(
+      (e) => clear(),
+      onError: (e) => clear(),
+    );
+
+    ref.onDispose(() async => await subscription.cancel());
+  }
+
   void notify() => ref.notifyListeners();
+
+  Future<void> play(String path) async {
+    await _player.play(DeviceFileSource(path));
+    CurrentChat.ttsStatus = TtsStatus.playing;
+    notify();
+  }
+
+  Future<void> stop() async {
+    await _player.stop();
+    clear();
+  }
+
+  void clear() {
+    CurrentChat.ttsStatus = TtsStatus.nothing;
+    notify();
+  }
 }
 
 enum MessageRole {
@@ -95,29 +119,161 @@ class Message {
 
 class MessageWidget extends ConsumerWidget {
   final Message message;
-
   static int _ttsTimes = 0;
-  static StreamSubscription? _subscription;
-  static final extensionSet = ExtensionSet(
-    <BlockSyntax>[
-      LatexBlockSyntax(),
-      const TableSyntax(),
-      const FootnoteDefSyntax(),
-      const FencedCodeBlockSyntax(),
-      const OrderedListWithCheckboxSyntax(),
-      const UnorderedListWithCheckboxSyntax(),
-    ],
-    <InlineSyntax>[
-      InlineHtmlSyntax(),
-      LatexInlineSyntax(),
-      StrikethroughSyntax(),
-      AutolinkExtensionSyntax()
-    ],
-  );
+
+  const MessageWidget({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(messageProvider(message));
+
+    final MainAxisAlignment optsAlignment;
+    String content = message.text;
+    final Alignment alignment;
+    final Color background;
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final markdownStyleSheet = MarkdownStyleSheet(
+      codeblockPadding: EdgeInsets.all(0),
+      codeblockDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.surfaceContainer,
+      ),
+      blockquoteDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.brightness == Brightness.light
+            ? Colors.blueGrey.withOpacity(0.3)
+            : Colors.black.withOpacity(0.3),
+      ),
+    );
+
+    if (message.image != null) {
+      content =
+          "![image](data:image/jpeg;base64,${message.image})\n\n${message.text}";
+    }
+
+    switch (message.role) {
+      case MessageRole.user:
+        background = colorScheme.secondaryContainer;
+        optsAlignment = MainAxisAlignment.end;
+        alignment = Alignment.topRight;
+        break;
+
+      case MessageRole.assistant:
+        background = colorScheme.surfaceContainerHighest;
+        optsAlignment = MainAxisAlignment.start;
+        alignment = Alignment.topLeft;
+        break;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: alignment,
+          child: GestureDetector(
+            onLongPress: () async => await _more(context, ref),
+            child: Container(
+              margin: EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  bottomLeft: const Radius.circular(16),
+                  bottomRight: const Radius.circular(16),
+                  topRight: Radius.circular(
+                      message.role == MessageRole.user ? 2 : 16),
+                ),
+              ),
+              child: MarkdownBody(
+                data: content,
+                shrinkWrap: true,
+                extensionSet: _extensionSet,
+                onTapLink: (text, href, title) async =>
+                    await Util.openLink(context: context, link: href),
+                builders: {
+                  "pre": CodeBlockBuilder(context: context),
+                  "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                },
+                styleSheet: markdownStyleSheet,
+                styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+              ),
+            ),
+          ),
+        ),
+        if (CurrentChat.messages.lastOrNull == message &&
+            CurrentChat.chatStatus.isNothing) ...[
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: optsAlignment,
+            children: [
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.paste),
+                  iconSize: 16,
+                  onPressed: () async => await _copy(context),
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.play_circle_outlined),
+                  iconSize: 18,
+                  onPressed: () async => await _tts(context, ref),
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.code_outlined),
+                  iconSize: 18,
+                  onPressed: () async => await _source(context),
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  iconSize: 18,
+                  onPressed: () async => await _edit(context, ref),
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.delete_outlined),
+                  iconSize: 18,
+                  onPressed: () async => await _delete(context, ref),
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.more_horiz),
+                  iconSize: 18,
+                  onPressed: () async => await _more(context, ref),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
 
   Future<void> _tts(BuildContext context, WidgetRef ref) async {
     if (!CurrentChat.ttsStatus.isNothing) return;
-    await _subscription?.cancel();
 
     final tts = Config.tts;
     final model = tts.model;
@@ -154,7 +310,7 @@ class MessageWidget extends ConsumerWidget {
           "model": model,
           "voice": voice,
           "stream": false,
-          "input": message.text,
+          "input": _markdownToText(message.text),
         }),
       );
 
@@ -169,23 +325,7 @@ class MessageWidget extends ConsumerWidget {
       await file.writeAsBytes(response.bodyBytes);
       if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
 
-      await audioPlayer.play(DeviceFileSource(path));
-      CurrentChat.ttsStatus = TtsStatus.playing;
-      ref.read(ttsProvider.notifier).notify();
-
-      _subscription = audioPlayer.onPlayerComplete.listen(
-        (event) {
-          CurrentChat.ttsStatus = TtsStatus.nothing;
-          ref.read(ttsProvider.notifier).notify();
-        },
-        onError: (e) async {
-          CurrentChat.ttsStatus = TtsStatus.nothing;
-          ref.read(ttsProvider.notifier).notify();
-          if (context.mounted) {
-            await Util.handleError(context: context, error: e);
-          }
-        },
-      );
+      await ref.read(ttsProvider.notifier).play(path);
     } catch (e) {
       if (context.mounted) await Util.handleError(context: context, error: e);
       CurrentChat.ttsStatus = TtsStatus.nothing;
@@ -202,8 +342,8 @@ class MessageWidget extends ConsumerWidget {
     if (!CurrentChat.ttsStatus.isNothing) return;
 
     InputWidget.unFocus();
-    final undo = UndoHistoryController();
-    final ctrl = TextEditingController(text: message.text);
+    final undoCtrl = UndoHistoryController();
+    final textCtrl = TextEditingController(text: message.text);
 
     final result = await showDialog<bool>(
       context: context,
@@ -217,11 +357,11 @@ class MessageWidget extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.undo),
-                onPressed: () => undo.undo(),
+                onPressed: () => undoCtrl.undo(),
               ),
               IconButton(
                 icon: const Icon(Icons.redo),
-                onPressed: () => undo.redo(),
+                onPressed: () => undoCtrl.redo(),
               ),
               IconButton(
                 icon: const Icon(Icons.save_outlined),
@@ -236,8 +376,8 @@ class MessageWidget extends ConsumerWidget {
             child: TextField(
               expands: true,
               maxLines: null,
-              controller: ctrl,
-              undoController: undo,
+              controller: textCtrl,
+              undoController: undoCtrl,
               textAlign: TextAlign.start,
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
@@ -250,8 +390,10 @@ class MessageWidget extends ConsumerWidget {
       },
     );
     if (!(result ?? false)) return;
+    undoCtrl.dispose();
+    textCtrl.dispose();
 
-    message.text = ctrl.text;
+    message.text = textCtrl.text;
     ref.read(messageProvider(message).notifier).notify();
     await CurrentChat.save();
   }
@@ -320,7 +462,7 @@ class MessageWidget extends ConsumerWidget {
     );
   }
 
-  Future<void> _longPress(BuildContext context, WidgetRef ref) async {
+  Future<void> _more(BuildContext context, WidgetRef ref) async {
     InputWidget.unFocus();
 
     final children = [
@@ -407,157 +549,6 @@ class MessageWidget extends ConsumerWidget {
         break;
     }
   }
-
-  const MessageWidget({
-    super.key,
-    required this.message,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(messageProvider(message));
-
-    final MainAxisAlignment optsAlignment;
-    String content = message.text;
-    final Alignment alignment;
-    final Color background;
-
-    final colorScheme = Theme.of(context).colorScheme;
-    final markdownStyleSheet = MarkdownStyleSheet(
-      codeblockPadding: EdgeInsets.all(0),
-      codeblockDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.surfaceContainer,
-      ),
-      blockquoteDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.brightness == Brightness.light
-            ? Colors.blueGrey.withOpacity(0.3)
-            : Colors.black.withOpacity(0.3),
-      ),
-    );
-
-    if (message.image != null) {
-      content =
-          "![image](data:image/jpeg;base64,${message.image})\n\n${message.text}";
-    }
-
-    switch (message.role) {
-      case MessageRole.user:
-        background = colorScheme.secondaryContainer;
-        optsAlignment = MainAxisAlignment.end;
-        alignment = Alignment.topRight;
-        break;
-
-      case MessageRole.assistant:
-        background = colorScheme.surfaceContainerHighest;
-        optsAlignment = MainAxisAlignment.start;
-        alignment = Alignment.topLeft;
-        break;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Align(
-          alignment: alignment,
-          child: GestureDetector(
-            onLongPress: () async => await _longPress(context, ref),
-            child: Container(
-              margin: EdgeInsets.only(top: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: background,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  bottomLeft: const Radius.circular(16),
-                  bottomRight: const Radius.circular(16),
-                  topRight: Radius.circular(
-                      message.role == MessageRole.user ? 2 : 16),
-                ),
-              ),
-              child: MarkdownBody(
-                data: content,
-                shrinkWrap: true,
-                extensionSet: extensionSet,
-                onTapLink: (text, href, title) async =>
-                    await Util.openLink(context: context, link: href),
-                builders: {
-                  "pre": CodeBlockBuilder(context: context),
-                  "latex": LatexElementBuilder(textScaleFactor: 1.2),
-                },
-                styleSheet: markdownStyleSheet,
-                styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-              ),
-            ),
-          ),
-        ),
-        if (CurrentChat.messages.lastOrNull == message &&
-            CurrentChat.chatStatus.isNothing) ...[
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: optsAlignment,
-            children: [
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.paste),
-                  iconSize: 16,
-                  onPressed: () async => await _copy(context),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.play_circle_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _tts(context, ref),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.code_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _source(context),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _edit(context, ref),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.delete_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _delete(context, ref),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.more_horiz),
-                  iconSize: 18,
-                  onPressed: () async => await _longPress(context, ref),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
 }
 
 class CodeBlockBuilder extends MarkdownElementBuilder {
@@ -628,4 +619,72 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
       ],
     );
   }
+}
+
+final _extensionSet = ExtensionSet(
+  <BlockSyntax>[
+    LatexBlockSyntax(),
+    const TableSyntax(),
+    const FootnoteDefSyntax(),
+    const FencedCodeBlockSyntax(),
+    const OrderedListWithCheckboxSyntax(),
+    const UnorderedListWithCheckboxSyntax(),
+  ],
+  <InlineSyntax>[
+    InlineHtmlSyntax(),
+    LatexInlineSyntax(),
+    StrikethroughSyntax(),
+    AutolinkExtensionSyntax()
+  ],
+);
+
+String _elementToText(md.Element element) {
+  final buff = StringBuffer();
+  final nodes = element.children ?? [];
+
+  if (element.tag == "ul") {
+    for (final node in nodes) {
+      if (node is md.Element && node.tag == "li") {
+        buff.write(_elementToText(node));
+      }
+    }
+  } else if (element.tag == "ol") {
+    int index = 1;
+    for (final node in nodes) {
+      if (node is md.Element && node.tag == "li") {
+        buff.write("${index++}. ${_elementToText(node)}");
+      }
+    }
+  } else {
+    for (final node in nodes) {
+      if (node is md.Text) {
+        buff.write(node.text);
+      } else if (node is md.Element) {
+        final tag = node.tag;
+        if (tag == "code") continue;
+        if (tag == "latex") continue;
+        if (tag == "th" || tag == "td") continue;
+        buff.write(_elementToText(node));
+      }
+      buff.write("\n");
+    }
+  }
+
+  return buff.toString();
+}
+
+String _markdownToText(String markdown) {
+  final doc = md.Document(
+    extensionSet: _extensionSet,
+  );
+  final buff = StringBuffer();
+  final nodes = doc.parse(markdown);
+
+  for (final node in nodes) {
+    if (node is md.Element) {
+      buff.write(_elementToText(node));
+    }
+  }
+
+  return buff.toString().trim();
 }
