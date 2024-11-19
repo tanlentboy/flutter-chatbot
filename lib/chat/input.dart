@@ -109,6 +109,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 if (isResponding) {
                   await _stopResponding(context);
                 } else {
+                  // hide the keyboard
+                  InputWidget.unFocus();
                   await _sendMessage(context);
                 }
               },
