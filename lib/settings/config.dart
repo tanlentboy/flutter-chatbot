@@ -41,6 +41,12 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
       TextEditingController(text: Config.tts.voice);
 
   @override
+  void dispose() {
+    _ttsVoice.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     ref.watch(botsProvider);
     ref.watch(apisProvider);

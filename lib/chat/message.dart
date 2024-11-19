@@ -121,282 +121,6 @@ class MessageWidget extends ConsumerWidget {
   final Message message;
   static int _ttsTimes = 0;
 
-  Future<void> _tts(BuildContext context, WidgetRef ref) async {
-    if (!CurrentChat.ttsStatus.isNothing) return;
-
-    final tts = Config.tts;
-    final model = tts.model;
-    final voice = tts.voice;
-    final api = Config.apis[tts.api];
-
-    if (model == null || voice == null || api == null) {
-      if (!context.mounted) return;
-      Util.showSnackBar(
-        context: context,
-        content: Text(
-          S.of(context).setup_tts_first,
-        ),
-      );
-      return;
-    }
-
-    final apiUrl = api.url;
-    final apiKey = api.key;
-    final endPoint = "$apiUrl/audio/speech";
-
-    CurrentChat.ttsStatus = TtsStatus.loading;
-    ref.read(ttsProvider.notifier).notify();
-    final times = ++_ttsTimes;
-
-    try {
-      final response = await http.post(
-        Uri.parse(endPoint),
-        headers: {
-          "Authorization": "Bearer $apiKey",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "model": model,
-          "voice": voice,
-          "stream": false,
-          "input": _markdownToText(message.text),
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        throw "${response.statusCode} ${response.body}";
-      }
-
-      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      final path = Config.audioFilePath("$timestamp.mp3");
-
-      final file = File(path);
-      await file.writeAsBytes(response.bodyBytes);
-      if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
-
-      await ref.read(ttsProvider.notifier).play(path);
-    } catch (e) {
-      if (context.mounted) await Util.handleError(context: context, error: e);
-      CurrentChat.ttsStatus = TtsStatus.nothing;
-      ref.read(ttsProvider.notifier).notify();
-    }
-  }
-
-  Future<void> _copy(BuildContext context) async {
-    await Util.copyText(context: context, text: message.text);
-  }
-
-  Future<void> _edit(BuildContext context, WidgetRef ref) async {
-    if (!CurrentChat.chatStatus.isNothing) return;
-    if (!CurrentChat.ttsStatus.isNothing) return;
-
-    InputWidget.unFocus();
-    final undo = UndoHistoryController();
-    final ctrl = TextEditingController(text: message.text);
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.undo),
-                onPressed: () => undo.undo(),
-              ),
-              IconButton(
-                icon: const Icon(Icons.redo),
-                onPressed: () => undo.redo(),
-              ),
-              IconButton(
-                icon: const Icon(Icons.save_outlined),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-            title: Text(S.of(context).edit),
-          ),
-          body: Padding(
-            padding:
-                const EdgeInsets.only(top: 0, left: 16, right: 16, bottom: 0),
-            child: TextField(
-              expands: true,
-              maxLines: null,
-              controller: ctrl,
-              undoController: undo,
-              textAlign: TextAlign.start,
-              keyboardType: TextInputType.multiline,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: S.of(context).enter_your_message,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    if (!(result ?? false)) return;
-
-    message.text = ctrl.text;
-    ref.read(messageProvider(message).notifier).notify();
-    await CurrentChat.save();
-  }
-
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
-    if (!CurrentChat.chatStatus.isNothing) return;
-    if (!CurrentChat.ttsStatus.isNothing) return;
-    CurrentChat.messages.remove(message);
-    ref.read(messagesProvider.notifier).notify();
-    await CurrentChat.save();
-  }
-
-  Future<void> _source(BuildContext context) async {
-    InputWidget.unFocus();
-
-    await showModalBottomSheet(
-      context: context,
-      enableDrag: true,
-      useSafeArea: true,
-      isScrollControlled: false,
-      scrollControlDisabledMaxHeightRatio: 1,
-      builder: (context) {
-        return ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: double.infinity,
-            minHeight: MediaQuery.of(context).size.height * 0.5,
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 8),
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.all(Radius.circular(2)),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(
-                        top: 0, left: 16, right: 16, bottom: 0),
-                    child: Column(
-                      children: [
-                        SelectableText(
-                          message.text,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        const SizedBox(height: 48),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _longPress(BuildContext context, WidgetRef ref) async {
-    InputWidget.unFocus();
-
-    final children = [
-      SizedBox(height: 8),
-      Container(
-        width: 36,
-        height: 4,
-        decoration: const BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.all(Radius.circular(2)),
-        ),
-      ),
-      SizedBox(height: 8),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).copy),
-        leading: const Icon(Icons.copy_all),
-        onTap: () => Navigator.pop(context, MessageEvent.copy),
-      ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).play),
-        leading: const Icon(Icons.play_circle_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.tts),
-      ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).source),
-        leading: const Icon(Icons.code_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.source),
-      ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).edit),
-        leading: const Icon(Icons.edit_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.edit),
-      ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).delete),
-        leading: const Icon(Icons.delete_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.delete),
-      ),
-    ];
-
-    final event = await showModalBottomSheet<MessageEvent>(
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: children,
-          ),
-        );
-      },
-    );
-    if (event == null || !context.mounted) return;
-
-    switch (event) {
-      case MessageEvent.tts:
-        await _tts(context, ref);
-        break;
-
-      case MessageEvent.copy:
-        await _copy(context);
-        break;
-
-      case MessageEvent.edit:
-        await _edit(context, ref);
-        break;
-
-      case MessageEvent.source:
-        await _source(context);
-        break;
-
-      case MessageEvent.delete:
-        await _delete(context, ref);
-        break;
-    }
-  }
-
   const MessageWidget({
     super.key,
     required this.message,
@@ -451,7 +175,7 @@ class MessageWidget extends ConsumerWidget {
         Align(
           alignment: alignment,
           child: GestureDetector(
-            onLongPress: () async => await _longPress(context, ref),
+            onLongPress: () async => await _more(context, ref),
             child: Container(
               margin: EdgeInsets.only(top: 12),
               padding: const EdgeInsets.all(12),
@@ -538,7 +262,7 @@ class MessageWidget extends ConsumerWidget {
                 child: IconButton(
                   icon: const Icon(Icons.more_horiz),
                   iconSize: 18,
-                  onPressed: () async => await _longPress(context, ref),
+                  onPressed: () async => await _more(context, ref),
                 ),
               ),
             ],
@@ -546,6 +270,284 @@ class MessageWidget extends ConsumerWidget {
         ],
       ],
     );
+  }
+
+  Future<void> _tts(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.ttsStatus.isNothing) return;
+
+    final tts = Config.tts;
+    final model = tts.model;
+    final voice = tts.voice;
+    final api = Config.apis[tts.api];
+
+    if (model == null || voice == null || api == null) {
+      if (!context.mounted) return;
+      Util.showSnackBar(
+        context: context,
+        content: Text(
+          S.of(context).setup_tts_first,
+        ),
+      );
+      return;
+    }
+
+    final apiUrl = api.url;
+    final apiKey = api.key;
+    final endPoint = "$apiUrl/audio/speech";
+
+    CurrentChat.ttsStatus = TtsStatus.loading;
+    ref.read(ttsProvider.notifier).notify();
+    final times = ++_ttsTimes;
+
+    try {
+      final response = await http.post(
+        Uri.parse(endPoint),
+        headers: {
+          "Authorization": "Bearer $apiKey",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "model": model,
+          "voice": voice,
+          "stream": false,
+          "input": _markdownToText(message.text),
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw "${response.statusCode} ${response.body}";
+      }
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final path = Config.audioFilePath("$timestamp.mp3");
+
+      final file = File(path);
+      await file.writeAsBytes(response.bodyBytes);
+      if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
+
+      await ref.read(ttsProvider.notifier).play(path);
+    } catch (e) {
+      if (context.mounted) await Util.handleError(context: context, error: e);
+      CurrentChat.ttsStatus = TtsStatus.nothing;
+      ref.read(ttsProvider.notifier).notify();
+    }
+  }
+
+  Future<void> _copy(BuildContext context) async {
+    await Util.copyText(context: context, text: message.text);
+  }
+
+  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.chatStatus.isNothing) return;
+    if (!CurrentChat.ttsStatus.isNothing) return;
+
+    InputWidget.unFocus();
+    final undoCtrl = UndoHistoryController();
+    final textCtrl = TextEditingController(text: message.text);
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.undo),
+                onPressed: () => undoCtrl.undo(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.redo),
+                onPressed: () => undoCtrl.redo(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.save_outlined),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+            title: Text(S.of(context).edit),
+          ),
+          body: Padding(
+            padding:
+                const EdgeInsets.only(top: 0, left: 16, right: 16, bottom: 0),
+            child: TextField(
+              expands: true,
+              maxLines: null,
+              controller: textCtrl,
+              undoController: undoCtrl,
+              textAlign: TextAlign.start,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: S.of(context).enter_your_message,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    if (!(result ?? false)) return;
+    undoCtrl.dispose();
+    textCtrl.dispose();
+
+    message.text = textCtrl.text;
+    ref.read(messageProvider(message).notifier).notify();
+    await CurrentChat.save();
+  }
+
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.chatStatus.isNothing) return;
+    if (!CurrentChat.ttsStatus.isNothing) return;
+    CurrentChat.messages.remove(message);
+    ref.read(messagesProvider.notifier).notify();
+    await CurrentChat.save();
+  }
+
+  Future<void> _source(BuildContext context) async {
+    InputWidget.unFocus();
+
+    await showModalBottomSheet(
+      context: context,
+      enableDrag: true,
+      useSafeArea: true,
+      isScrollControlled: false,
+      scrollControlDisabledMaxHeightRatio: 1,
+      builder: (context) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: double.infinity,
+            minHeight: MediaQuery.of(context).size.height * 0.5,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 8),
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: const BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(
+                        top: 0, left: 16, right: 16, bottom: 0),
+                    child: Column(
+                      children: [
+                        SelectableText(
+                          message.text,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _more(BuildContext context, WidgetRef ref) async {
+    InputWidget.unFocus();
+
+    final children = [
+      SizedBox(height: 8),
+      Container(
+        width: 36,
+        height: 4,
+        decoration: const BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.all(Radius.circular(2)),
+        ),
+      ),
+      SizedBox(height: 8),
+      ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
+        title: Text(S.of(context).copy),
+        leading: const Icon(Icons.copy_all),
+        onTap: () => Navigator.pop(context, MessageEvent.copy),
+      ),
+      ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
+        title: Text(S.of(context).play),
+        leading: const Icon(Icons.play_circle_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.tts),
+      ),
+      ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
+        title: Text(S.of(context).source),
+        leading: const Icon(Icons.code_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.source),
+      ),
+      ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
+        title: Text(S.of(context).edit),
+        leading: const Icon(Icons.edit_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.edit),
+      ),
+      ListTile(
+        minTileHeight: 48,
+        shape: StadiumBorder(),
+        title: Text(S.of(context).delete),
+        leading: const Icon(Icons.delete_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.delete),
+      ),
+    ];
+
+    final event = await showModalBottomSheet<MessageEvent>(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
+        );
+      },
+    );
+    if (event == null || !context.mounted) return;
+
+    switch (event) {
+      case MessageEvent.tts:
+        await _tts(context, ref);
+        break;
+
+      case MessageEvent.copy:
+        await _copy(context);
+        break;
+
+      case MessageEvent.edit:
+        await _edit(context, ref);
+        break;
+
+      case MessageEvent.source:
+        await _source(context);
+        break;
+
+      case MessageEvent.delete:
+        await _delete(context, ref);
+        break;
+    }
   }
 }
 

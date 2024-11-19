@@ -38,16 +38,87 @@ class InputWidget extends ConsumerStatefulWidget {
     required this.scrollCtrl,
   });
 
-  static void unFocus() => focusNode.unfocus();
-
   @override
   ConsumerState<InputWidget> createState() => _InputWidgetState();
+
+  static void unFocus() => focusNode.unfocus();
 }
 
 class _InputWidgetState extends ConsumerState<InputWidget> {
-  static int _sendTimes = 0;
-  static final ImagePicker _imagePicker = ImagePicker();
+  int _sendTimes = 0;
+  final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _inputCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _inputCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = CurrentChat.image != null;
+    final isResponding = CurrentChat.chatStatus.isResponding;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12, left: 6, right: 6, bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Badge(
+              isLabelVisible: hasImage,
+              label: const Text("1"),
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                onPressed: () async {
+                  if (hasImage) {
+                    _clearImage(context);
+                  } else {
+                    await _addImage(context);
+                  }
+                },
+                icon: Icon(hasImage ? Icons.delete : Icons.add_photo_alternate),
+              ),
+            ),
+            Expanded(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 120),
+                child: TextField(
+                  maxLines: null,
+                  autofocus: false,
+                  controller: _inputCtrl,
+                  focusNode: InputWidget.focusNode,
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: S.of(context).enter_your_message,
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () async {
+                if (isResponding) {
+                  await _stopResponding(context);
+                } else {
+                  await _sendMessage(context);
+                }
+              },
+              icon: Icon(isResponding ? Icons.stop_circle : Icons.send),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _addImage(BuildContext context) async {
     InputWidget.unFocus();
@@ -210,71 +281,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     } else if (await CurrentChat.save()) {
       ref.read(chatsProvider.notifier).notify();
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final hasImage = CurrentChat.image != null;
-    final isResponding = CurrentChat.chatStatus.isResponding;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 12, left: 6, right: 6, bottom: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Badge(
-              isLabelVisible: hasImage,
-              label: const Text("1"),
-              alignment: Alignment.topLeft,
-              child: IconButton(
-                onPressed: () async {
-                  if (hasImage) {
-                    _clearImage(context);
-                  } else {
-                    await _addImage(context);
-                  }
-                },
-                icon: Icon(hasImage ? Icons.delete : Icons.add_photo_alternate),
-              ),
-            ),
-            Expanded(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 120),
-                child: TextField(
-                  maxLines: null,
-                  autofocus: false,
-                  controller: _inputCtrl,
-                  focusNode: InputWidget.focusNode,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: S.of(context).enter_your_message,
-                  ),
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: () async {
-                if (isResponding) {
-                  await _stopResponding(context);
-                } else {
-                  await _sendMessage(context);
-                }
-              },
-              icon: Icon(isResponding ? Icons.stop_circle : Icons.send),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

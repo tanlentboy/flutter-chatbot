@@ -20,29 +20,6 @@ import "package:flutter/material.dart";
 import "package:url_launcher/url_launcher.dart";
 
 class Util {
-  static String _keepTwo(int n) => n.toString().padLeft(2, '0');
-
-  static String formatDateTime(DateTime time) {
-    return "${_keepTwo(time.month)}-${_keepTwo(time.day)} "
-        "${_keepTwo(time.hour)}:${_keepTwo(time.minute)}";
-  }
-
-  static void showSnackBar({
-    required Text content,
-    required BuildContext context,
-    Duration duration = const Duration(milliseconds: 800),
-    SnackBarBehavior behavior = SnackBarBehavior.floating,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: content,
-        duration: duration,
-        behavior: behavior,
-        dismissDirection: DismissDirection.down,
-      ),
-    );
-  }
-
   static Future<void> copyText({
     required BuildContext context,
     required String text,
@@ -53,36 +30,6 @@ class Util {
       context: context,
       content: Text(S.of(context).copied_successfully),
     );
-  }
-
-  static Future<void> handleError({
-    required BuildContext context,
-    required dynamic error,
-  }) async {
-    final info = error.toString();
-    final result = await showDialog<int>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(S.of(context).error),
-          content: Text(info),
-          actions: [
-            TextButton(
-              child: Text(S.of(context).cancel),
-              onPressed: () => Navigator.of(context).pop(0),
-            ),
-            TextButton(
-              child: Text(S.of(context).copy),
-              onPressed: () => Navigator.of(context).pop(1),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (result == 1 && context.mounted) {
-      await Util.copyText(context: context, text: info);
-    }
   }
 
   static Future<void> openLink({
@@ -122,10 +69,6 @@ class Util {
     );
 
     switch (result) {
-      case null:
-      case 0:
-        return;
-
       case 1:
         if (!context.mounted) return;
         await copyText(context: context, text: link);
@@ -145,4 +88,57 @@ class Util {
         break;
     }
   }
+
+  static Future<void> handleError({
+    required BuildContext context,
+    required dynamic error,
+  }) async {
+    final info = error.toString();
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(S.of(context).error),
+          content: Text(info),
+          actions: [
+            TextButton(
+              child: Text(S.of(context).cancel),
+              onPressed: () => Navigator.of(context).pop(0),
+            ),
+            TextButton(
+              child: Text(S.of(context).copy),
+              onPressed: () => Navigator.of(context).pop(1),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == 1 && context.mounted) {
+      await Util.copyText(context: context, text: info);
+    }
+  }
+
+  static void showSnackBar({
+    required Text content,
+    required BuildContext context,
+    Duration duration = const Duration(milliseconds: 800),
+    SnackBarBehavior behavior = SnackBarBehavior.floating,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: content,
+        duration: duration,
+        behavior: behavior,
+        dismissDirection: DismissDirection.down,
+      ),
+    );
+  }
+
+  static String formatDateTime(DateTime time) {
+    return "${_keepTwo(time.month)}-${_keepTwo(time.day)} "
+        "${_keepTwo(time.hour)}:${_keepTwo(time.minute)}";
+  }
+
+  static String _keepTwo(int n) => n.toString().padLeft(2, '0');
 }

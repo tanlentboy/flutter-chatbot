@@ -100,65 +100,6 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
   final TextEditingController _temperatureCtrl = TextEditingController();
   final TextEditingController _systemPromptsCtrl = TextEditingController();
 
-  bool _save(BuildContext context) {
-    final name = _nameCtrl.text;
-    final botPair = widget.botPair;
-
-    if (name.isEmpty) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).enter_a_name),
-      );
-      return false;
-    }
-
-    if (Config.bots.containsKey(name) &&
-        (botPair == null || name != botPair.key)) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).duplicate_bot_name),
-      );
-      return false;
-    }
-
-    final maxTokens = int.tryParse(_maxTokensCtrl.text);
-    final temperature = double.tryParse(_temperatureCtrl.text);
-
-    if (_maxTokensCtrl.text.isNotEmpty && maxTokens == null) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).invalid_max_tokens),
-      );
-      return false;
-    }
-
-    if (_temperatureCtrl.text.isNotEmpty && temperature == null) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).invalid_temperature),
-      );
-      return false;
-    }
-
-    if (botPair != null) Config.bots.remove(botPair.key);
-
-    final systemPrompts = _systemPromptsCtrl.text;
-    Config.bots[name] = BotConfig(
-      stream: _stream,
-      maxTokens: maxTokens,
-      temperature: temperature,
-      systemPrompts: systemPrompts.isEmpty ? null : systemPrompts,
-    );
-
-    Util.showSnackBar(
-      context: context,
-      content: Text(S.of(context).saved_successfully),
-    );
-
-    ref.read(botsProvider.notifier).notify();
-    return true;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -183,6 +124,15 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
     if (systemPrompts != null) {
       _systemPromptsCtrl.text = systemPrompts.toString();
     }
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _maxTokensCtrl.dispose();
+    _temperatureCtrl.dispose();
+    _systemPromptsCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -317,5 +267,64 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
         ),
       ),
     );
+  }
+
+  bool _save(BuildContext context) {
+    final name = _nameCtrl.text;
+    final botPair = widget.botPair;
+
+    if (name.isEmpty) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).enter_a_name),
+      );
+      return false;
+    }
+
+    if (Config.bots.containsKey(name) &&
+        (botPair == null || name != botPair.key)) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).duplicate_bot_name),
+      );
+      return false;
+    }
+
+    final maxTokens = int.tryParse(_maxTokensCtrl.text);
+    final temperature = double.tryParse(_temperatureCtrl.text);
+
+    if (_maxTokensCtrl.text.isNotEmpty && maxTokens == null) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).invalid_max_tokens),
+      );
+      return false;
+    }
+
+    if (_temperatureCtrl.text.isNotEmpty && temperature == null) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).invalid_temperature),
+      );
+      return false;
+    }
+
+    if (botPair != null) Config.bots.remove(botPair.key);
+
+    final systemPrompts = _systemPromptsCtrl.text;
+    Config.bots[name] = BotConfig(
+      stream: _stream,
+      maxTokens: maxTokens,
+      temperature: temperature,
+      systemPrompts: systemPrompts.isEmpty ? null : systemPrompts,
+    );
+
+    Util.showSnackBar(
+      context: context,
+      content: Text(S.of(context).saved_successfully),
+    );
+
+    ref.read(botsProvider.notifier).notify();
+    return true;
   }
 }
