@@ -164,7 +164,7 @@ class Config {
     if (Platform.isAndroid) {
       _dir = (await getExternalStorageDirectory())!.path;
     } else {
-      _dir = (await getApplicationDocumentsDirectory()).path;
+      _dir = (await getApplicationSupportDirectory()).path;
     }
 
     await _initDir();
