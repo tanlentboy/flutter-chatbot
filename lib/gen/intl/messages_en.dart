@@ -87,7 +87,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reanswer": MessageLookupByLibrary.simpleMessage("Reanswer"),
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "restart_app": MessageLookupByLibrary.simpleMessage(
-            "The App is about to exit, Please relaunch it to apply the new settings."),
+            "Please restart App to load the new settings."),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saved_successfully":
             MessageLookupByLibrary.simpleMessage("Saved Successfully"),

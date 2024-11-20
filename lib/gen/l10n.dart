@@ -460,10 +460,10 @@ class S {
     );
   }
 
-  /// `The App is about to exit, Please relaunch it to apply the new settings.`
+  /// `Please restart App to load the new settings.`
   String get restart_app {
     return Intl.message(
-      'The App is about to exit, Please relaunch it to apply the new settings.',
+      'Please restart App to load the new settings.',
       name: 'restart_app',
       desc: '',
       args: [],

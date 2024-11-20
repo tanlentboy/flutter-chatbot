@@ -16,9 +16,9 @@
 import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
+import "package:archive/archive_io.dart";
 import "package:file_picker/file_picker.dart";
 import "package:path_provider/path_provider.dart";
-import "package:flutter_archive/flutter_archive.dart";
 import "package:flutter_highlighter/themes/atom-one-dark.dart";
 import "package:flutter_highlighter/themes/atom-one-light.dart";
 
@@ -263,12 +263,19 @@ class Backup {
     final path = "$dir${Config._sep}chatbot-backup-$time.zip";
 
     try {
-      final file = File(path);
-      ZipFile.createFromDirectory(
-        sourceDir: Directory(Config._dir),
-        recurseSubDirs: true,
-        zipFile: file,
-      );
+      final dir = Directory(Config._dir);
+      final encoder = ZipFileEncoder();
+      encoder.create(path);
+
+      await for (final entity in dir.list()) {
+        if (entity is File) {
+          encoder.addFile(entity);
+        } else if (entity is Directory) {
+          encoder.addDirectory(entity);
+        }
+      }
+
+      await encoder.close();
     } catch (e) {
       rethrow;
     }
@@ -281,11 +288,8 @@ class Backup {
     if (result == null) return false;
 
     try {
-      final file = File(result.files.single.path!);
-      ZipFile.extractToDirectory(
-        destinationDir: Directory(Config._dir),
-        zipFile: file,
-      );
+      final path = result.files.single.path!;
+      await extractFileToDisk(path, Config._dir);
     } catch (e) {
       rethrow;
     }

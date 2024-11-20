@@ -72,8 +72,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "play": MessageLookupByLibrary.simpleMessage("播放"),
         "reanswer": MessageLookupByLibrary.simpleMessage("重新回答"),
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
-        "restart_app":
-            MessageLookupByLibrary.simpleMessage("应用即将退出，请重新启动以加载新配置。"),
+        "restart_app": MessageLookupByLibrary.simpleMessage("请重启应用以加载新配置。"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "saved_successfully": MessageLookupByLibrary.simpleMessage("保存成功"),
         "select_models": MessageLookupByLibrary.simpleMessage("选择模型"),

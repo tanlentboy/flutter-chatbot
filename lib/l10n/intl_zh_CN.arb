@@ -47,7 +47,7 @@
     "import_config": "导入配置",
     "exported_successfully": "导出成功",
     "imported_successfully": "导入成功",
-    "restart_app": "应用即将退出，请重新启动以加载新配置。",
+    "restart_app": "请重启应用以加载新配置。",
 
     "enter_a_name": "请输入名称",
     "enter_a_title": "请输入标题",

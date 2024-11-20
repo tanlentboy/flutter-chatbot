@@ -47,7 +47,7 @@
     "import_config": "Import Config",
     "exported_successfully": "Exported Successfully",
     "imported_successfully": "Imported Successfully",
-    "restart_app": "The App is about to exit, Please relaunch it to apply the new settings.",
+    "restart_app": "Please restart App to load the new settings.",
 
     "enter_a_name": "Please enter a name",
     "enter_a_title": "Please enter a title",
