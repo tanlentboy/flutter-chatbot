@@ -109,8 +109,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 if (isResponding) {
                   await _stopResponding(context);
                 } else {
-                  // hide the keyboard
-                  InputWidget.unFocus();
                   await _sendMessage(context);
                 }
               },
@@ -164,22 +162,31 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     );
     if (source == null) return;
 
-    final result = await _imagePicker.pickImage(source: source);
-    if (result == null) return;
+    final XFile? result;
+    Uint8List? compressed;
 
-    final compressed = await FlutterImageCompress.compressWithFile(result.path,
-        quality: 60, minWidth: 1024, minHeight: 1024);
-    Uint8List bytes = compressed ?? await File(result.path).readAsBytes();
-
-    if (compressed == null && context.mounted) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).image_compress_failed),
-      );
+    try {
+      result = await _imagePicker.pickImage(source: source);
+      if (result == null) return;
+    } catch (e) {
+      return;
     }
 
-    final base64 = base64Encode(bytes);
-    setState(() => CurrentChat.image = base64);
+    try {
+      compressed = await FlutterImageCompress.compressWithFile(result.path,
+          quality: 60, minWidth: 1024, minHeight: 1024);
+      if (compressed == null) throw false;
+    } catch (e) {
+      if (context.mounted) {
+        Util.showSnackBar(
+          context: context,
+          content: Text(S.of(context).image_compress_failed),
+        );
+      }
+    }
+
+    final bytes = compressed ?? await File(result.path).readAsBytes();
+    setState(() => CurrentChat.image = base64Encode(bytes));
   }
 
   void _clearImage(BuildContext context) {

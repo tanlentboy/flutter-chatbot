@@ -140,8 +140,6 @@ class ChatPageState extends ConsumerState<ChatPage> {
                         ref.read(chatProvider.notifier).notify();
                         ref.read(chatsProvider.notifier).notify();
                         ref.read(messagesProvider.notifier).notify();
-                        // close the drawer
-                        Navigator.pop(context);
                       },
                       trailing: IconButton(
                         icon: const Icon(Icons.delete),

@@ -587,10 +587,9 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
           ),
           padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 16),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(language),
-              Expanded(child: SizedBox()),
               GestureDetector(
                 onTap: () async {
                   await Util.copyText(
