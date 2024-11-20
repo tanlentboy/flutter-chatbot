@@ -69,7 +69,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       child: Padding(
-        padding: const EdgeInsets.only(top: 12, left: 6, right: 6, bottom: 12),
+        padding: const EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -90,7 +90,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
             ),
             Expanded(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 120),
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height / 4),
                 child: TextField(
                   maxLines: null,
                   autofocus: false,

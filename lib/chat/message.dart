@@ -372,7 +372,7 @@ class MessageWidget extends ConsumerWidget {
           ),
           body: Padding(
             padding:
-                const EdgeInsets.only(top: 0, left: 16, right: 16, bottom: 0),
+                const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
             child: TextField(
               expands: true,
               maxLines: null,
@@ -422,12 +422,12 @@ class MessageWidget extends ConsumerWidget {
             minHeight: MediaQuery.of(context).size.height * 0.5,
           ),
           child: Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Center(
                   child: Container(
                     width: 36,
@@ -438,18 +438,19 @@ class MessageWidget extends ConsumerWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Flexible(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.only(
                         top: 0, left: 16, right: 16, bottom: 0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SelectableText(
                           message.text,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 48, width: double.infinity),
                       ],
                     ),
                   ),
@@ -576,46 +577,49 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
     };
     final content = text.textContent.trim();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: theme == codeDarkTheme
-                ? Colors.black.withOpacity(0.3)
-                : Colors.blueGrey.withOpacity(0.3),
-          ),
-          padding: EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(language),
-              GestureDetector(
-                onTap: () async {
-                  await Util.copyText(
+    return IntrinsicWidth(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: theme == codeDarkTheme
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.blueGrey.withOpacity(0.3),
+            ),
+            padding: EdgeInsets.only(left: 16, right: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(language),
+                InkWell(
+                  onTap: () async => await Util.copyText(
                     context: context,
                     text: content,
-                  );
-                },
-                child: Text(
-                  S.of(context).copy,
-                  style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 8),
+                    child: Text(
+                      S.of(context).copy,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: HighlightView(
-            content,
-            tabSize: 2,
-            theme: theme,
-            language: language,
-            padding: const EdgeInsets.all(8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: HighlightView(
+              content,
+              tabSize: 2,
+              theme: theme,
+              language: language,
+              padding: const EdgeInsets.all(8),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
