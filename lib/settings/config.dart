@@ -20,6 +20,7 @@ import "../config.dart";
 import "../gen/l10n.dart";
 import "../chat/chat.dart";
 
+import "package:flutter/services.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -93,154 +94,197 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
       ));
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return Stack(
       children: [
-        Text(" ${S.of(context).default_config}"),
-        SizedBox(height: 8),
-        Row(
+        ListView(
+          padding: const EdgeInsets.all(16),
           children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: _bot,
-                items: botList,
-                isExpanded: true,
-                hint: Text(S.of(context).bot),
-                onChanged: (it) => setState(() => _bot = it),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+            Text(" ${S.of(context).default_config}"),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _bot,
+                    items: botList,
+                    isExpanded: true,
+                    hint: Text(S.of(context).bot),
+                    onChanged: (it) => setState(() => _bot = it),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                    ),
                   ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _chatApi,
+                    items: apiList,
+                    isExpanded: true,
+                    hint: Text(S.of(context).api),
+                    onChanged: (it) => setState(() {
+                      _chatModel = null;
+                      _chatApi = it;
+                    }),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _chatModel,
+              items: chatModelList,
+              isExpanded: true,
+              menuMaxHeight: 480,
+              hint: Text(S.of(context).model),
+              onChanged: (it) => setState(() => _chatModel = it),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: _chatApi,
-                items: apiList,
-                isExpanded: true,
-                hint: Text(S.of(context).api),
-                onChanged: (it) => setState(() {
-                  _chatModel = null;
-                  _chatApi = it;
-                }),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+            const SizedBox(height: 16),
+            Text(" ${S.of(context).text_to_speech}"),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _ttsVoice,
+                    decoration: InputDecoration(
+                      hintText: S.of(context).voice,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _ttsApi,
+                    items: apiList,
+                    isExpanded: true,
+                    hint: Text(S.of(context).api),
+                    onChanged: (it) => setState(() {
+                      _ttsModel = null;
+                      _ttsApi = it;
+                    }),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _ttsModel,
+              items: ttsModelList,
+              isExpanded: true,
+              menuMaxHeight: 480,
+              hint: Text(S.of(context).model),
+              onChanged: (it) => setState(() => _ttsModel = it),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
               ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: FilledButton.tonal(
+                    child: Text(S.of(context).export_config),
+                    onPressed: () async {
+                      try {
+                        final result = await Backup.exportConfig();
+                        if (!result || !context.mounted) return;
+
+                        Util.showSnackBar(
+                          context: context,
+                          content: Text(S.of(context).exported_successfully),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        Util.handleError(context: context, error: e);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 1,
+                  child: FilledButton(
+                    child: Text(S.of(context).import_config),
+                    onPressed: () async {
+                      try {
+                        final result = await Backup.importConfig();
+                        if (!result || !context.mounted) return;
+
+                        await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(S.of(context).imported_successfully),
+                            content: Text(S.of(context).restart_app),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text(S.of(context).ok),
+                              )
+                            ],
+                          ),
+                        );
+
+                        SystemNavigator.pop();
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        Util.handleError(context: context, error: e);
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          value: _chatModel,
-          items: chatModelList,
-          isExpanded: true,
-          menuMaxHeight: 480,
-          hint: Text(S.of(context).model),
-          onChanged: (it) => setState(() => _chatModel = it),
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton.extended(
+            icon: const Icon(Icons.save),
+            label: Text(S.of(context).save),
+            onPressed: () async {
+              Config.core.bot = _bot;
+              Config.core.api = _chatApi;
+              Config.core.model = _chatModel;
+
+              Config.tts.api = _ttsApi;
+              Config.tts.model = _ttsModel;
+              final voice = _ttsVoice.text;
+              Config.tts.voice = voice.isEmpty ? null : voice;
+
+              Util.showSnackBar(
+                context: context,
+                content: Text(S.of(context).saved_successfully),
+              );
+
+              ref.read(chatProvider.notifier).notify();
+              await Config.save();
+            },
           ),
-        ),
-        const SizedBox(height: 16),
-        Text(" ${S.of(context).text_to_speech}"),
-        SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _ttsVoice,
-                decoration: InputDecoration(
-                  hintText: S.of(context).voice,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                value: _ttsApi,
-                items: apiList,
-                isExpanded: true,
-                hint: Text(S.of(context).api),
-                onChanged: (it) => setState(() {
-                  _ttsModel = null;
-                  _ttsApi = it;
-                }),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          value: _ttsModel,
-          items: ttsModelList,
-          isExpanded: true,
-          menuMaxHeight: 480,
-          hint: Text(S.of(context).model),
-          onChanged: (it) => setState(() => _ttsModel = it),
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: FilledButton.tonal(
-                child: Text(S.of(context).reset),
-                onPressed: () => setState(() {
-                  _bot = null;
-                  _chatApi = null;
-                  _chatModel = null;
-                  _ttsApi = null;
-                  _ttsModel = null;
-                  _ttsVoice.text = "";
-                }),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 1,
-              child: FilledButton(
-                child: Text(S.of(context).save),
-                onPressed: () async {
-                  Config.core.bot = _bot;
-                  Config.core.api = _chatApi;
-                  Config.core.model = _chatModel;
-
-                  Config.tts.api = _ttsApi;
-                  Config.tts.model = _ttsModel;
-                  final voice = _ttsVoice.text;
-                  Config.tts.voice = voice.isEmpty ? null : voice;
-
-                  Util.showSnackBar(
-                    context: context,
-                    content: Text(S.of(context).saved_successfully),
-                  );
-
-                  ref.read(chatProvider.notifier).notify();
-                  await Config.save();
-                },
-              ),
-            ),
-          ],
         ),
       ],
     );

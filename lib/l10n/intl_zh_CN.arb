@@ -2,6 +2,7 @@
     "@@locale": "zh_CN",
     "title": "ChatBot",
 
+    "ok": "好的",
     "copy": "拷贝",
     "edit": "编辑",
     "play": "播放",
@@ -41,6 +42,12 @@
     "api_key": "接口密钥",
     "model_list": "模型列表",
     "select_models": "选择模型",
+
+    "export_config": "导出配置",
+    "import_config": "导入配置",
+    "exported_successfully": "导出成功",
+    "imported_successfully": "导入成功",
+    "restart_app": "应用即将退出，请重新启动以加载新配置。",
 
     "enter_a_name": "请输入名称",
     "enter_a_title": "请输入标题",

@@ -60,6 +60,16 @@ class S {
     );
   }
 
+  /// `Ok`
+  String get ok {
+    return Intl.message(
+      'Ok',
+      name: 'ok',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy`
   String get copy {
     return Intl.message(
@@ -405,6 +415,56 @@ class S {
     return Intl.message(
       'Select Models',
       name: 'select_models',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export Config`
+  String get export_config {
+    return Intl.message(
+      'Export Config',
+      name: 'export_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import Config`
+  String get import_config {
+    return Intl.message(
+      'Import Config',
+      name: 'import_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exported Successfully`
+  String get exported_successfully {
+    return Intl.message(
+      'Exported Successfully',
+      name: 'exported_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Imported Successfully`
+  String get imported_successfully {
+    return Intl.message(
+      'Imported Successfully',
+      name: 'imported_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The App is about to exit, Please relaunch it to apply the new settings.`
+  String get restart_app {
+    return Intl.message(
+      'The App is about to exit, Please relaunch it to apply the new settings.',
+      name: 'restart_app',
       desc: '',
       args: [],
     );

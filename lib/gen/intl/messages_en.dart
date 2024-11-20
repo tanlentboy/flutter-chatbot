@@ -57,9 +57,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "enter_your_message":
             MessageLookupByLibrary.simpleMessage("Enter your message"),
         "error": MessageLookupByLibrary.simpleMessage("Error"),
+        "export_config": MessageLookupByLibrary.simpleMessage("Export Config"),
+        "exported_successfully":
+            MessageLookupByLibrary.simpleMessage("Exported Successfully"),
         "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "image_compress_failed":
             MessageLookupByLibrary.simpleMessage("Failed to comprese image"),
+        "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
+        "imported_successfully":
+            MessageLookupByLibrary.simpleMessage("Imported Successfully"),
         "invalid_max_tokens":
             MessageLookupByLibrary.simpleMessage("Invalid Max Tokens"),
         "invalid_temperature":
@@ -75,10 +81,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "no_model": MessageLookupByLibrary.simpleMessage("no model"),
         "not_implemented_yet":
             MessageLookupByLibrary.simpleMessage("Not implemented yet"),
+        "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "open": MessageLookupByLibrary.simpleMessage("Open"),
         "play": MessageLookupByLibrary.simpleMessage("Play"),
         "reanswer": MessageLookupByLibrary.simpleMessage("Reanswer"),
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
+        "restart_app": MessageLookupByLibrary.simpleMessage(
+            "The App is about to exit, Please relaunch it to apply the new settings."),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saved_successfully":
             MessageLookupByLibrary.simpleMessage("Saved Successfully"),

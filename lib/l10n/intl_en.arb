@@ -2,6 +2,7 @@
     "@@locale": "en",
     "title": "ChatBot",
 
+    "ok": "Ok",
     "copy": "Copy",
     "edit": "Edit",
     "play": "Play",
@@ -41,6 +42,12 @@
     "api_key": "API Key",
     "model_list": "Model List",
     "select_models": "Select Models",
+
+    "export_config": "Export Config",
+    "import_config": "Import Config",
+    "exported_successfully": "Exported Successfully",
+    "imported_successfully": "Imported Successfully",
+    "restart_app": "The App is about to exit, Please relaunch it to apply the new settings.",
 
     "enter_a_name": "Please enter a name",
     "enter_a_title": "Please enter a title",

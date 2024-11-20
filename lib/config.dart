@@ -16,7 +16,9 @@
 import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
+import "package:file_picker/file_picker.dart";
 import "package:path_provider/path_provider.dart";
+import "package:flutter_archive/flutter_archive.dart";
 import "package:flutter_highlighter/themes/atom-one-dark.dart";
 import "package:flutter_highlighter/themes/atom-one-light.dart";
 
@@ -249,6 +251,46 @@ class Config {
         await file.rename(newPath);
       }
     }
+  }
+}
+
+class Backup {
+  static Future<bool> exportConfig() async {
+    String? dir = await FilePicker.platform.getDirectoryPath();
+    if (dir == null) return false;
+
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
+    final path = "$dir${Config._sep}chatbot-backup-$time.zip";
+
+    try {
+      final file = File(path);
+      ZipFile.createFromDirectory(
+        sourceDir: Directory(Config._dir),
+        recurseSubDirs: true,
+        zipFile: file,
+      );
+    } catch (e) {
+      rethrow;
+    }
+
+    return true;
+  }
+
+  static Future<bool> importConfig() async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result == null) return false;
+
+    try {
+      final file = File(result.files.single.path!);
+      ZipFile.extractToDirectory(
+        destinationDir: Directory(Config._dir),
+        zipFile: file,
+      );
+    } catch (e) {
+      rethrow;
+    }
+
+    return true;
   }
 }
 
