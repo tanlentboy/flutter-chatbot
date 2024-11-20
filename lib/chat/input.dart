@@ -73,20 +73,20 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Badge(
-              isLabelVisible: hasImage,
-              label: const Text("1"),
-              alignment: Alignment.topLeft,
-              child: IconButton(
-                onPressed: () async {
-                  if (hasImage) {
-                    _clearImage(context);
-                  } else {
-                    await _addImage(context);
-                  }
-                },
-                icon: Icon(hasImage ? Icons.delete : Icons.add_photo_alternate),
+            IconButton(
+              icon: Badge(
+                smallSize: 8,
+                isLabelVisible: hasImage,
+                child:
+                    Icon(hasImage ? Icons.delete : Icons.add_photo_alternate),
               ),
+              onPressed: () async {
+                if (hasImage) {
+                  _clearImage(context);
+                } else {
+                  await _addImage(context);
+                }
+              },
             ),
             Expanded(
               child: ConstrainedBox(
