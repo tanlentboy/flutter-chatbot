@@ -221,7 +221,12 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     final times = ++_sendTimes;
     final scrollCtrl = widget.scrollCtrl;
     final chatContext = _buildContext(messages);
-    final assistant = Message(text: "", role: MessageRole.assistant);
+    final assistant = Message(
+      text: "",
+      model: CurrentChat.model,
+      role: MessageRole.assistant,
+      time: Util.formatDateTime(DateTime.now()),
+    );
 
     messages.add(assistant);
     ref.read(messagesProvider.notifier).notify();

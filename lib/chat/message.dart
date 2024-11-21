@@ -86,6 +86,7 @@ enum MessageRole {
 }
 
 enum MessageEvent {
+  reanswer,
   source,
   delete,
   copy,
@@ -95,26 +96,47 @@ enum MessageEvent {
 
 class Message {
   String text;
+  String? time;
+  String? model;
   String? image;
   MessageRole role;
 
-  Message({this.image, required this.role, required this.text});
+  Message({
+    this.time,
+    this.image,
+    this.model,
+    required this.role,
+    required this.text,
+  });
 
-  Map<String, String?> toJson() => {
-        "text": text,
-        "image": image,
-        "role": role.name,
+  Map toJson() => switch (role) {
+        MessageRole.assistant => {
+            "time": time,
+            "text": text,
+            "model": model,
+            "role": role.name,
+          },
+        MessageRole.user => {
+            "text": text,
+            "image": image,
+            "role": role.name,
+          },
       };
 
-  factory Message.fromJson(Map<String, dynamic> json) => Message(
-        text: json["text"],
-        image: json["image"],
-        role: switch (json["role"]) {
-          "assistant" => MessageRole.assistant,
-          "user" => MessageRole.user,
-          _ => throw "bad role",
-        },
-      );
+  factory Message.fromJson(Map json) => switch (json["role"]) {
+        "assistant" => Message(
+            time: json["time"],
+            text: json["text"],
+            model: json["model"],
+            role: MessageRole.assistant,
+          ),
+        "user" => Message(
+            text: json["text"],
+            image: json["image"],
+            role: MessageRole.user,
+          ),
+        _ => throw "bad role",
+      };
 }
 
 class MessageWidget extends ConsumerWidget {
@@ -172,12 +194,39 @@ class MessageWidget extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (message.role.isAssistant) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              CircleAvatar(
+                child: const Icon(Icons.smart_toy),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    message.model ?? CurrentChat.model ?? S.of(context).model,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(
+                    message.time ??
+                        CurrentChat.chat?.time ??
+                        Util.formatDateTime(DateTime.now()),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              )
+            ],
+          ),
+        ],
         Align(
           alignment: alignment,
           child: GestureDetector(
-            onLongPress: () async => await _more(context, ref),
+            onLongPress: () async => await _longPress(context, ref),
             child: Container(
-              margin: EdgeInsets.only(top: 12),
+              margin: EdgeInsets.only(top: message.role.isAssistant ? 8 : 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: background,
@@ -229,6 +278,15 @@ class MessageWidget extends ConsumerWidget {
                   onPressed: () async => await _tts(context, ref),
                 ),
               ),
+              // SizedBox(
+              //   width: 36,
+              //   height: 36,
+              //   child: IconButton(
+              //     icon: const Icon(Icons.sync_outlined),
+              //     iconSize: 18,
+              //     onPressed: () async => await _reanswer(context, ref),
+              //   ),
+              // ),
               SizedBox(
                 width: 36,
                 height: 36,
@@ -254,15 +312,6 @@ class MessageWidget extends ConsumerWidget {
                   icon: const Icon(Icons.delete_outlined),
                   iconSize: 18,
                   onPressed: () async => await _delete(context, ref),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.more_horiz),
-                  iconSize: 18,
-                  onPressed: () async => await _more(context, ref),
                 ),
               ),
             ],
@@ -463,7 +512,11 @@ class MessageWidget extends ConsumerWidget {
     );
   }
 
-  Future<void> _more(BuildContext context, WidgetRef ref) async {
+  Future<void> _reanswer(BuildContext context, WidgetRef ref) async {
+    if (!CurrentChat.chatStatus.isNothing) return;
+  }
+
+  Future<void> _longPress(BuildContext context, WidgetRef ref) async {
     InputWidget.unFocus();
 
     final children = [
@@ -491,6 +544,14 @@ class MessageWidget extends ConsumerWidget {
         leading: const Icon(Icons.play_circle_outlined),
         onTap: () => Navigator.pop(context, MessageEvent.tts),
       ),
+      // if (CurrentChat.messages.lastOrNull == message)
+      //   ListTile(
+      //     minTileHeight: 48,
+      //     shape: StadiumBorder(),
+      //     title: Text(S.of(context).reanswer),
+      //     leading: const Icon(Icons.sync_outlined),
+      //     onTap: () => Navigator.pop(context, MessageEvent.reanswer),
+      //   ),
       ListTile(
         minTileHeight: 48,
         shape: StadiumBorder(),
@@ -547,6 +608,10 @@ class MessageWidget extends ConsumerWidget {
 
       case MessageEvent.delete:
         await _delete(context, ref);
+        break;
+
+      case MessageEvent.reanswer:
+        await _reanswer(context, ref);
         break;
     }
   }

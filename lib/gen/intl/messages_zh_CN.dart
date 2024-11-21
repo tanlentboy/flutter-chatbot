@@ -70,7 +70,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("好的"),
         "open": MessageLookupByLibrary.simpleMessage("打开"),
         "play": MessageLookupByLibrary.simpleMessage("播放"),
-        "reanswer": MessageLookupByLibrary.simpleMessage("重新回答"),
+        "reanswer": MessageLookupByLibrary.simpleMessage("重答"),
         "reset": MessageLookupByLibrary.simpleMessage("重置"),
         "restart_app": MessageLookupByLibrary.simpleMessage("请重启应用以加载新配置。"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
