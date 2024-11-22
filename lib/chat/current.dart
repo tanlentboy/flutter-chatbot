@@ -83,7 +83,7 @@ class CurrentChat {
 
     if (chat == null) {
       if (messages.isEmpty) return false;
-      initChat(messages.first.text);
+      initChat(messages.first.item.text);
     }
 
     if (_file == null) {

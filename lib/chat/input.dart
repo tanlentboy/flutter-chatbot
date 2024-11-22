@@ -212,21 +212,22 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       return;
     }
 
-    messages.add(Message(
+    messages.add(Message.fromItem(MessageItem(
       text: text,
       role: MessageRole.user,
       image: CurrentChat.image,
-    ));
+    )));
 
     final times = ++_sendTimes;
     final scrollCtrl = widget.scrollCtrl;
     final chatContext = _buildContext(messages);
-    final assistant = Message(
+    final item = MessageItem(
       text: "",
       model: CurrentChat.model,
       role: MessageRole.assistant,
       time: Util.formatDateTime(DateTime.now()),
     );
+    final assistant = Message.fromItem(item);
 
     messages.add(assistant);
     ref.read(messagesProvider.notifier).notify();
@@ -253,21 +254,21 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
         final stream = llm.stream(PromptValue.chat(chatContext));
         await for (final chunk in stream) {
           if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
-          assistant.text += chunk.output.content;
+          item.text += chunk.output.content;
           ref.read(messageProvider(assistant).notifier).notify();
           scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
         }
       } else {
         final result = await llm.invoke(PromptValue.chat(chatContext));
         if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
-        assistant.text += result.output.content;
+        item.text += result.output.content;
         ref.read(messageProvider(assistant).notifier).notify();
         scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
       }
     } catch (e) {
       if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
       if (context.mounted) await Util.handleError(context: context, error: e);
-      if (assistant.text.isEmpty) {
+      if (item.text.isEmpty) {
         messages.length -= 2;
         _inputCtrl.text = text;
         ref.read(messagesProvider.notifier).notify();
@@ -286,8 +287,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     setState(() => CurrentChat.chatStatus = CurrentChatStatus.nothing);
     final list = CurrentChat.messages;
 
-    final user = list[list.length - 2];
-    final assistant = list.last;
+    final user = list[list.length - 2].item;
+    final assistant = list.last.item;
 
     if (assistant.text.isEmpty) {
       list.removeRange(list.length - 2, list.length);
@@ -301,12 +302,13 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
 List<ChatMessage> _buildContext(List<Message> list) {
   final context = <ChatMessage>[];
+  final items = [for (final message in list) message.item];
 
   if (CurrentChat.systemPrompts != null) {
     context.add(ChatMessage.system(CurrentChat.systemPrompts!));
   }
 
-  for (final item in list) {
+  for (final item in items) {
     switch (item.role) {
       case MessageRole.assistant:
         context.add(ChatMessage.ai(item.text));

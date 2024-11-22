@@ -51,29 +51,35 @@ enum MessageRole {
   bool get isUser => this == MessageRole.user;
 }
 
-enum MessageEvent {
-  reanswer,
-  source,
-  delete,
-  copy,
-  edit,
-  tts,
-}
-
-class Message {
+class MessageItem {
   String text;
   String? time;
   String? model;
   String? image;
   MessageRole role;
 
-  Message({
+  MessageItem({
     this.time,
     this.image,
     this.model,
     required this.role,
     required this.text,
   });
+
+  factory MessageItem.fromJson(Map json) => switch (json["role"]) {
+        "assistant" => MessageItem(
+            time: json["time"],
+            text: json["text"],
+            model: json["model"],
+            role: MessageRole.assistant,
+          ),
+        "user" => MessageItem(
+            text: json["text"],
+            image: json["image"],
+            role: MessageRole.user,
+          ),
+        _ => throw "bad role",
+      };
 
   Map toJson() => switch (role) {
         MessageRole.assistant => {
@@ -88,21 +94,35 @@ class Message {
             "role": role.name,
           },
       };
+}
 
-  factory Message.fromJson(Map json) => switch (json["role"]) {
-        "assistant" => Message(
-            time: json["time"],
-            text: json["text"],
-            model: json["model"],
-            role: MessageRole.assistant,
-          ),
-        "user" => Message(
-            text: json["text"],
-            image: json["image"],
-            role: MessageRole.user,
-          ),
-        _ => throw "bad role",
+class Message {
+  int index;
+  List<MessageItem> list;
+
+  Message({
+    required this.index,
+    required this.list,
+  });
+
+  factory Message.fromItem(MessageItem item) => Message(index: 0, list: [item]);
+
+  factory Message.fromJson(Map json) =>
+      json["index"] == null && json["list"] == null
+          ? Message(index: 0, list: [MessageItem.fromJson(json)])
+          : Message(
+              index: json["index"],
+              list: [
+                for (final item in json["list"]) MessageItem.fromJson(item),
+              ],
+            );
+
+  Map toJson() => {
+        "index": index,
+        "list": list,
       };
+
+  MessageItem get item => list[index];
 }
 
 class MessageWidget extends ConsumerStatefulWidget {
@@ -143,10 +163,11 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       ),
     );
 
-    final role = message.role;
-    var content = message.text;
-    if (message.image != null) {
-      content = "![image](data:image/jpeg;base64,${message.image})\n\n$content";
+    final item = message.item;
+    var content = item.text;
+    final role = item.role;
+    if (item.image != null) {
+      content = "![image](data:image/jpeg;base64,${item.image})\n\n$content";
     }
 
     switch (role) {
@@ -183,15 +204,13 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        message.model ??
-                            CurrentChat.model ??
-                            S.of(context).model,
+                        item.model ?? CurrentChat.model ?? S.of(context).model,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        message.time ??
+                        item.time ??
                             CurrentChat.chat?.time ??
                             Util.formatDateTime(DateTime.now()),
                         style: Theme.of(context).textTheme.labelSmall,
@@ -255,53 +274,82 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                 CurrentChat.chatStatus.isNothing) ...[
               const SizedBox(height: 4),
               Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.paste_rounded),
-                      iconSize: 16,
-                      onPressed: () async => await _copy(context),
-                    ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: IconButton(
+                          icon: const Icon(Icons.paste_rounded),
+                          iconSize: 16,
+                          onPressed: () async => await _copy(context),
+                        ),
+                      ),
+                      // SizedBox(
+                      //   width: 36,
+                      //   height: 36,
+                      //   child: IconButton(
+                      //     icon: const Icon(Icons.sync_outlined),
+                      //     iconSize: 18,
+                      //     onPressed: () async => await _reanswer(context, ref),
+                      //   ),
+                      // ),
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: IconButton(
+                          icon: const Icon(Icons.code_rounded),
+                          iconSize: 18,
+                          onPressed: () async => await _source(context),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          iconSize: 18,
+                          onPressed: () async => await _edit(context),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: IconButton(
+                          icon: const Icon(Icons.delete_outlined),
+                          iconSize: 18,
+                          onPressed: () async => await _delete(context),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                   ),
-                  // SizedBox(
-                  //   width: 36,
-                  //   height: 36,
-                  //   child: IconButton(
-                  //     icon: const Icon(Icons.sync_outlined),
-                  //     iconSize: 18,
-                  //     onPressed: () async => await _reanswer(context, ref),
-                  //   ),
-                  // ),
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.code_rounded),
-                      iconSize: 18,
-                      onPressed: () async => await _source(context),
+                  if (role.isAssistant && message.list.length > 1)
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_rounded),
+                            iconSize: 18,
+                            onPressed: () {},
+                          ),
+                        ),
+                        Text("1/3"),
+                        SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_forward_ios_rounded),
+                            iconSize: 18,
+                            onPressed: () {},
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      iconSize: 18,
-                      onPressed: () async => await _edit(context),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete_outlined),
-                      iconSize: 18,
-                      onPressed: () async => await _delete(context),
-                    ),
-                  ),
                 ],
               ),
             ],
@@ -338,7 +386,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final times = ++_ttsTimes;
 
     try {
-      final text = widget.message.text;
+      final text = widget.message.item.text;
       final response = await http.post(
         Uri.parse(endPoint),
         headers: {
@@ -373,7 +421,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
   }
 
   Future<void> _copy(BuildContext context) async {
-    await Util.copyText(context: context, text: widget.message.text);
+    await Util.copyText(context: context, text: widget.message.item.text);
   }
 
   Future<void> _edit(BuildContext context) async {
@@ -384,11 +432,11 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final message = widget.message;
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => _MessageEditor(text: message.text),
+      builder: (context) => _MessageEditor(text: message.item.text),
     );
 
     if (result != null) {
-      setState(() => message.text = result);
+      setState(() => message.item.text = result);
       await CurrentChat.save();
     }
   }
@@ -442,7 +490,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SelectableText(
-                          widget.message.text,
+                          widget.message.item.text,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         const SizedBox(height: 48, width: double.infinity),
@@ -481,7 +529,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         shape: StadiumBorder(),
         title: Text(S.of(context).copy),
         leading: const Icon(Icons.copy_all),
-        onTap: () => Navigator.pop(context, MessageEvent.copy),
+        onTap: () => Navigator.pop(context, _LongPressEvent.copy),
       ),
       // if (CurrentChat.messages.lastOrNull == message)
       //   ListTile(
@@ -496,25 +544,25 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         shape: StadiumBorder(),
         title: Text(S.of(context).source),
         leading: const Icon(Icons.code_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.source),
+        onTap: () => Navigator.pop(context, _LongPressEvent.source),
       ),
       ListTile(
         minTileHeight: 48,
         shape: StadiumBorder(),
         title: Text(S.of(context).edit),
         leading: const Icon(Icons.edit_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.edit),
+        onTap: () => Navigator.pop(context, _LongPressEvent.edit),
       ),
       ListTile(
         minTileHeight: 48,
         shape: StadiumBorder(),
         title: Text(S.of(context).delete),
         leading: const Icon(Icons.delete_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.delete),
+        onTap: () => Navigator.pop(context, _LongPressEvent.delete),
       ),
     ];
 
-    final event = await showModalBottomSheet<MessageEvent>(
+    final event = await showModalBottomSheet<_LongPressEvent>(
       context: context,
       builder: (context) {
         return Padding(
@@ -529,19 +577,19 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     if (event == null || !context.mounted) return;
 
     switch (event) {
-      case MessageEvent.copy:
+      case _LongPressEvent.copy:
         await _copy(context);
         break;
 
-      case MessageEvent.edit:
+      case _LongPressEvent.edit:
         await _edit(context);
         break;
 
-      case MessageEvent.source:
+      case _LongPressEvent.source:
         await _source(context);
         break;
 
-      case MessageEvent.delete:
+      case _LongPressEvent.delete:
         await _delete(context);
         break;
 
@@ -549,6 +597,83 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         break;
     }
   }
+}
+
+enum _LongPressEvent {
+  reanswer,
+  source,
+  delete,
+  copy,
+  edit,
+  tts,
+}
+
+final _extensionSet = ExtensionSet(
+  <BlockSyntax>[
+    LatexBlockSyntax(),
+    const TableSyntax(),
+    const FootnoteDefSyntax(),
+    const FencedCodeBlockSyntax(),
+    const OrderedListWithCheckboxSyntax(),
+    const UnorderedListWithCheckboxSyntax(),
+  ],
+  <InlineSyntax>[
+    InlineHtmlSyntax(),
+    LatexInlineSyntax(),
+    StrikethroughSyntax(),
+    AutolinkExtensionSyntax()
+  ],
+);
+
+String _markdownToText(String markdown) {
+  final doc = md.Document(
+    extensionSet: _extensionSet,
+  );
+  final buff = StringBuffer();
+  final nodes = doc.parse(markdown);
+
+  for (final node in nodes) {
+    if (node is md.Element) {
+      buff.write(_elementToText(node));
+    }
+  }
+
+  return buff.toString().trim();
+}
+
+String _elementToText(md.Element element) {
+  final buff = StringBuffer();
+  final nodes = element.children ?? [];
+
+  if (element.tag == "ul") {
+    for (final node in nodes) {
+      if (node is md.Element && node.tag == "li") {
+        buff.write(_elementToText(node));
+      }
+    }
+  } else if (element.tag == "ol") {
+    int index = 1;
+    for (final node in nodes) {
+      if (node is md.Element && node.tag == "li") {
+        buff.write("${index++}. ${_elementToText(node)}");
+      }
+    }
+  } else {
+    for (final node in nodes) {
+      if (node is md.Text) {
+        buff.write(node.text);
+      } else if (node is md.Element) {
+        final tag = node.tag;
+        if (tag == "code") continue;
+        if (tag == "latex") continue;
+        if (tag == "th" || tag == "td") continue;
+        buff.write(_elementToText(node));
+      }
+      buff.write("\n");
+    }
+  }
+
+  return buff.toString();
 }
 
 extension _Tts on _MessageWidgetState {
@@ -716,72 +841,4 @@ class _CodeBlockBuilder extends MarkdownElementBuilder {
       ],
     );
   }
-}
-
-final _extensionSet = ExtensionSet(
-  <BlockSyntax>[
-    LatexBlockSyntax(),
-    const TableSyntax(),
-    const FootnoteDefSyntax(),
-    const FencedCodeBlockSyntax(),
-    const OrderedListWithCheckboxSyntax(),
-    const UnorderedListWithCheckboxSyntax(),
-  ],
-  <InlineSyntax>[
-    InlineHtmlSyntax(),
-    LatexInlineSyntax(),
-    StrikethroughSyntax(),
-    AutolinkExtensionSyntax()
-  ],
-);
-
-String _elementToText(md.Element element) {
-  final buff = StringBuffer();
-  final nodes = element.children ?? [];
-
-  if (element.tag == "ul") {
-    for (final node in nodes) {
-      if (node is md.Element && node.tag == "li") {
-        buff.write(_elementToText(node));
-      }
-    }
-  } else if (element.tag == "ol") {
-    int index = 1;
-    for (final node in nodes) {
-      if (node is md.Element && node.tag == "li") {
-        buff.write("${index++}. ${_elementToText(node)}");
-      }
-    }
-  } else {
-    for (final node in nodes) {
-      if (node is md.Text) {
-        buff.write(node.text);
-      } else if (node is md.Element) {
-        final tag = node.tag;
-        if (tag == "code") continue;
-        if (tag == "latex") continue;
-        if (tag == "th" || tag == "td") continue;
-        buff.write(_elementToText(node));
-      }
-      buff.write("\n");
-    }
-  }
-
-  return buff.toString();
-}
-
-String _markdownToText(String markdown) {
-  final doc = md.Document(
-    extensionSet: _extensionSet,
-  );
-  final buff = StringBuffer();
-  final nodes = doc.parse(markdown);
-
-  for (final node in nodes) {
-    if (node is md.Element) {
-      buff.write(_elementToText(node));
-    }
-  }
-
-  return buff.toString().trim();
 }
