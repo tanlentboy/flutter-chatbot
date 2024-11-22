@@ -60,6 +60,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "export_config": MessageLookupByLibrary.simpleMessage("Export Config"),
         "exported_successfully":
             MessageLookupByLibrary.simpleMessage("Exported Successfully"),
+        "failed_to_export": MessageLookupByLibrary.simpleMessage(
+            "Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually)."),
         "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "image_compress_failed":
             MessageLookupByLibrary.simpleMessage("Failed to comprese image"),

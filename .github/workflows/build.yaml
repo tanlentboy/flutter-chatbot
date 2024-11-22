@@ -41,10 +41,17 @@ jobs:
           flutter pub get
           flutter build apk --target-platform android-arm64
 
+      - name: ChangeLog
+        id: changelog
+        run: |
+          echo "latest<<EOF" >> $GITHUB_OUTPUT
+          awk '/^[0-9]/{i++}i==1' CHANGELOG | sed '${/^$/d}' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/flutter-apk/app-release.apk.sha1
-          body: "Automated build for version ${{ github.ref_name }}"
+          body: ${{ steps.changelog.outputs.latest }}

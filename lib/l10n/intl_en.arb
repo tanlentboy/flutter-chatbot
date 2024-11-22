@@ -48,6 +48,7 @@
     "exported_successfully": "Exported Successfully",
     "imported_successfully": "Imported Successfully",
     "restart_app": "Please restart App to load the new settings.",
+    "failed_to_export": "Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually).",
 
     "enter_a_name": "Please enter a name",
     "enter_a_title": "Please enter a title",

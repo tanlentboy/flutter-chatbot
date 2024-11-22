@@ -48,6 +48,7 @@
     "exported_successfully": "导出成功",
     "imported_successfully": "导入成功",
     "restart_app": "请重启应用以加载新配置。",
+    "failed_to_export": "因系统权限限制，无法在该目录下写入文件。建议选择 Documents 或 Download/ChatBot 目录（如不存在，请手动创建）。",
 
     "enter_a_name": "请输入名称",
     "enter_a_title": "请输入标题",

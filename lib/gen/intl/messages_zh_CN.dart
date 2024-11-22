@@ -51,6 +51,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("错误"),
         "export_config": MessageLookupByLibrary.simpleMessage("导出配置"),
         "exported_successfully": MessageLookupByLibrary.simpleMessage("导出成功"),
+        "failed_to_export": MessageLookupByLibrary.simpleMessage(
+            "因系统权限限制，无法在该目录下写入文件。建议选择 Documents 或 Download/ChatBot 目录（如不存在，请手动创建）。"),
         "gallery": MessageLookupByLibrary.simpleMessage("图库"),
         "image_compress_failed": MessageLookupByLibrary.simpleMessage("图片压缩失败"),
         "import_config": MessageLookupByLibrary.simpleMessage("导入配置"),

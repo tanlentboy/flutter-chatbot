@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "dart:io";
+
 import "bot.dart";
 import "api.dart";
 import "../util.dart";
@@ -217,9 +219,22 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
                           context: context,
                           content: Text(S.of(context).exported_successfully),
                         );
+                      } on PathAccessException {
+                        await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(S.of(context).error),
+                            content: Text(S.of(context).failed_to_export),
+                            actions: [
+                              TextButton(
+                                child: Text(S.of(context).ok),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          ),
+                        );
                       } catch (e) {
-                        if (!context.mounted) return;
-                        Util.handleError(context: context, error: e);
+                        await Util.handleError(context: context, error: e);
                       }
                     },
                   ),
@@ -248,10 +263,10 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
                           ),
                         );
 
-                        SystemNavigator.pop();
+                        await SystemNavigator.pop();
                       } catch (e) {
                         if (!context.mounted) return;
-                        Util.handleError(context: context, error: e);
+                        await Util.handleError(context: context, error: e);
                       }
                     },
                   ),

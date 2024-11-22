@@ -470,6 +470,16 @@ class S {
     );
   }
 
+  /// `Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually).`
+  String get failed_to_export {
+    return Intl.message(
+      'Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually).',
+      name: 'failed_to_export',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please enter a name`
   String get enter_a_name {
     return Intl.message(

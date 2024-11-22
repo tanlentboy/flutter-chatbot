@@ -197,19 +197,20 @@ class MessageWidget extends ConsumerWidget {
         if (message.role.isAssistant) ...[
           const SizedBox(height: 12),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CircleAvatar(
                 child: const Icon(Icons.smart_toy),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     message.model ?? CurrentChat.model ?? S.of(context).model,
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     message.time ??
                         CurrentChat.chat?.time ??
@@ -226,7 +227,7 @@ class MessageWidget extends ConsumerWidget {
           child: GestureDetector(
             onLongPress: () async => await _longPress(context, ref),
             child: Container(
-              margin: EdgeInsets.only(top: message.role.isAssistant ? 8 : 12),
+              margin: const EdgeInsets.only(top: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: background,

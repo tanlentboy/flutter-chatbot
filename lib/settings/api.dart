@@ -292,13 +292,8 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
 
       _modelsCtrl.text = models.join(", ");
     } catch (e) {
-      if (context.mounted) {
-        Util.showSnackBar(
-          context: context,
-          content: Text("$e"),
-          duration: const Duration(milliseconds: 1500),
-        );
-      }
+      if (!context.mounted) return;
+      await Util.handleError(context: context, error: e);
     }
   }
 
