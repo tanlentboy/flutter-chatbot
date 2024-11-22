@@ -1,0 +1,7 @@
+0.1.11 (2024-11-22)
+
+    * Add: More informative error messages.
+    * Improve: Style of the Message Widget.
+
+    * 增加：更多错误提示
+    * 改进：消息卡片组件样式
