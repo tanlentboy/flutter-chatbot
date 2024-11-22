@@ -280,32 +280,6 @@ class ChatPageState extends ConsumerState<ChatPage> {
                     );
                   },
                 ),
-                Consumer(
-                  builder: (context, ref, child) {
-                    ref.watch(ttsProvider);
-                    final status = CurrentChat.ttsStatus;
-
-                    return Positioned(
-                      right: 16,
-                      bottom: 16,
-                      child: switch (status) {
-                        TtsStatus.nothing => const SizedBox(),
-                        _ => FloatingActionButton(
-                            child: status.isPlaying
-                                ? const Icon(Icons.pause_sharp)
-                                : Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
-                                    ),
-                                  ),
-                            onPressed: () async =>
-                                await ref.read(ttsProvider.notifier).stop(),
-                          ),
-                      },
-                    );
-                  },
-                ),
               ],
             ),
           ),

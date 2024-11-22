@@ -36,45 +36,11 @@ import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
 final messageProvider = NotifierProvider.autoDispose
     .family<MessageNotifier, void, Message>(MessageNotifier.new);
 
-final ttsProvider =
-    NotifierProvider.autoDispose<TtsNotifier, void>(TtsNotifier.new);
-
 class MessageNotifier extends AutoDisposeFamilyNotifier<void, Message> {
   @override
   void build(Message arg) {}
-  void notify() => ref.notifyListeners();
-}
-
-class TtsNotifier extends AutoDisposeNotifier<void> {
-  static final AudioPlayer _player = AudioPlayer();
-
-  @override
-  void build() {
-    final subscription = _player.onPlayerComplete.listen(
-      (e) => clear(),
-      onError: (e) => clear(),
-    );
-
-    ref.onDispose(() async => await subscription.cancel());
-  }
 
   void notify() => ref.notifyListeners();
-
-  Future<void> play(String path) async {
-    await _player.play(DeviceFileSource(path));
-    CurrentChat.ttsStatus = TtsStatus.playing;
-    notify();
-  }
-
-  Future<void> stop() async {
-    await _player.stop();
-    clear();
-  }
-
-  void clear() {
-    CurrentChat.ttsStatus = TtsStatus.nothing;
-    notify();
-  }
 }
 
 enum MessageRole {
@@ -139,9 +105,8 @@ class Message {
       };
 }
 
-class MessageWidget extends ConsumerWidget {
+class MessageWidget extends ConsumerStatefulWidget {
   final Message message;
-  static int _ttsTimes = 0;
 
   const MessageWidget({
     super.key,
@@ -149,7 +114,15 @@ class MessageWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MessageWidget> createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends ConsumerState<MessageWidget> {
+  static int _ttsTimes = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final message = widget.message;
     ref.watch(messageProvider(message));
 
     final Color background;
@@ -225,18 +198,29 @@ class MessageWidget extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.volume_up),
-                    iconSize: 20,
-                    onPressed: () async => await _tts(context, ref),
-                  ),
+                  const SizedBox(width: 4),
+                  switch (CurrentChat.ttsStatus) {
+                    TtsStatus.nothing => IconButton(
+                        icon: const Icon(Icons.volume_up_rounded),
+                        onPressed: () async => await _tts(context),
+                      ),
+                    TtsStatus.loading || TtsStatus.playing => IconButton(
+                        icon: Icon(CurrentChat.ttsStatus.isPlaying
+                            ? Icons.pause_circle_outlined
+                            : Icons.cancel_outlined),
+                        onPressed: () async {
+                          await _ttsStop();
+                          setState(
+                              () => CurrentChat.ttsStatus = TtsStatus.nothing);
+                        },
+                      ),
+                  }
                 ],
               ),
             ],
             SizedBox(height: role.isAssistant ? 8 : 12),
             GestureDetector(
-              onLongPress: () async => await _longPress(context, ref),
+              onLongPress: () async => await _longPress(context),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 constraints: role.isUser
@@ -259,7 +243,7 @@ class MessageWidget extends ConsumerWidget {
                   onTapLink: (text, href, title) async =>
                       await Util.openLink(context: context, link: href),
                   builders: {
-                    "pre": CodeBlockBuilder(context: context),
+                    "pre": _CodeBlockBuilder(context: context),
                     "latex": LatexElementBuilder(textScaleFactor: 1.2),
                   },
                   styleSheet: markdownStyleSheet,
@@ -277,7 +261,7 @@ class MessageWidget extends ConsumerWidget {
                     width: 36,
                     height: 36,
                     child: IconButton(
-                      icon: const Icon(Icons.paste),
+                      icon: const Icon(Icons.paste_rounded),
                       iconSize: 16,
                       onPressed: () async => await _copy(context),
                     ),
@@ -295,7 +279,7 @@ class MessageWidget extends ConsumerWidget {
                     width: 36,
                     height: 36,
                     child: IconButton(
-                      icon: const Icon(Icons.code_outlined),
+                      icon: const Icon(Icons.code_rounded),
                       iconSize: 18,
                       onPressed: () async => await _source(context),
                     ),
@@ -306,7 +290,7 @@ class MessageWidget extends ConsumerWidget {
                     child: IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       iconSize: 18,
-                      onPressed: () async => await _edit(context, ref),
+                      onPressed: () async => await _edit(context),
                     ),
                   ),
                   SizedBox(
@@ -315,7 +299,7 @@ class MessageWidget extends ConsumerWidget {
                     child: IconButton(
                       icon: const Icon(Icons.delete_outlined),
                       iconSize: 18,
-                      onPressed: () async => await _delete(context, ref),
+                      onPressed: () async => await _delete(context),
                     ),
                   ),
                 ],
@@ -327,7 +311,7 @@ class MessageWidget extends ConsumerWidget {
     );
   }
 
-  Future<void> _tts(BuildContext context, WidgetRef ref) async {
+  Future<void> _tts(BuildContext context) async {
     if (!CurrentChat.ttsStatus.isNothing) return;
 
     final tts = Config.tts;
@@ -350,11 +334,11 @@ class MessageWidget extends ConsumerWidget {
     final apiKey = api.key;
     final endPoint = "$apiUrl/audio/speech";
 
-    CurrentChat.ttsStatus = TtsStatus.loading;
-    ref.read(ttsProvider.notifier).notify();
+    setState(() => CurrentChat.ttsStatus = TtsStatus.loading);
     final times = ++_ttsTimes;
 
     try {
+      final text = widget.message.text;
       final response = await http.post(
         Uri.parse(endPoint),
         headers: {
@@ -365,7 +349,7 @@ class MessageWidget extends ConsumerWidget {
           "model": model,
           "voice": voice,
           "stream": false,
-          "input": _markdownToText(message.text),
+          "input": _markdownToText(text),
         }),
       );
 
@@ -380,83 +364,39 @@ class MessageWidget extends ConsumerWidget {
       await file.writeAsBytes(response.bodyBytes);
       if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
 
-      await ref.read(ttsProvider.notifier).play(path);
+      await _ttsPlay(path);
+      setState(() => CurrentChat.ttsStatus = TtsStatus.playing);
     } catch (e) {
       if (context.mounted) await Util.handleError(context: context, error: e);
-      CurrentChat.ttsStatus = TtsStatus.nothing;
-      ref.read(ttsProvider.notifier).notify();
+      setState(() => CurrentChat.ttsStatus = TtsStatus.nothing);
     }
   }
 
   Future<void> _copy(BuildContext context) async {
-    await Util.copyText(context: context, text: message.text);
+    await Util.copyText(context: context, text: widget.message.text);
   }
 
-  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+  Future<void> _edit(BuildContext context) async {
     if (!CurrentChat.chatStatus.isNothing) return;
     if (!CurrentChat.ttsStatus.isNothing) return;
-
     InputWidget.unFocus();
-    final undoCtrl = UndoHistoryController();
-    final textCtrl = TextEditingController(text: message.text);
 
-    final result = await showDialog<bool>(
+    final message = widget.message;
+    final result = await showDialog<String>(
       context: context,
-      builder: (context) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.undo),
-                onPressed: () => undoCtrl.undo(),
-              ),
-              IconButton(
-                icon: const Icon(Icons.redo),
-                onPressed: () => undoCtrl.redo(),
-              ),
-              IconButton(
-                icon: const Icon(Icons.save_outlined),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-            title: Text(S.of(context).edit),
-          ),
-          body: Padding(
-            padding:
-                const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
-            child: TextField(
-              expands: true,
-              maxLines: null,
-              controller: textCtrl,
-              undoController: undoCtrl,
-              textAlign: TextAlign.start,
-              keyboardType: TextInputType.multiline,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: S.of(context).enter_your_message,
-              ),
-            ),
-          ),
-        );
-      },
+      builder: (context) => _MessageEditor(text: message.text),
     );
-    if (!(result ?? false)) return;
-    undoCtrl.dispose();
-    textCtrl.dispose();
 
-    message.text = textCtrl.text;
-    ref.read(messageProvider(message).notifier).notify();
-    await CurrentChat.save();
+    if (result != null) {
+      setState(() => message.text = result);
+      await CurrentChat.save();
+    }
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+  Future<void> _delete(BuildContext context) async {
     if (!CurrentChat.chatStatus.isNothing) return;
     if (!CurrentChat.ttsStatus.isNothing) return;
-    CurrentChat.messages.remove(message);
+    CurrentChat.messages.remove(widget.message);
     ref.read(messagesProvider.notifier).notify();
     await CurrentChat.save();
   }
@@ -502,7 +442,7 @@ class MessageWidget extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SelectableText(
-                          message.text,
+                          widget.message.text,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         const SizedBox(height: 48, width: double.infinity),
@@ -518,11 +458,11 @@ class MessageWidget extends ConsumerWidget {
     );
   }
 
-  Future<void> _reanswer(BuildContext context, WidgetRef ref) async {
+  Future<void> _reanswer(BuildContext context) async {
     if (!CurrentChat.chatStatus.isNothing) return;
   }
 
-  Future<void> _longPress(BuildContext context, WidgetRef ref) async {
+  Future<void> _longPress(BuildContext context) async {
     InputWidget.unFocus();
 
     final children = [
@@ -594,7 +534,7 @@ class MessageWidget extends ConsumerWidget {
         break;
 
       case MessageEvent.edit:
-        await _edit(context, ref);
+        await _edit(context);
         break;
 
       case MessageEvent.source:
@@ -602,7 +542,7 @@ class MessageWidget extends ConsumerWidget {
         break;
 
       case MessageEvent.delete:
-        await _delete(context, ref);
+        await _delete(context);
         break;
 
       default:
@@ -611,11 +551,108 @@ class MessageWidget extends ConsumerWidget {
   }
 }
 
-class CodeBlockBuilder extends MarkdownElementBuilder {
+extension _Tts on _MessageWidgetState {
+  static StreamSubscription? _subscription;
+  static final AudioPlayer _player = AudioPlayer();
+
+  Future<void> _ttsPlay(String path) async {
+    await _subscription?.cancel();
+
+    _subscription = _player.onPlayerComplete.listen(
+      (e) => _ttsClear(),
+      onError: (e) => _ttsClear(),
+    );
+
+    await _player.play(DeviceFileSource(path));
+  }
+
+  Future<void> _ttsStop() async {
+    await _player.stop();
+  }
+
+  void _ttsClear() {
+    CurrentChat.ttsStatus = TtsStatus.nothing;
+    ref.read(messageProvider(widget.message).notifier).notify();
+  }
+}
+
+class _MessageEditor extends StatefulWidget {
+  final String text;
+
+  const _MessageEditor({
+    required this.text,
+  });
+
+  @override
+  State<_MessageEditor> createState() => _MessageEditorState();
+}
+
+class _MessageEditorState extends State<_MessageEditor> {
+  late final UndoHistoryController _undoCtrl;
+  late final TextEditingController _editCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _undoCtrl = UndoHistoryController();
+    _editCtrl = TextEditingController(text: widget.text);
+  }
+
+  @override
+  void dispose() {
+    _editCtrl.dispose();
+    _undoCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(S.of(context).edit),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.undo),
+            onPressed: () => _undoCtrl.undo(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.redo),
+            onPressed: () => _undoCtrl.redo(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.save_outlined),
+            onPressed: () => Navigator.of(context).pop(_editCtrl.text),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
+        child: TextField(
+          expands: true,
+          maxLines: null,
+          controller: _editCtrl,
+          undoController: _undoCtrl,
+          textAlign: TextAlign.start,
+          keyboardType: TextInputType.multiline,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: S.of(context).enter_your_message,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CodeBlockBuilder extends MarkdownElementBuilder {
   var language = "";
   final BuildContext context;
 
-  CodeBlockBuilder({required this.context});
+  _CodeBlockBuilder({required this.context});
 
   @override
   void visitElementBefore(md.Element element) {
