@@ -152,11 +152,9 @@ class MessageWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(messageProvider(message));
 
-    final MainAxisAlignment optsAlignment;
-    String content = message.text;
-    final Alignment alignment;
     final Color background;
-
+    final Alignment alignment;
+    final CrossAxisAlignment crossAlignment;
     final colorScheme = Theme.of(context).colorScheme;
     final markdownStyleSheet = MarkdownStyleSheet(
       codeblockPadding: EdgeInsets.all(0),
@@ -172,153 +170,160 @@ class MessageWidget extends ConsumerWidget {
       ),
     );
 
+    final role = message.role;
+    var content = message.text;
     if (message.image != null) {
-      content =
-          "![image](data:image/jpeg;base64,${message.image})\n\n${message.text}";
+      content = "![image](data:image/jpeg;base64,${message.image})\n\n$content";
     }
 
-    switch (message.role) {
+    switch (role) {
       case MessageRole.user:
         background = colorScheme.secondaryContainer;
-        optsAlignment = MainAxisAlignment.end;
+        crossAlignment = CrossAxisAlignment.end;
         alignment = Alignment.topRight;
         break;
 
       case MessageRole.assistant:
         background = colorScheme.surfaceContainerHighest;
-        optsAlignment = MainAxisAlignment.start;
+        crossAlignment = CrossAxisAlignment.start;
         alignment = Alignment.topLeft;
         break;
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (message.role.isAssistant) ...[
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                child: const Icon(Icons.smart_toy),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      alignment: alignment,
+      child: IntrinsicWidth(
+        child: Column(
+          crossAxisAlignment: crossAlignment,
+          children: [
+            if (role.isAssistant) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    message.model ?? CurrentChat.model ?? S.of(context).model,
-                    style: Theme.of(context).textTheme.titleSmall,
+                  CircleAvatar(
+                    child: const Icon(Icons.smart_toy),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    message.time ??
-                        CurrentChat.chat?.time ??
-                        Util.formatDateTime(DateTime.now()),
-                    style: Theme.of(context).textTheme.labelSmall,
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        message.model ??
+                            CurrentChat.model ??
+                            S.of(context).model,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        message.time ??
+                            CurrentChat.chat?.time ??
+                            Util.formatDateTime(DateTime.now()),
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.volume_up),
+                    iconSize: 20,
+                    onPressed: () async => await _tts(context, ref),
                   ),
                 ],
-              )
-            ],
-          ),
-        ],
-        Align(
-          alignment: alignment,
-          child: GestureDetector(
-            onLongPress: () async => await _longPress(context, ref),
-            child: Container(
-              margin: const EdgeInsets.only(top: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: background,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  bottomLeft: const Radius.circular(16),
-                  bottomRight: const Radius.circular(16),
-                  topRight: Radius.circular(
-                      message.role == MessageRole.user ? 2 : 16),
-                ),
               ),
-              child: MarkdownBody(
-                data: content,
-                shrinkWrap: true,
-                extensionSet: _extensionSet,
-                onTapLink: (text, href, title) async =>
-                    await Util.openLink(context: context, link: href),
-                builders: {
-                  "pre": CodeBlockBuilder(context: context),
-                  "latex": LatexElementBuilder(textScaleFactor: 1.2),
-                },
-                styleSheet: markdownStyleSheet,
-                styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+            ],
+            SizedBox(height: role.isAssistant ? 8 : 12),
+            GestureDetector(
+              onLongPress: () async => await _longPress(context, ref),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                constraints: role.isUser
+                    ? BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.8)
+                    : null,
+                decoration: BoxDecoration(
+                  color: background,
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(16),
+                    bottomLeft: const Radius.circular(16),
+                    bottomRight: const Radius.circular(16),
+                    topRight: Radius.circular(role.isUser ? 2 : 16),
+                  ),
+                ),
+                child: MarkdownBody(
+                  data: content,
+                  shrinkWrap: true,
+                  extensionSet: _extensionSet,
+                  onTapLink: (text, href, title) async =>
+                      await Util.openLink(context: context, link: href),
+                  builders: {
+                    "pre": CodeBlockBuilder(context: context),
+                    "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                  },
+                  styleSheet: markdownStyleSheet,
+                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                ),
               ),
             ),
-          ),
-        ),
-        if (CurrentChat.messages.lastOrNull == message &&
-            CurrentChat.chatStatus.isNothing) ...[
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: optsAlignment,
-            children: [
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.paste),
-                  iconSize: 16,
-                  onPressed: () async => await _copy(context),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.play_circle_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _tts(context, ref),
-                ),
-              ),
-              // SizedBox(
-              //   width: 36,
-              //   height: 36,
-              //   child: IconButton(
-              //     icon: const Icon(Icons.sync_outlined),
-              //     iconSize: 18,
-              //     onPressed: () async => await _reanswer(context, ref),
-              //   ),
-              // ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.code_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _source(context),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _edit(context, ref),
-                ),
-              ),
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.delete_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _delete(context, ref),
-                ),
+            if (CurrentChat.messages.lastOrNull == message &&
+                CurrentChat.chatStatus.isNothing) ...[
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.paste),
+                      iconSize: 16,
+                      onPressed: () async => await _copy(context),
+                    ),
+                  ),
+                  // SizedBox(
+                  //   width: 36,
+                  //   height: 36,
+                  //   child: IconButton(
+                  //     icon: const Icon(Icons.sync_outlined),
+                  //     iconSize: 18,
+                  //     onPressed: () async => await _reanswer(context, ref),
+                  //   ),
+                  // ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.code_outlined),
+                      iconSize: 18,
+                      onPressed: () async => await _source(context),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit_outlined),
+                      iconSize: 18,
+                      onPressed: () async => await _edit(context, ref),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.delete_outlined),
+                      iconSize: 18,
+                      onPressed: () async => await _delete(context, ref),
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
-      ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -538,13 +543,6 @@ class MessageWidget extends ConsumerWidget {
         leading: const Icon(Icons.copy_all),
         onTap: () => Navigator.pop(context, MessageEvent.copy),
       ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).play),
-        leading: const Icon(Icons.play_circle_outlined),
-        onTap: () => Navigator.pop(context, MessageEvent.tts),
-      ),
       // if (CurrentChat.messages.lastOrNull == message)
       //   ListTile(
       //     minTileHeight: 48,
@@ -591,10 +589,6 @@ class MessageWidget extends ConsumerWidget {
     if (event == null || !context.mounted) return;
 
     switch (event) {
-      case MessageEvent.tts:
-        await _tts(context, ref);
-        break;
-
       case MessageEvent.copy:
         await _copy(context);
         break;
@@ -611,8 +605,7 @@ class MessageWidget extends ConsumerWidget {
         await _delete(context, ref);
         break;
 
-      case MessageEvent.reanswer:
-        await _reanswer(context, ref);
+      default:
         break;
     }
   }
@@ -643,49 +636,47 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
     };
     final content = text.textContent.trim();
 
-    return IntrinsicWidth(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: theme == codeDarkTheme
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.blueGrey.withOpacity(0.3),
-            ),
-            padding: EdgeInsets.only(left: 16, right: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(language),
-                InkWell(
-                  onTap: () async => await Util.copyText(
-                    context: context,
-                    text: content,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
-                    child: Text(
-                      S.of(context).copy,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: theme == codeDarkTheme
+                ? Colors.black.withOpacity(0.3)
+                : Colors.blueGrey.withOpacity(0.3),
+          ),
+          padding: EdgeInsets.only(left: 16, right: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(language),
+              InkWell(
+                onTap: () async => await Util.copyText(
+                  context: context,
+                  text: content,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 8),
+                  child: Text(
+                    S.of(context).copy,
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: HighlightView(
-              content,
-              tabSize: 2,
-              theme: theme,
-              language: language,
-              padding: const EdgeInsets.all(8),
-            ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: HighlightView(
+            content,
+            tabSize: 2,
+            theme: theme,
+            language: language,
+            padding: const EdgeInsets.all(8),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
