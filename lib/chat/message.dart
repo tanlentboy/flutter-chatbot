@@ -25,10 +25,12 @@ import "dart:async";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
+import "package:langchain/langchain.dart";
 import "package:markdown/markdown.dart" as md;
 import "package:audioplayers/audioplayers.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
+import "package:langchain_openai/langchain_openai.dart";
 import "package:markdown/markdown.dart" hide Element, Text;
 import "package:flutter_highlighter/flutter_highlighter.dart";
 import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
@@ -193,47 +195,65 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             if (role.isAssistant) ...[
               const SizedBox(height: 12),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     child: const Icon(Icons.smart_toy),
                   ),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.model ?? CurrentChat.model ?? S.of(context).model,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.time ??
-                            CurrentChat.chat?.time ??
-                            Util.formatDateTime(DateTime.now()),
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                    ],
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.model ??
+                              CurrentChat.model ??
+                              S.of(context).model,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.time ??
+                              CurrentChat.chat?.time ??
+                              Util.formatDateTime(DateTime.now()),
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 4),
-                  switch (CurrentChat.ttsStatus) {
-                    TtsStatus.nothing => IconButton(
-                        icon: const Icon(Icons.volume_up_rounded),
-                        onPressed: () async => await _tts(context),
-                      ),
-                    TtsStatus.loading || TtsStatus.playing => IconButton(
-                        icon: Icon(CurrentChat.ttsStatus.isPlaying
-                            ? Icons.pause_circle_outlined
-                            : Icons.cancel_outlined),
+                  if (message.list.length > 1) ...[
+                    const SizedBox(width: 4),
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_rounded),
+                        iconSize: 16,
                         onPressed: () async {
-                          await _ttsStop();
-                          setState(
-                              () => CurrentChat.ttsStatus = TtsStatus.nothing);
+                          if (!CurrentChat.chatStatus.isNothing) return;
+                          if (item == message.list.first) return;
+                          setState(() => message.index--);
+                          await CurrentChat.save();
                         },
                       ),
-                  }
+                    ),
+                    Text("${message.index + 1}/${message.list.length}"),
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_forward_ios_rounded),
+                        iconSize: 16,
+                        onPressed: () async {
+                          if (!CurrentChat.chatStatus.isNothing) return;
+                          if (item == message.list.last) return;
+                          setState(() => message.index++);
+                          await CurrentChat.save();
+                        },
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -274,82 +294,66 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                 CurrentChat.chatStatus.isNothing) ...[
               const SizedBox(height: 4),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: IconButton(
-                          icon: const Icon(Icons.paste_rounded),
-                          iconSize: 16,
-                          onPressed: () async => await _copy(context),
-                        ),
+                  if (role.isAssistant)
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: IconButton(
+                        icon: const Icon(Icons.sync_outlined),
+                        iconSize: 18,
+                        onPressed: () async => await _reanswer(context),
                       ),
-                      // SizedBox(
-                      //   width: 36,
-                      //   height: 36,
-                      //   child: IconButton(
-                      //     icon: const Icon(Icons.sync_outlined),
-                      //     iconSize: 18,
-                      //     onPressed: () async => await _reanswer(context, ref),
-                      //   ),
-                      // ),
-                      SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: IconButton(
-                          icon: const Icon(Icons.code_rounded),
-                          iconSize: 18,
-                          onPressed: () async => await _source(context),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: IconButton(
-                          icon: const Icon(Icons.edit_outlined),
-                          iconSize: 18,
-                          onPressed: () async => await _edit(context),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: IconButton(
-                          icon: const Icon(Icons.delete_outlined),
-                          iconSize: 18,
-                          onPressed: () async => await _delete(context),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                  if (role.isAssistant && message.list.length > 1)
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_back_ios_rounded),
-                            iconSize: 18,
-                            onPressed: () {},
-                          ),
-                        ),
-                        Text("1/3"),
-                        SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_forward_ios_rounded),
-                            iconSize: 18,
-                            onPressed: () {},
-                          ),
-                        ),
-                      ],
                     ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: switch (CurrentChat.ttsStatus) {
+                      TtsStatus.nothing => IconButton(
+                          icon: const Icon(Icons.volume_up_outlined),
+                          iconSize: 18,
+                          onPressed: () async => await _tts(context),
+                        ),
+                      TtsStatus.loading || TtsStatus.playing => IconButton(
+                          icon: Icon(CurrentChat.ttsStatus.isPlaying
+                              ? Icons.pause_circle_outlined
+                              : Icons.cancel_outlined),
+                          iconSize: 18,
+                          onPressed: () async {
+                            await _ttsStop();
+                            setState(() =>
+                                CurrentChat.ttsStatus = TtsStatus.nothing);
+                          },
+                        ),
+                    },
+                  ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.paste_rounded),
+                      iconSize: 16,
+                      onPressed: () async => await _copy(context),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit_outlined),
+                      iconSize: 18,
+                      onPressed: () async => await _edit(context),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.delete_outlined),
+                      iconSize: 18,
+                      onPressed: () async => await _delete(context),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -444,8 +448,19 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
   Future<void> _delete(BuildContext context) async {
     if (!CurrentChat.chatStatus.isNothing) return;
     if (!CurrentChat.ttsStatus.isNothing) return;
-    CurrentChat.messages.remove(widget.message);
-    ref.read(messagesProvider.notifier).notify();
+
+    final message = widget.message;
+    final list = message.list;
+    final item = message.item;
+
+    if (list.length == 1) {
+      CurrentChat.messages.remove(message);
+      ref.read(messagesProvider.notifier).notify();
+    } else {
+      if (item == list.last) message.index--;
+      setState(() => list.remove(item));
+    }
+
     await CurrentChat.save();
   }
 
@@ -508,6 +523,67 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
   Future<void> _reanswer(BuildContext context) async {
     if (!CurrentChat.chatStatus.isNothing) return;
+
+    final messages = CurrentChat.messages;
+    final apiUrl = CurrentChat.apiUrl;
+    final apiKey = CurrentChat.apiKey;
+    final model = CurrentChat.model;
+
+    if (apiUrl == null || apiKey == null || model == null) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).setup_bot_api_first),
+      );
+      return;
+    }
+
+    final chatContext = buildChatContext(messages);
+    final item = MessageItem(
+      text: "",
+      model: CurrentChat.model,
+      role: MessageRole.assistant,
+      time: Util.formatDateTime(DateTime.now()),
+    );
+
+    final message = widget.message;
+    setState(() {
+      message.list.add(item);
+      message.index = message.list.length - 1;
+      CurrentChat.chatStatus = CurrentChatStatus.responding;
+    });
+
+    try {
+      final llm = ChatOpenAI(
+        apiKey: apiKey,
+        baseUrl: apiUrl,
+        defaultOptions: ChatOpenAIOptions(
+          model: model,
+          maxTokens: CurrentChat.maxTokens,
+          temperature: CurrentChat.temperature,
+        ),
+      );
+
+      if (CurrentChat.stream ?? true) {
+        final stream = llm.stream(PromptValue.chat(chatContext));
+        await for (final chunk in stream) {
+          setState(() => item.text += chunk.output.content);
+        }
+      } else {
+        final result = await llm.invoke(PromptValue.chat(chatContext));
+        setState(() => item.text += result.output.content);
+      }
+    } catch (e) {
+      if (context.mounted) await Util.handleError(context: context, error: e);
+      if (item.text.isEmpty) {
+        setState(() {
+          message.list.removeLast();
+          message.index--;
+        });
+      }
+    }
+
+    setState(() => CurrentChat.chatStatus = CurrentChatStatus.nothing);
+    await CurrentChat.save();
   }
 
   Future<void> _longPress(BuildContext context) async {
@@ -531,14 +607,6 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         leading: const Icon(Icons.copy_all),
         onTap: () => Navigator.pop(context, _LongPressEvent.copy),
       ),
-      // if (CurrentChat.messages.lastOrNull == message)
-      //   ListTile(
-      //     minTileHeight: 48,
-      //     shape: StadiumBorder(),
-      //     title: Text(S.of(context).reanswer),
-      //     leading: const Icon(Icons.sync_outlined),
-      //     onTap: () => Navigator.pop(context, MessageEvent.reanswer),
-      //   ),
       ListTile(
         minTileHeight: 48,
         shape: StadiumBorder(),
@@ -600,12 +668,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 }
 
 enum _LongPressEvent {
-  reanswer,
   source,
   delete,
   copy,
   edit,
-  tts,
 }
 
 final _extensionSet = ExtensionSet(
