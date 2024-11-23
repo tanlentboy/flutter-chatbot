@@ -21,6 +21,7 @@ import "../gen/l10n.dart";
 
 import "dart:io";
 import "dart:convert";
+import "package:http/http.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:langchain/langchain.dart";
@@ -45,7 +46,7 @@ class InputWidget extends ConsumerStatefulWidget {
 }
 
 class _InputWidgetState extends ConsumerState<InputWidget> {
-  int _sendTimes = 0;
+  Client? client;
   final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _inputCtrl = TextEditingController();
 
@@ -218,7 +219,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       image: CurrentChat.image,
     )));
 
-    final times = ++_sendTimes;
     final scrollCtrl = widget.scrollCtrl;
     final chatContext = buildChatContext(messages);
     final item = MessageItem(
@@ -231,16 +231,17 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     messages.add(assistant);
     ref.read(messagesProvider.notifier).notify();
-    scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
 
     setState(() {
       _inputCtrl.clear();
       CurrentChat.image = null;
-      CurrentChat.chatStatus = CurrentChatStatus.responding;
+      CurrentChat.chatStatus = ChatStatus.responding;
     });
 
     try {
+      client ??= Client();
       final llm = ChatOpenAI(
+        client: client,
         apiKey: apiKey,
         baseUrl: apiUrl,
         defaultOptions: ChatOpenAIOptions(
@@ -253,21 +254,20 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       if (CurrentChat.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(chatContext));
         await for (final chunk in stream) {
-          if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
           item.text += chunk.output.content;
           ref.read(messageProvider(assistant).notifier).notify();
           scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
         }
       } else {
         final result = await llm.invoke(PromptValue.chat(chatContext));
-        if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
         item.text += result.output.content;
         ref.read(messageProvider(assistant).notifier).notify();
         scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
       }
     } catch (e) {
-      if (CurrentChat.chatStatus.isNothing || times != _sendTimes) return;
-      if (context.mounted) await Util.handleError(context: context, error: e);
+      if (CurrentChat.chatStatus.isResponding && context.mounted) {
+        await Util.handleError(context: context, error: e);
+      }
       if (item.text.isEmpty) {
         messages.length -= 2;
         _inputCtrl.text = text;
@@ -275,28 +275,18 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       }
     }
 
-    if (await CurrentChat.save()) {
-      ref.read(chatProvider.notifier).notify();
-      ref.read(chatsProvider.notifier).notify();
-    }
-    setState(() => CurrentChat.chatStatus = CurrentChatStatus.nothing);
+    setState(() => CurrentChat.chatStatus = ChatStatus.nothing);
     ref.read(messageProvider(assistant).notifier).notify();
+    if (await CurrentChat.save()) {
+      ref.read(chatsProvider.notifier).notify();
+      ref.read(chatProvider.notifier).notify();
+    }
   }
 
   Future<void> _stopResponding(BuildContext context) async {
-    setState(() => CurrentChat.chatStatus = CurrentChatStatus.nothing);
-    final list = CurrentChat.messages;
-
-    final user = list[list.length - 2].item;
-    final assistant = list.last.item;
-
-    if (assistant.text.isEmpty) {
-      list.removeRange(list.length - 2, list.length);
-      ref.read(messagesProvider.notifier).notify();
-      _inputCtrl.text = user.text;
-    } else if (await CurrentChat.save()) {
-      ref.read(chatsProvider.notifier).notify();
-    }
+    CurrentChat.chatStatus = ChatStatus.nothing;
+    client?.close();
+    client = null;
   }
 }
 

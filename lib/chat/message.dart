@@ -140,16 +140,19 @@ class MessageWidget extends ConsumerStatefulWidget {
 }
 
 class _MessageWidgetState extends ConsumerState<MessageWidget> {
-  static int _ttsTimes = 0;
+  http.Client? ttsClient;
+  http.Client? chatClient;
+  static final AudioPlayer _player = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
     final message = widget.message;
     ref.watch(messageProvider(message));
 
-    final Color background;
-    final Alignment alignment;
-    final CrossAxisAlignment crossAlignment;
+    final item = message.item;
+    var content = item.text;
+    final role = item.role;
+
     final colorScheme = Theme.of(context).colorScheme;
     final markdownStyleSheet = MarkdownStyleSheet(
       codeblockPadding: EdgeInsets.all(0),
@@ -165,32 +168,21 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       ),
     );
 
-    final item = message.item;
-    var content = item.text;
-    final role = item.role;
+    final background = role.isUser
+        ? colorScheme.secondaryContainer
+        : colorScheme.surfaceContainerHighest;
+
     if (item.image != null) {
       content = "![image](data:image/jpeg;base64,${item.image})\n\n$content";
     }
 
-    switch (role) {
-      case MessageRole.user:
-        background = colorScheme.secondaryContainer;
-        crossAlignment = CrossAxisAlignment.end;
-        alignment = Alignment.topRight;
-        break;
-
-      case MessageRole.assistant:
-        background = colorScheme.surfaceContainerHighest;
-        crossAlignment = CrossAxisAlignment.start;
-        alignment = Alignment.topLeft;
-        break;
-    }
-
     return Container(
-      alignment: alignment,
+      alignment: role.isAssistant ? Alignment.topLeft : Alignment.topRight,
       child: IntrinsicWidth(
         child: Column(
-          crossAxisAlignment: crossAlignment,
+          crossAxisAlignment: role.isAssistant
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.end,
           children: [
             if (role.isAssistant) ...[
               const SizedBox(height: 12),
@@ -224,35 +216,47 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                   ),
                   if (message.list.length > 1) ...[
                     const SizedBox(width: 4),
-                    SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_rounded),
-                        iconSize: 16,
-                        onPressed: () async {
-                          if (!CurrentChat.chatStatus.isNothing) return;
-                          if (item == message.list.first) return;
-                          setState(() => message.index--);
-                          await CurrentChat.save();
-                        },
+                    if (message != CurrentChat.messages.last ||
+                        CurrentChat.chatStatus.isNothing) ...[
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_rounded),
+                          iconSize: 16,
+                          onPressed: () async {
+                            if (item == message.list.first) return;
+                            setState(() => message.index--);
+                            await CurrentChat.save();
+                          },
+                        ),
                       ),
-                    ),
-                    Text("${message.index + 1}/${message.list.length}"),
-                    SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios_rounded),
-                        iconSize: 16,
-                        onPressed: () async {
-                          if (!CurrentChat.chatStatus.isNothing) return;
-                          if (item == message.list.last) return;
-                          setState(() => message.index++);
-                          await CurrentChat.save();
-                        },
+                      Text("${message.index + 1}/${message.list.length}"),
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios_rounded),
+                          iconSize: 16,
+                          onPressed: () async {
+                            if (item == message.list.last) return;
+                            setState(() => message.index++);
+                            await CurrentChat.save();
+                          },
+                        ),
                       ),
-                    ),
+                    ],
+                    if (message == CurrentChat.messages.last &&
+                        CurrentChat.chatStatus.isResponding)
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: IconButton(
+                          icon: const Icon(Icons.pause_outlined),
+                          iconSize: 18,
+                          onPressed: () async => await _reanswerStop(context),
+                        ),
+                      ),
                   ],
                 ],
               ),
@@ -294,8 +298,29 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                 CurrentChat.chatStatus.isNothing) ...[
               const SizedBox(height: 4),
               Row(
+                mainAxisAlignment: role.isAssistant
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.end,
                 children: [
-                  if (role.isAssistant)
+                  if (role.isAssistant) ...[
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: switch (CurrentChat.ttsStatus) {
+                        TtsStatus.nothing => IconButton(
+                            icon: const Icon(Icons.volume_up_outlined),
+                            iconSize: 18,
+                            onPressed: () async => await _tts(context),
+                          ),
+                        TtsStatus.loading || TtsStatus.playing => IconButton(
+                            icon: Icon(CurrentChat.ttsStatus.isPlaying
+                                ? Icons.pause_circle_outlined
+                                : Icons.cancel_outlined),
+                            iconSize: 18,
+                            onPressed: () async => await _ttsStop(),
+                          ),
+                      },
+                    ),
                     SizedBox(
                       width: 36,
                       height: 36,
@@ -305,33 +330,12 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                         onPressed: () async => await _reanswer(context),
                       ),
                     ),
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: switch (CurrentChat.ttsStatus) {
-                      TtsStatus.nothing => IconButton(
-                          icon: const Icon(Icons.volume_up_outlined),
-                          iconSize: 18,
-                          onPressed: () async => await _tts(context),
-                        ),
-                      TtsStatus.loading || TtsStatus.playing => IconButton(
-                          icon: Icon(CurrentChat.ttsStatus.isPlaying
-                              ? Icons.pause_circle_outlined
-                              : Icons.cancel_outlined),
-                          iconSize: 18,
-                          onPressed: () async {
-                            await _ttsStop();
-                            setState(() =>
-                                CurrentChat.ttsStatus = TtsStatus.nothing);
-                          },
-                        ),
-                    },
-                  ),
+                  ],
                   SizedBox(
                     width: 36,
                     height: 36,
                     child: IconButton(
-                      icon: const Icon(Icons.paste_rounded),
+                      icon: const Icon(Icons.paste_outlined),
                       iconSize: 16,
                       onPressed: () async => await _copy(context),
                     ),
@@ -365,6 +369,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
   Future<void> _tts(BuildContext context) async {
     if (!CurrentChat.ttsStatus.isNothing) return;
+    final text = widget.message.item.text;
+    if (text.isEmpty) return;
 
     final tts = Config.tts;
     final model = tts.model;
@@ -387,11 +393,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final endPoint = "$apiUrl/audio/speech";
 
     setState(() => CurrentChat.ttsStatus = TtsStatus.loading);
-    final times = ++_ttsTimes;
 
     try {
-      final text = widget.message.item.text;
-      final response = await http.post(
+      ttsClient ??= http.Client();
+      final response = await ttsClient!.post(
         Uri.parse(endPoint),
         headers: {
           "Authorization": "Bearer $apiKey",
@@ -414,14 +419,34 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
       final file = File(path);
       await file.writeAsBytes(response.bodyBytes);
-      if (CurrentChat.ttsStatus.isNothing || times != _ttsTimes) return;
 
-      await _ttsPlay(path);
-      setState(() => CurrentChat.ttsStatus = TtsStatus.playing);
+      if (CurrentChat.ttsStatus.isLoading) {
+        setState(() => CurrentChat.ttsStatus = TtsStatus.playing);
+        await _ttsPlay(path);
+      }
     } catch (e) {
-      if (context.mounted) await Util.handleError(context: context, error: e);
-      setState(() => CurrentChat.ttsStatus = TtsStatus.nothing);
+      if (!CurrentChat.ttsStatus.isNothing && context.mounted) {
+        await Util.handleError(context: context, error: e);
+      }
     }
+
+    setState(() => CurrentChat.ttsStatus = TtsStatus.nothing);
+  }
+
+  Future<void> _ttsPlay(String path) async {
+    await _player.play(DeviceFileSource(path));
+    await _player.onPlayerStateChanged.first;
+  }
+
+  Future<void> _ttsStop() async {
+    if (CurrentChat.ttsStatus.isLoading) {
+      ttsClient?.close();
+      ttsClient = null;
+    }
+    if (CurrentChat.ttsStatus.isPlaying) {
+      await _player.stop();
+    }
+    CurrentChat.ttsStatus = TtsStatus.nothing;
   }
 
   Future<void> _copy(BuildContext context) async {
@@ -549,13 +574,15 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     setState(() {
       message.list.add(item);
       message.index = message.list.length - 1;
-      CurrentChat.chatStatus = CurrentChatStatus.responding;
+      CurrentChat.chatStatus = ChatStatus.responding;
     });
 
     try {
+      chatClient ??= http.Client();
       final llm = ChatOpenAI(
         apiKey: apiKey,
         baseUrl: apiUrl,
+        client: chatClient,
         defaultOptions: ChatOpenAIOptions(
           model: model,
           maxTokens: CurrentChat.maxTokens,
@@ -573,7 +600,9 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         setState(() => item.text += result.output.content);
       }
     } catch (e) {
-      if (context.mounted) await Util.handleError(context: context, error: e);
+      if (CurrentChat.chatStatus.isResponding && context.mounted) {
+        await Util.handleError(context: context, error: e);
+      }
       if (item.text.isEmpty) {
         setState(() {
           message.list.removeLast();
@@ -582,8 +611,14 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       }
     }
 
-    setState(() => CurrentChat.chatStatus = CurrentChatStatus.nothing);
+    setState(() => CurrentChat.chatStatus = ChatStatus.nothing);
     await CurrentChat.save();
+  }
+
+  Future<void> _reanswerStop(BuildContext context) async {
+    CurrentChat.chatStatus = ChatStatus.nothing;
+    chatClient?.close();
+    chatClient = null;
   }
 
   Future<void> _longPress(BuildContext context) async {
@@ -740,31 +775,6 @@ String _elementToText(md.Element element) {
   }
 
   return buff.toString();
-}
-
-extension _Tts on _MessageWidgetState {
-  static StreamSubscription? _subscription;
-  static final AudioPlayer _player = AudioPlayer();
-
-  Future<void> _ttsPlay(String path) async {
-    await _subscription?.cancel();
-
-    _subscription = _player.onPlayerComplete.listen(
-      (e) => _ttsClear(),
-      onError: (e) => _ttsClear(),
-    );
-
-    await _player.play(DeviceFileSource(path));
-  }
-
-  Future<void> _ttsStop() async {
-    await _player.stop();
-  }
-
-  void _ttsClear() {
-    CurrentChat.ttsStatus = TtsStatus.nothing;
-    ref.read(messageProvider(widget.message).notifier).notify();
-  }
 }
 
 class _MessageEditor extends StatefulWidget {

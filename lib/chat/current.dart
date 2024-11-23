@@ -24,12 +24,12 @@ import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-enum CurrentChatStatus {
+enum ChatStatus {
   nothing,
   responding;
 
-  bool get isNothing => this == CurrentChatStatus.nothing;
-  bool get isResponding => this == CurrentChatStatus.responding;
+  bool get isNothing => this == ChatStatus.nothing;
+  bool get isResponding => this == ChatStatus.responding;
 }
 
 enum TtsStatus {
@@ -50,7 +50,7 @@ class CurrentChat {
   static CoreConfig core = Config.core;
   static final List<Message> messages = [];
   static TtsStatus ttsStatus = TtsStatus.nothing;
-  static CurrentChatStatus chatStatus = CurrentChatStatus.nothing;
+  static ChatStatus chatStatus = ChatStatus.nothing;
 
   static void clear() {
     chat = null;
