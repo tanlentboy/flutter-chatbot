@@ -1,3 +1,11 @@
+0.2.0 (2024-11-23)
+
+    * Add: Reanswer.
+    * Improve: TTS button.
+
+    * 增加：重新回答
+    * 改进：文本转语音按钮
+
 0.1.11 (2024-11-22)
 
     * Add: More informative error messages.
