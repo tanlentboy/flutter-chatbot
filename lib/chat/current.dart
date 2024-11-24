@@ -332,6 +332,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
 
     if (title != oldTitle && CurrentChat.hasFile) {
       ref.read(chatsProvider.notifier).notify();
+      ref.read(chatProvider.notifier).notify();
     }
     if (_model != oldModel) {
       ref.read(chatProvider.notifier).notify();
