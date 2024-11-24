@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:animate_do/animate_do.dart";
+
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
@@ -20,6 +22,7 @@ import "../gen/l10n.dart";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
+import "package:animations/animations.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final apisProvider =
@@ -45,37 +48,44 @@ class ApisTab extends ConsumerWidget {
           padding:
               const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
           itemCount: apis.length,
-          itemBuilder: (context, index) {
-            return Card.filled(
-              margin: const EdgeInsets.only(top: 12),
-              child: ListTile(
+          itemBuilder: (context, index) => Container(
+            margin: const EdgeInsets.only(top: 12),
+            child: OpenContainer(
+              closedElevation: 0,
+              closedColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              closedShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              closedBuilder: (context, open) => ListTile(
                 title: Text(
                   apis[index].key,
                   overflow: TextOverflow.ellipsis,
                 ),
+                onTap: open,
                 leading: const Icon(Icons.api),
                 contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () async => await showDialog(
-                    context: context,
-                    builder: (context) => ApiSettings(apiPair: apis[index]),
-                  ),
-                ),
               ),
-            );
-          },
+              openBuilder: (context, close) =>
+                  ApiSettings(apiPair: apis[index]),
+            ),
+          ),
         ),
         Positioned(
           right: 16,
           bottom: 16,
-          child: FloatingActionButton.extended(
-            icon: const Icon(Icons.api),
-            label: Text(S.of(context).new_api),
-            onPressed: () async => await showDialog<bool>(
-              context: context,
-              builder: (context) => ApiSettings(),
+          child: OpenContainer(
+            closedElevation: 6,
+            closedColor: Colors.transparent,
+            closedShape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
+            closedBuilder: (context, open) => FloatingActionButton.extended(
+              icon: const Icon(Icons.api),
+              label: Text(S.of(context).new_api),
+              onPressed: open,
+            ),
+            openBuilder: (context, close) => ApiSettings(),
           ),
         ),
       ],
@@ -96,6 +106,8 @@ class ApiSettings extends ConsumerStatefulWidget {
 }
 
 class ApiSettingsState extends ConsumerState<ApiSettings> {
+  bool isFetching = false;
+  http.Client? fetchClient;
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _modelsCtrl = TextEditingController();
   final TextEditingController _apiUrlCtrl = TextEditingController();
@@ -132,7 +144,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(S.of(context).api),
       ),
@@ -202,9 +214,13 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                 const SizedBox(width: 8),
                 Column(
                   children: [
-                    IconButton.outlined(
-                      onPressed: () async => _fetchModels(context),
-                      icon: const Icon(Icons.sync),
+                    Spin(
+                      animate: isFetching,
+                      duration: Duration(seconds: 1),
+                      child: IconButton.outlined(
+                        onPressed: () async => _fetchModels(context),
+                        icon: const Icon(Icons.sync),
+                      ),
                     ),
                     const SizedBox(height: 8),
                     IconButton.outlined(
@@ -222,7 +238,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                   flex: 1,
                   child: FilledButton.tonal(
                     child: Text(S.of(context).cancel),
-                    onPressed: () => Navigator.of(context).pop(false),
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -238,7 +254,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                       onPressed: () async {
                         Config.apis.remove(apiPair.key);
                         ref.read(apisProvider.notifier).notify();
-                        Navigator.of(context).pop(true);
+                        Navigator.of(context).pop();
                         await Config.save();
                       },
                     ),
@@ -250,7 +266,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     child: Text(S.of(context).save),
                     onPressed: () async {
                       if (!_save(context)) return;
-                      Navigator.of(context).pop(true);
+                      Navigator.of(context).pop();
                       await Config.save();
                     },
                   ),
@@ -264,8 +280,16 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
   }
 
   Future<void> _fetchModels(BuildContext context) async {
+    if (isFetching) {
+      setState(() => isFetching = false);
+      fetchClient?.close();
+      fetchClient = null;
+      return;
+    }
+
     final url = _apiUrlCtrl.text;
     final key = _apiKeyCtrl.text;
+    final modelsEndpoint = "$url/models";
 
     if (url.isEmpty || key.isEmpty) {
       Util.showSnackBar(
@@ -275,10 +299,11 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
       return;
     }
 
-    final modelsEndpoint = "$url/models";
+    setState(() => isFetching = true);
 
     try {
-      final response = await http.get(
+      fetchClient ??= http.Client();
+      final response = await fetchClient!.get(
         Uri.parse(modelsEndpoint),
         headers: {"Authorization": "Bearer $key"},
       );
@@ -292,9 +317,12 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
 
       _modelsCtrl.text = models.join(", ");
     } catch (e) {
-      if (!context.mounted) return;
-      await Util.handleError(context: context, error: e);
+      if (isFetching && context.mounted) {
+        await Util.handleError(context: context, error: e);
+      }
     }
+
+    setState(() => isFetching = false);
   }
 
   Future<void> _editModels(BuildContext context) async {
@@ -306,42 +334,38 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(S.of(context).select_models),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: chosen.keys.map((model) {
-                    return CheckboxListTile(
-                      title: Text(model),
-                      value: chosen[model],
-                      onChanged: (value) =>
-                          setState(() => chosen[model] = value ?? false),
-                    );
-                  }).toList(),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: Text(S.of(context).cancel),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                TextButton(
-                  child: Text(S.of(context).clear),
-                  onPressed: () => setState(() =>
-                      chosen.forEach((model, _) => chosen[model] = false)),
-                ),
-                TextButton(
-                  child: Text(S.of(context).save),
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(S.of(context).select_models),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: chosen.keys
+                  .map((model) => CheckboxListTile(
+                        title: Text(model),
+                        value: chosen[model],
+                        onChanged: (value) =>
+                            setState(() => chosen[model] = value ?? false),
+                      ))
+                  .toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text(S.of(context).cancel),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: Text(S.of(context).clear),
+              onPressed: () => setState(
+                  () => chosen.forEach((model, _) => chosen[model] = false)),
+            ),
+            TextButton(
+              child: Text(S.of(context).save),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      ),
     );
 
     if (result == null || !result) return;

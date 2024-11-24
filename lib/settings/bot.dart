@@ -18,6 +18,7 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "package:flutter/material.dart";
+import "package:animations/animations.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final botsProvider =
@@ -43,37 +44,44 @@ class BotsTab extends ConsumerWidget {
           padding:
               const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
           itemCount: bots.length,
-          itemBuilder: (context, index) {
-            return Card.filled(
-              margin: const EdgeInsets.only(top: 12),
-              child: ListTile(
+          itemBuilder: (context, index) => Container(
+            margin: const EdgeInsets.only(top: 12),
+            child: OpenContainer(
+              closedElevation: 0,
+              closedColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              closedShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              closedBuilder: (context, open) => ListTile(
+                onTap: open,
                 title: Text(
                   bots[index].key,
                   overflow: TextOverflow.ellipsis,
                 ),
                 leading: const Icon(Icons.smart_toy),
                 contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () async => await showDialog<bool>(
-                    context: context,
-                    builder: (context) => BotSettings(botPair: bots[index]),
-                  ),
-                ),
               ),
-            );
-          },
+              openBuilder: (context, close) =>
+                  BotSettings(botPair: bots[index]),
+            ),
+          ),
         ),
         Positioned(
           right: 16,
           bottom: 16,
-          child: FloatingActionButton.extended(
-            icon: const Icon(Icons.smart_toy),
-            label: Text(S.of(context).new_bot),
-            onPressed: () async => await showDialog<bool>(
-              context: context,
-              builder: (context) => BotSettings(),
+          child: OpenContainer(
+            closedElevation: 6,
+            closedColor: Colors.transparent,
+            closedShape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
+            closedBuilder: (context, open) => FloatingActionButton.extended(
+              icon: const Icon(Icons.smart_toy),
+              label: Text(S.of(context).new_bot),
+              onPressed: open,
+            ),
+            openBuilder: (context, close) => BotSettings(),
           ),
         ),
       ],
@@ -143,7 +151,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(S.of(context).bot),
       ),
@@ -243,7 +251,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                       onPressed: () async {
                         Config.bots.remove(botPair.key);
                         ref.read(botsProvider.notifier).notify();
-                        Navigator.of(context).pop(true);
+                        Navigator.of(context).pop();
                         await Config.save();
                       },
                     ),
@@ -256,7 +264,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     child: Text(S.of(context).save),
                     onPressed: () async {
                       if (!_save(context)) return;
-                      Navigator.of(context).pop(true);
+                      Navigator.of(context).pop();
                       await Config.save();
                     },
                   ),
