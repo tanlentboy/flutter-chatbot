@@ -21,7 +21,7 @@
     "save": "保存",
     "reset": "重置",
     "error": "错误",
-    "clear": "清除",
+    "clear": "清空",
     "cancel": "取消",
     "reanswer": "重答",
 
@@ -59,9 +59,14 @@
     "no_model": "无模型",
     "all_chats": "所有对话",
     "chat_title": "对话标题",
-    "chat_settings": "对话配置",
     "default_config": "默认配置",
     "text_to_speech": "文本转语音",
+
+    "clone_chat": "复制对话",
+    "clear_chat": "清空对话",
+    "chat_settings": "对话设置",
+    "cloned_successfully": "复制成功",
+    "ensure_clear_chat": "确定要清空对话？",
 
     "saved_successfully": "保存成功",
     "copied_successfully": "拷贝成功",

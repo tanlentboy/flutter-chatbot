@@ -59,9 +59,14 @@
     "no_model": "no model",
     "all_chats": "All Chats",
     "chat_title": "Chat Title",
-    "chat_settings": "Chat Settings",
     "default_config": "Default Config",
     "text_to_speech": "Text To Speech",
+
+    "clone_chat": "Clone Chat",
+    "clear_chat": "Clear Chat",
+    "chat_settings": "Chat Settings",
+    "cloned_successfully": "Cloned Successfully",
+    "ensure_clear_chat": "Are you sure you want to clear the chat?",
 
     "saved_successfully": "Saved Successfully",
     "copied_successfully": "Copied Successfully",

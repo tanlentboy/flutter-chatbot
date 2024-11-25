@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:flutter_spinkit/flutter_spinkit.dart";
+
 import "chat.dart";
 import "input.dart";
 import "current.dart";
@@ -279,19 +281,29 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                     topRight: Radius.circular(role.isUser ? 2 : 16),
                   ),
                 ),
-                child: MarkdownBody(
-                  data: content,
-                  shrinkWrap: true,
-                  extensionSet: _extensionSet,
-                  onTapLink: (text, href, title) async =>
-                      await Util.openLink(context: context, link: href),
-                  builders: {
-                    "pre": _CodeBlockBuilder(context: context),
-                    "latex": LatexElementBuilder(textScaleFactor: 1.2),
-                  },
-                  styleSheet: markdownStyleSheet,
-                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                ),
+                child: switch (item.text.isNotEmpty) {
+                  true => MarkdownBody(
+                      data: content,
+                      shrinkWrap: true,
+                      extensionSet: _extensionSet,
+                      onTapLink: (text, href, title) async =>
+                          await Util.openLink(context: context, link: href),
+                      builders: {
+                        "pre": _CodeBlockBuilder(context: context),
+                        "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                      },
+                      styleSheet: markdownStyleSheet,
+                      styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                    ),
+                  false => SizedBox(
+                      width: 36,
+                      height: 18,
+                      child: SpinKitWave(
+                        size: 18,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                },
               ),
             ),
             if (CurrentChat.messages.lastOrNull == message &&
@@ -459,10 +471,9 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     InputWidget.unFocus();
 
     final message = widget.message;
-    final result = await showDialog<String>(
-      context: context,
+    final result = await Navigator.of(context).push<String>(MaterialPageRoute(
       builder: (context) => _MessageEditor(text: message.item.text),
-    );
+    ));
 
     if (result != null) {
       setState(() => message.item.text = result);

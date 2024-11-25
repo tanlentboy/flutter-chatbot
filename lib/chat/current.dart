@@ -43,7 +43,7 @@ enum TtsStatus {
 }
 
 class CurrentChat {
-  static File? _file;
+  static File? file;
   static String? image;
   static ChatConfig? chat;
 
@@ -54,7 +54,7 @@ class CurrentChat {
 
   static void clear() {
     chat = null;
-    _file = null;
+    file = null;
     image = null;
     messages.clear();
     core = Config.core;
@@ -63,9 +63,9 @@ class CurrentChat {
   static Future<void> load(ChatConfig chat) async {
     clear();
     CurrentChat.chat = chat;
-    _file = File(Config.chatFilePath(chat.fileName));
+    file = File(Config.chatFilePath(chat.fileName));
 
-    final json = jsonDecode(await _file!.readAsString());
+    final json = jsonDecode(await file!.readAsString());
     final messagesJson = json["messages"] ?? [];
     final coreJson = json["core"];
 
@@ -86,14 +86,14 @@ class CurrentChat {
       initChat(messages.first.item.text);
     }
 
-    if (_file == null) {
+    if (file == null) {
       initFile();
       isNew = true;
       Config.chats.insert(0, chat!);
       await Config.save();
     }
 
-    await _file!.writeAsString(jsonEncode({
+    await file!.writeAsString(jsonEncode({
       "core": core,
       "messages": messages,
     }));
@@ -115,22 +115,21 @@ class CurrentChat {
   }
 
   static void initFile() {
-    _file = File(Config.chatFilePath(chat!.fileName));
+    file = File(Config.chatFilePath(chat!.fileName));
   }
 
   static bool get hasChat => chat != null;
-  static bool get hasFile => _file != null;
+  static bool get hasFile => file != null;
 
   static String? get bot => core.bot;
   static String? get api => core.api;
   static String? get model => core.model;
 
-  static String? get title => chat?.title;
-  static BotConfig? get _bot => Config.bots[core.bot];
-
   static String? get apiUrl => Config.apis[api]?.url;
   static String? get apiKey => Config.apis[api]?.key;
+  static BotConfig? get _bot => Config.bots[core.bot];
 
+  static String? get title => chat?.title;
   static bool? get stream => _bot?.stream;
   static int? get maxTokens => _bot?.maxTokens;
   static double? get temperature => _bot?.temperature;

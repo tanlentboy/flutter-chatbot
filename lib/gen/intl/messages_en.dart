@@ -35,6 +35,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
+        "clear_chat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "clone_chat": MessageLookupByLibrary.simpleMessage("Clone Chat"),
+        "cloned_successfully":
+            MessageLookupByLibrary.simpleMessage("Cloned Successfully"),
         "complete_all_fields":
             MessageLookupByLibrary.simpleMessage("Please complete all fields"),
         "config": MessageLookupByLibrary.simpleMessage("Config"),
@@ -50,6 +54,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Duplicate Bot name"),
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "empty_link": MessageLookupByLibrary.simpleMessage("Empty Link"),
+        "ensure_clear_chat": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to clear the chat?"),
         "enter_a_name":
             MessageLookupByLibrary.simpleMessage("Please enter a name"),
         "enter_a_title":

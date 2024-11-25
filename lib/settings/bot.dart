@@ -77,6 +77,7 @@ class BotsTab extends ConsumerWidget {
               borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
             closedBuilder: (context, open) => FloatingActionButton.extended(
+              heroTag: "bot",
               icon: const Icon(Icons.smart_toy),
               label: Text(S.of(context).new_bot),
               onPressed: open,

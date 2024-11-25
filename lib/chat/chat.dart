@@ -16,6 +16,7 @@
 import "input.dart";
 import "message.dart";
 import "current.dart";
+import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
 import "../settings/api.dart";
@@ -241,15 +242,37 @@ class ChatPageState extends ConsumerState<ChatPage> {
           ),
         ),
         actions: [
-          IconButton(
+          PopupMenuButton(
             icon: const Icon(Icons.more_horiz),
-            onPressed: () async {
-              InputWidget.unFocus();
-              await showDialog(
-                context: context,
-                builder: (context) => CurrentChatSettings(),
-              );
-            },
+            menuPadding: const EdgeInsets.all(0),
+            onSelected: (value) async => await _onSelected(context, value),
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            itemBuilder: (context) => <PopupMenuItem<int>>[
+              PopupMenuItem(
+                value: 1,
+                child: ListTile(
+                  leading: const Icon(Icons.file_copy, size: 20),
+                  title: Text(S.of(context).clone_chat),
+                  minTileHeight: 32,
+                ),
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: ListTile(
+                  leading: const Icon(Icons.delete, size: 24),
+                  title: Text(S.of(context).clear_chat),
+                  minTileHeight: 32,
+                ),
+              ),
+              PopupMenuItem(
+                value: 3,
+                child: ListTile(
+                  leading: const Icon(Icons.settings, size: 24),
+                  title: Text(S.of(context).chat_settings),
+                  minTileHeight: 32,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -288,5 +311,60 @@ class ChatPageState extends ConsumerState<ChatPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _onSelected(BuildContext context, int value) async {
+    InputWidget.unFocus();
+
+    switch (value) {
+      case 1:
+        if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
+
+        CurrentChat.file = null;
+        CurrentChat.initChat(CurrentChat.title!);
+
+        await CurrentChat.save();
+        ref.read(chatsProvider.notifier).notify();
+
+        if (!context.mounted) return;
+        Util.showSnackBar(
+          context: context,
+          content: Text(S.of(context).cloned_successfully),
+        );
+        break;
+
+      case 2:
+        if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
+
+        final result = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(S.of(context).clear_chat),
+            content: Text(S.of(context).ensure_clear_chat),
+            actions: [
+              TextButton(
+                child: Text(S.of(context).cancel),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: Text(S.of(context).clear),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+        );
+        if (!(result ?? false)) return;
+        CurrentChat.messages.clear();
+
+        await CurrentChat.save();
+        ref.read(messagesProvider.notifier).notify();
+        break;
+
+      case 3:
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const CurrentChatSettings(),
+        ));
+        break;
+    }
   }
 }

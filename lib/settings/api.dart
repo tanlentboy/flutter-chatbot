@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:animate_do/animate_do.dart";
-
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
@@ -22,6 +20,7 @@ import "../gen/l10n.dart";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
+import "package:animate_do/animate_do.dart";
 import "package:animations/animations.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -81,6 +80,7 @@ class ApisTab extends ConsumerWidget {
               borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
             closedBuilder: (context, open) => FloatingActionButton.extended(
+              heroTag: "api",
               icon: const Icon(Icons.api),
               label: Text(S.of(context).new_api),
               onPressed: open,
@@ -215,6 +215,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                 Column(
                   children: [
                     Spin(
+                      infinite: true,
                       animate: isFetching,
                       duration: Duration(seconds: 1),
                       child: IconButton.outlined(

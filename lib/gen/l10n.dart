@@ -560,16 +560,6 @@ class S {
     );
   }
 
-  /// `Chat Settings`
-  String get chat_settings {
-    return Intl.message(
-      'Chat Settings',
-      name: 'chat_settings',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Default Config`
   String get default_config {
     return Intl.message(
@@ -585,6 +575,56 @@ class S {
     return Intl.message(
       'Text To Speech',
       name: 'text_to_speech',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clone Chat`
+  String get clone_chat {
+    return Intl.message(
+      'Clone Chat',
+      name: 'clone_chat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear Chat`
+  String get clear_chat {
+    return Intl.message(
+      'Clear Chat',
+      name: 'clear_chat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat Settings`
+  String get chat_settings {
+    return Intl.message(
+      'Chat Settings',
+      name: 'chat_settings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cloned Successfully`
+  String get cloned_successfully {
+    return Intl.message(
+      'Cloned Successfully',
+      name: 'cloned_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to clear the chat?`
+  String get ensure_clear_chat {
+    return Intl.message(
+      'Are you sure you want to clear the chat?',
+      name: 'ensure_clear_chat',
       desc: '',
       args: [],
     );
