@@ -21,7 +21,6 @@ import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:animate_do/animate_do.dart";
-import "package:animations/animations.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final apisProvider =
@@ -47,47 +46,36 @@ class ApisTab extends ConsumerWidget {
           padding:
               const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
           itemCount: apis.length,
-          itemBuilder: (context, index) => Container(
+          itemBuilder: (context, index) => Card.filled(
             margin: const EdgeInsets.only(top: 12),
-            child: OpenContainer(
-              transitionType: ContainerTransitionType.fade,
-              closedElevation: 0,
-              closedColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
-              closedShape: const RoundedRectangleBorder(
+            child: ListTile(
+              title: Text(
+                apis[index].key,
+                overflow: TextOverflow.ellipsis,
+              ),
+              leading: const Icon(Icons.api),
+              contentPadding: const EdgeInsets.only(left: 16, right: 8),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => ApiSettings(
+                  apiPair: apis[index],
+                ),
+              )),
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
-              closedBuilder: (context, open) => ListTile(
-                title: Text(
-                  apis[index].key,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: open,
-                leading: const Icon(Icons.api),
-                contentPadding: const EdgeInsets.only(left: 16, right: 8),
-              ),
-              openBuilder: (context, close) =>
-                  ApiSettings(apiPair: apis[index]),
             ),
           ),
         ),
         Positioned(
           right: 16,
           bottom: 16,
-          child: OpenContainer(
-            transitionType: ContainerTransitionType.fade,
-            closedElevation: 6,
-            closedColor: Colors.transparent,
-            closedShape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            closedBuilder: (context, open) => FloatingActionButton.extended(
-              heroTag: "api",
-              icon: const Icon(Icons.api),
-              label: Text(S.of(context).new_api),
-              onPressed: open,
-            ),
-            openBuilder: (context, close) => ApiSettings(),
+          child: FloatingActionButton.extended(
+            heroTag: "api",
+            icon: const Icon(Icons.api),
+            label: Text(S.of(context).new_api),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => ApiSettings(),
+            )),
           ),
         ),
       ],

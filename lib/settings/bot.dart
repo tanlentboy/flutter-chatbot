@@ -18,7 +18,6 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "package:flutter/material.dart";
-import "package:animations/animations.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final botsProvider =
@@ -44,47 +43,34 @@ class BotsTab extends ConsumerWidget {
           padding:
               const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
           itemCount: bots.length,
-          itemBuilder: (context, index) => Container(
+          itemBuilder: (context, index) => Card.filled(
             margin: const EdgeInsets.only(top: 12),
-            child: OpenContainer(
-              transitionType: ContainerTransitionType.fade,
-              closedElevation: 0,
-              closedColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
-              closedShape: const RoundedRectangleBorder(
+            child: ListTile(
+              title: Text(
+                bots[index].key,
+                overflow: TextOverflow.ellipsis,
+              ),
+              leading: const Icon(Icons.smart_toy),
+              contentPadding: const EdgeInsets.only(left: 16, right: 8),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => BotSettings(botPair: bots[index]),
+              )),
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
               ),
-              closedBuilder: (context, open) => ListTile(
-                onTap: open,
-                title: Text(
-                  bots[index].key,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                leading: const Icon(Icons.smart_toy),
-                contentPadding: const EdgeInsets.only(left: 16, right: 8),
-              ),
-              openBuilder: (context, close) =>
-                  BotSettings(botPair: bots[index]),
             ),
           ),
         ),
         Positioned(
           right: 16,
           bottom: 16,
-          child: OpenContainer(
-            transitionType: ContainerTransitionType.fade,
-            closedElevation: 6,
-            closedColor: Colors.transparent,
-            closedShape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            closedBuilder: (context, open) => FloatingActionButton.extended(
-              heroTag: "bot",
-              icon: const Icon(Icons.smart_toy),
-              label: Text(S.of(context).new_bot),
-              onPressed: open,
-            ),
-            openBuilder: (context, close) => BotSettings(),
+          child: FloatingActionButton.extended(
+            heroTag: "bot",
+            icon: const Icon(Icons.smart_toy),
+            label: Text(S.of(context).new_bot),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => BotSettings(),
+            )),
           ),
         ),
       ],

@@ -114,7 +114,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
               ref.watch(chatsProvider);
 
               return ListView.builder(
-                padding: EdgeInsets.only(left: 8, right: 8),
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
                 itemCount: Config.chats.length,
                 itemBuilder: (context, index) {
                   final chat = Config.chats[index];
