@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:flutter_spinkit/flutter_spinkit.dart";
-
 import "chat.dart";
 import "input.dart";
 import "current.dart";
@@ -30,6 +28,7 @@ import "package:http/http.dart" as http;
 import "package:langchain/langchain.dart";
 import "package:markdown/markdown.dart" as md;
 import "package:audioplayers/audioplayers.dart";
+import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:langchain_openai/langchain_openai.dart";

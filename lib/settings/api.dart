@@ -50,6 +50,7 @@ class ApisTab extends ConsumerWidget {
           itemBuilder: (context, index) => Container(
             margin: const EdgeInsets.only(top: 12),
             child: OpenContainer(
+              transitionType: ContainerTransitionType.fade,
               closedElevation: 0,
               closedColor:
                   Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -74,6 +75,7 @@ class ApisTab extends ConsumerWidget {
           right: 16,
           bottom: 16,
           child: OpenContainer(
+            transitionType: ContainerTransitionType.fade,
             closedElevation: 6,
             closedColor: Colors.transparent,
             closedShape: const RoundedRectangleBorder(
