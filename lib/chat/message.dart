@@ -26,6 +26,7 @@ import "dart:convert";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:langchain/langchain.dart";
+import "package:animate_do/animate_do.dart";
 import "package:markdown/markdown.dart" as md;
 import "package:audioplayers/audioplayers.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
@@ -187,80 +188,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
           children: [
             if (role.isAssistant) ...[
               const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    child: const Icon(Icons.smart_toy),
-                  ),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.model ??
-                              CurrentChat.model ??
-                              S.of(context).model,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.time ??
-                              CurrentChat.chat?.time ??
-                              Util.formatDateTime(DateTime.now()),
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (message.list.length > 1) ...[
-                    const SizedBox(width: 4),
-                    if (message != CurrentChat.messages.last ||
-                        CurrentChat.chatStatus.isNothing) ...[
-                      SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_rounded),
-                          iconSize: 16,
-                          onPressed: () async {
-                            if (item == message.list.first) return;
-                            setState(() => message.index--);
-                            await CurrentChat.save();
-                          },
-                        ),
-                      ),
-                      Text("${message.index + 1}/${message.list.length}"),
-                      SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_forward_ios_rounded),
-                          iconSize: 16,
-                          onPressed: () async {
-                            if (item == message.list.last) return;
-                            setState(() => message.index++);
-                            await CurrentChat.save();
-                          },
-                        ),
-                      ),
-                    ],
-                    if (message == CurrentChat.messages.last &&
-                        CurrentChat.chatStatus.isResponding)
-                      SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: IconButton(
-                          icon: const Icon(Icons.pause_outlined),
-                          iconSize: 18,
-                          onPressed: () async => await _reanswerStop(context),
-                        ),
-                      ),
-                  ],
-                ],
-              ),
+              _buildHeader(message, item),
             ],
             SizedBox(height: role.isAssistant ? 8 : 12),
             GestureDetector(
@@ -308,73 +236,151 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             if (CurrentChat.messages.lastOrNull == message &&
                 CurrentChat.chatStatus.isNothing) ...[
               const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: role.isAssistant
-                    ? MainAxisAlignment.start
-                    : MainAxisAlignment.end,
-                children: [
-                  if (role.isAssistant) ...[
-                    SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: switch (CurrentChat.ttsStatus) {
-                        TtsStatus.nothing => IconButton(
-                            icon: const Icon(Icons.volume_up_outlined),
-                            iconSize: 18,
-                            onPressed: () async => await _tts(context),
-                          ),
-                        TtsStatus.loading || TtsStatus.playing => IconButton(
-                            icon: Icon(CurrentChat.ttsStatus.isPlaying
-                                ? Icons.pause_circle_outlined
-                                : Icons.cancel_outlined),
-                            iconSize: 18,
-                            onPressed: () async => await _ttsStop(),
-                          ),
-                      },
-                    ),
-                    SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: IconButton(
-                        icon: const Icon(Icons.sync_outlined),
-                        iconSize: 18,
-                        onPressed: () async => await _reanswer(context),
-                      ),
-                    ),
-                  ],
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.paste_outlined),
-                      iconSize: 16,
-                      onPressed: () async => await _copy(context),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      iconSize: 18,
-                      onPressed: () async => await _edit(context),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete_outlined),
-                      iconSize: 18,
-                      onPressed: () async => await _delete(context),
-                    ),
-                  ),
-                ],
-              ),
+              FadeIn(child: _buildToolBar(role)),
             ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(Message message, MessageItem item) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        CircleAvatar(
+          child: const Icon(Icons.smart_toy),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.model ?? CurrentChat.model ?? S.of(context).model,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item.time ??
+                    CurrentChat.chat?.time ??
+                    Util.formatDateTime(DateTime.now()),
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ),
+        ),
+        if (message.list.length > 1) ...[
+          const SizedBox(width: 4),
+          if (message != CurrentChat.messages.last ||
+              CurrentChat.chatStatus.isNothing) ...[
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_rounded),
+                iconSize: 16,
+                onPressed: () async {
+                  if (item == message.list.first) return;
+                  setState(() => message.index--);
+                  await CurrentChat.save();
+                },
+              ),
+            ),
+            Text("${message.index + 1}/${message.list.length}"),
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_forward_ios_rounded),
+                iconSize: 16,
+                onPressed: () async {
+                  if (item == message.list.last) return;
+                  setState(() => message.index++);
+                  await CurrentChat.save();
+                },
+              ),
+            ),
+          ],
+          if (message == CurrentChat.messages.last &&
+              CurrentChat.chatStatus.isResponding)
+            SizedBox(
+              width: 36,
+              height: 36,
+              child: IconButton(
+                icon: const Icon(Icons.pause_outlined),
+                iconSize: 18,
+                onPressed: () async => await _reanswerStop(context),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildToolBar(MessageRole role) {
+    return Row(
+      mainAxisAlignment:
+          role.isAssistant ? MainAxisAlignment.start : MainAxisAlignment.end,
+      children: [
+        if (role.isAssistant) ...[
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: switch (CurrentChat.ttsStatus) {
+              TtsStatus.nothing => IconButton(
+                  icon: const Icon(Icons.volume_up_outlined),
+                  iconSize: 18,
+                  onPressed: () async => await _tts(context),
+                ),
+              TtsStatus.loading || TtsStatus.playing => IconButton(
+                  icon: Icon(CurrentChat.ttsStatus.isPlaying
+                      ? Icons.pause_circle_outlined
+                      : Icons.cancel_outlined),
+                  iconSize: 18,
+                  onPressed: () async => await _ttsStop(),
+                ),
+            },
+          ),
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: IconButton(
+              icon: const Icon(Icons.sync_outlined),
+              iconSize: 18,
+              onPressed: () async => await _reanswer(context),
+            ),
+          ),
+        ],
+        SizedBox(
+          width: 36,
+          height: 36,
+          child: IconButton(
+            icon: const Icon(Icons.paste_outlined),
+            iconSize: 16,
+            onPressed: () async => await _copy(context),
+          ),
+        ),
+        SizedBox(
+          width: 36,
+          height: 36,
+          child: IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            iconSize: 18,
+            onPressed: () async => await _edit(context),
+          ),
+        ),
+        SizedBox(
+          width: 36,
+          height: 36,
+          child: IconButton(
+            icon: const Icon(Icons.delete_outlined),
+            iconSize: 18,
+            onPressed: () async => await _delete(context),
+          ),
+        ),
+      ],
     );
   }
 
@@ -508,51 +514,49 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       useSafeArea: true,
       isScrollControlled: false,
       scrollControlDisabledMaxHeightRatio: 1,
-      builder: (context) {
-        return ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: double.infinity,
-            minHeight: MediaQuery.of(context).size.height * 0.5,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.all(Radius.circular(2)),
-                    ),
+      builder: (context) => ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: double.infinity,
+          minHeight: MediaQuery.of(context).size.height * 0.5,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.all(Radius.circular(2)),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(
-                        top: 0, left: 16, right: 16, bottom: 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SelectableText(
-                          widget.message.item.text,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        const SizedBox(height: 48, width: double.infinity),
-                      ],
-                    ),
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(
+                      top: 0, left: 16, right: 16, bottom: 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SelectableText(
+                        widget.message.item.text,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 48, width: double.infinity),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -634,58 +638,54 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
   Future<void> _longPress(BuildContext context) async {
     InputWidget.unFocus();
 
-    final children = [
-      SizedBox(height: 8),
-      Container(
-        width: 36,
-        height: 4,
-        decoration: const BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.all(Radius.circular(2)),
-        ),
-      ),
-      SizedBox(height: 8),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).copy),
-        leading: const Icon(Icons.copy_all),
-        onTap: () => Navigator.pop(context, _LongPressEvent.copy),
-      ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).source),
-        leading: const Icon(Icons.code_outlined),
-        onTap: () => Navigator.pop(context, _LongPressEvent.source),
-      ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).edit),
-        leading: const Icon(Icons.edit_outlined),
-        onTap: () => Navigator.pop(context, _LongPressEvent.edit),
-      ),
-      ListTile(
-        minTileHeight: 48,
-        shape: StadiumBorder(),
-        title: Text(S.of(context).delete),
-        leading: const Icon(Icons.delete_outlined),
-        onTap: () => Navigator.pop(context, _LongPressEvent.delete),
-      ),
-    ];
-
     final event = await showModalBottomSheet<_LongPressEvent>(
       context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: children,
-          ),
-        );
-      },
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: const BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.all(Radius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              minTileHeight: 48,
+              shape: StadiumBorder(),
+              title: Text(S.of(context).copy),
+              leading: const Icon(Icons.copy_all),
+              onTap: () => Navigator.pop(context, _LongPressEvent.copy),
+            ),
+            ListTile(
+              minTileHeight: 48,
+              shape: const StadiumBorder(),
+              title: Text(S.of(context).source),
+              leading: const Icon(Icons.code_outlined),
+              onTap: () => Navigator.pop(context, _LongPressEvent.source),
+            ),
+            ListTile(
+              minTileHeight: 48,
+              shape: const StadiumBorder(),
+              title: Text(S.of(context).edit),
+              leading: const Icon(Icons.edit_outlined),
+              onTap: () => Navigator.pop(context, _LongPressEvent.edit),
+            ),
+            ListTile(
+              minTileHeight: 48,
+              shape: const StadiumBorder(),
+              title: Text(S.of(context).delete),
+              leading: const Icon(Icons.delete_outlined),
+              onTap: () => Navigator.pop(context, _LongPressEvent.delete),
+            ),
+          ],
+        ),
+      ),
     );
     if (event == null || !context.mounted) return;
 

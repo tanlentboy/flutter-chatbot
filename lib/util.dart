@@ -46,26 +46,24 @@ class Util {
     if (!context.mounted) return;
     final result = await showDialog<int>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(S.of(context).link),
-          content: Text(link),
-          actions: [
-            TextButton(
-              child: Text(S.of(context).cancel),
-              onPressed: () => Navigator.of(context).pop(0),
-            ),
-            TextButton(
-              child: Text(S.of(context).copy),
-              onPressed: () => Navigator.of(context).pop(1),
-            ),
-            TextButton(
-              child: Text(S.of(context).open),
-              onPressed: () => Navigator.of(context).pop(2),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: Text(S.of(context).link),
+        content: Text(link),
+        actions: [
+          TextButton(
+            child: Text(S.of(context).cancel),
+            onPressed: () => Navigator.of(context).pop(0),
+          ),
+          TextButton(
+            child: Text(S.of(context).copy),
+            onPressed: () => Navigator.of(context).pop(1),
+          ),
+          TextButton(
+            child: Text(S.of(context).open),
+            onPressed: () => Navigator.of(context).pop(2),
+          ),
+        ],
+      ),
     );
 
     switch (result) {
@@ -96,22 +94,20 @@ class Util {
     final info = error.toString();
     final result = await showDialog<int>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(S.of(context).error),
-          content: Text(info),
-          actions: [
-            TextButton(
-              child: Text(S.of(context).cancel),
-              onPressed: () => Navigator.of(context).pop(0),
-            ),
-            TextButton(
-              child: Text(S.of(context).copy),
-              onPressed: () => Navigator.of(context).pop(1),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: Text(S.of(context).error),
+        content: Text(info),
+        actions: [
+          TextButton(
+            child: Text(S.of(context).cancel),
+            onPressed: () => Navigator.of(context).pop(0),
+          ),
+          TextButton(
+            child: Text(S.of(context).copy),
+            onPressed: () => Navigator.of(context).pop(1),
+          ),
+        ],
+      ),
     );
 
     if (result == 1 && context.mounted) {

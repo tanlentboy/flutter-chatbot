@@ -256,29 +256,25 @@ class Config {
 
 class Backup {
   static Future<bool> exportConfig() async {
-    String? dir = await FilePicker.platform.getDirectoryPath();
-    if (dir == null) return false;
+    String? root = await FilePicker.platform.getDirectoryPath();
+    if (root == null) return false;
 
     final time = DateTime.now().millisecondsSinceEpoch.toString();
-    final path = "$dir${Config._sep}chatbot-backup-$time.zip";
+    final path = "root${Config._sep}chatbot-backup-$time.zip";
 
-    try {
-      final dir = Directory(Config._dir);
-      final encoder = ZipFileEncoder();
-      encoder.create(path);
+    final dir = Directory(Config._dir);
+    final encoder = ZipFileEncoder();
+    encoder.create(path);
 
-      await for (final entity in dir.list()) {
-        if (entity is File) {
-          encoder.addFile(entity);
-        } else if (entity is Directory) {
-          encoder.addDirectory(entity);
-        }
+    await for (final entity in dir.list()) {
+      if (entity is File) {
+        encoder.addFile(entity);
+      } else if (entity is Directory) {
+        encoder.addDirectory(entity);
       }
-
-      await encoder.close();
-    } catch (e) {
-      rethrow;
     }
+
+    await encoder.close();
 
     return true;
   }
@@ -287,12 +283,8 @@ class Backup {
     final result = await FilePicker.platform.pickFiles();
     if (result == null) return false;
 
-    try {
-      final path = result.files.single.path!;
-      await extractFileToDisk(path, Config._dir);
-    } catch (e) {
-      rethrow;
-    }
+    final path = result.files.single.path!;
+    await extractFileToDisk(path, Config._dir);
 
     return true;
   }
