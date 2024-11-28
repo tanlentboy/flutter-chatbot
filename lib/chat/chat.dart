@@ -118,12 +118,6 @@ class ChatPageState extends ConsumerState<ChatPage> {
           child: Consumer(
             builder: (context, ref, child) {
               ref.watch(chatProvider);
-              final model = CurrentChat.model;
-              final models = Config.apis[CurrentChat.api]?.models;
-
-              if (models == null || !models.contains(model)) {
-                CurrentChat.core.model = null;
-              }
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

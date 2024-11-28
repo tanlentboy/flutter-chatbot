@@ -173,8 +173,10 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     }
 
     try {
-      compressed = await FlutterImageCompress.compressWithFile(result.path,
-          quality: 60, minWidth: 1024, minHeight: 1024);
+      compressed = await FlutterImageCompress.compressWithFile(
+        result.path,
+        quality: 60,
+      );
       if (compressed == null) throw false;
     } catch (e) {
       if (context.mounted) {

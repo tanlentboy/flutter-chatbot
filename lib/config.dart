@@ -23,15 +23,26 @@ import "package:flutter_highlighter/themes/atom-one-dark.dart";
 import "package:flutter_highlighter/themes/atom-one-light.dart";
 
 class CoreConfig {
-  String? bot;
-  String? api;
-  String? model;
+  String? _bot;
+  String? _api;
+  String? _model;
 
   CoreConfig({
-    this.bot,
-    this.api,
-    this.model,
-  });
+    String? bot,
+    String? api,
+    String? model,
+  })  : _bot = bot,
+        _api = api,
+        _model = model;
+
+  String? get bot => Config.bots.containsKey(_bot) ? _bot : null;
+  String? get api => Config.apis.containsKey(_api) ? _api : null;
+  String? get model =>
+      (Config.apis[_api]?.models.contains(_model) ?? false) ? _model : null;
+
+  set bot(String? value) => _bot = value;
+  set api(String? value) => _api = value;
+  set model(String? value) => _model = value;
 
   Map toJson() => {
         "bot": bot,

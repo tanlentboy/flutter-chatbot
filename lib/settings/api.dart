@@ -244,10 +244,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                       onPressed: () async {
                         Config.apis.remove(apiPair.key);
 
-                        _fixCore(Config.core);
-                        _fixCore(CurrentChat.core);
                         ref.read(apisProvider.notifier).notify();
-
                         Navigator.of(context).pop();
                         await Config.save();
                       },
@@ -261,10 +258,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     onPressed: () async {
                       if (!_save(context)) return;
 
-                      _fixCore(Config.core);
-                      _fixCore(CurrentChat.core);
                       ref.read(apisProvider.notifier).notify();
-
                       Navigator.of(context).pop();
                       await Config.save();
                     },
@@ -325,11 +319,11 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
   }
 
   Future<void> _editModels(BuildContext context) async {
-    final models = _modelsCtrl.text;
-    if (models.isEmpty) return;
+    final text = _modelsCtrl.text;
+    if (text.isEmpty) return;
 
-    final modelList = models.split(',').map((it) => it.trim()).toList();
-    final chosen = {for (final model in modelList) model: true};
+    final models = text.split(',').map((it) => it.trim()).toList();
+    final chosen = {for (final model in models) model: true};
     if (chosen.isEmpty) return;
 
     final result = await showDialog<bool>(
@@ -354,11 +348,11 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                   shrinkWrap: true,
                   itemCount: chosen.length,
                   itemBuilder: (context, index) => CheckboxListTile(
-                    title: Text(modelList[index]),
-                    value: chosen[modelList[index]],
+                    title: Text(models[index]),
+                    value: chosen[models[index]],
                     contentPadding: const EdgeInsets.only(left: 24, right: 16),
-                    onChanged: (value) => setState(
-                        () => chosen[modelList[index]] = value ?? false),
+                    onChanged: (value) =>
+                        setState(() => chosen[models[index]] = value ?? false),
                   ),
                 ),
               ),
@@ -391,7 +385,6 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
         ),
       ),
     );
-
     if (result == null || !result) return;
 
     _modelsCtrl.text = [
@@ -429,14 +422,5 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
     Config.apis[name] = ApiConfig(url: apiUrl, key: apiKey, models: modelList);
 
     return true;
-  }
-}
-
-void _fixCore(CoreConfig core) {
-  final models = Config.apis[core.api]?.models;
-  if (models == null) {
-    core.api = core.model = null;
-  } else if (!models.contains(core.model)) {
-    core.model = null;
   }
 }

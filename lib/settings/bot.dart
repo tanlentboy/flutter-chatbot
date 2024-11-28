@@ -242,10 +242,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                       onPressed: () async {
                         Config.bots.remove(botPair.key);
 
-                        _fixCore(Config.core);
-                        _fixCore(CurrentChat.core);
                         ref.read(botsProvider.notifier).notify();
-
                         Navigator.of(context).pop();
                         await Config.save();
                       },
@@ -259,10 +256,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     onPressed: () async {
                       if (!_save(context)) return;
 
-                      _fixCore(Config.core);
-                      _fixCore(CurrentChat.core);
                       ref.read(botsProvider.notifier).notify();
-
                       Navigator.of(context).pop();
                       await Config.save();
                     },
@@ -328,11 +322,5 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
     );
 
     return true;
-  }
-}
-
-void _fixCore(CoreConfig core) {
-  if (!Config.bots.containsKey(core.bot)) {
-    core.bot = null;
   }
 }
