@@ -16,6 +16,7 @@
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../chat/current.dart";
 
 import "dart:convert";
 import "package:flutter/material.dart";
@@ -56,9 +57,7 @@ class ApisTab extends ConsumerWidget {
               leading: const Icon(Icons.api),
               contentPadding: const EdgeInsets.only(left: 16, right: 8),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ApiSettings(
-                  apiPair: apis[index],
-                ),
+                builder: (context) => ApiSettings(apiPair: apis[index]),
               )),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -244,7 +243,11 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                       child: Text(S.of(context).delete),
                       onPressed: () async {
                         Config.apis.remove(apiPair.key);
+
+                        _fixCore(Config.core);
+                        _fixCore(CurrentChat.core);
                         ref.read(apisProvider.notifier).notify();
+
                         Navigator.of(context).pop();
                         await Config.save();
                       },
@@ -257,6 +260,11 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     child: Text(S.of(context).save),
                     onPressed: () async {
                       if (!_save(context)) return;
+
+                      _fixCore(Config.core);
+                      _fixCore(CurrentChat.core);
+                      ref.read(apisProvider.notifier).notify();
+
                       Navigator.of(context).pop();
                       await Config.save();
                     },
@@ -320,41 +328,66 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
     final models = _modelsCtrl.text;
     if (models.isEmpty) return;
 
-    final chosen = {for (final model in models.split(",")) model.trim(): true};
+    final modelList = models.split(',').map((it) => it.trim()).toList();
+    final chosen = {for (final model in modelList) model: true};
     if (chosen.isEmpty) return;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(S.of(context).select_models),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: chosen.keys
-                  .map((model) => CheckboxListTile(
-                        title: Text(model),
-                        value: chosen[model],
-                        onChanged: (value) =>
-                            setState(() => chosen[model] = value ?? false),
-                      ))
-                  .toList(),
-            ),
+        builder: (context, setState) => Dialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 24),
+              Text(S.of(context).select_models,
+                  style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.only(left: 24, right: 24),
+                child: Divider(height: 1),
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.5),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: chosen.length,
+                  itemBuilder: (context, index) => CheckboxListTile(
+                    title: Text(modelList[index]),
+                    value: chosen[modelList[index]],
+                    contentPadding: const EdgeInsets.only(left: 24, right: 16),
+                    onChanged: (value) => setState(
+                        () => chosen[modelList[index]] = value ?? false),
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(left: 24, right: 24),
+                child: Divider(height: 1),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    child: Text(S.of(context).cancel),
+                    onPressed: () => Navigator.of(context).pop(false),
+                  ),
+                  TextButton(
+                    child: Text(S.of(context).clear),
+                    onPressed: () => setState(() =>
+                        chosen.forEach((model, _) => chosen[model] = false)),
+                  ),
+                  TextButton(
+                    child: Text(S.of(context).save),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
-          actions: [
-            TextButton(
-              child: Text(S.of(context).cancel),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            TextButton(
-              child: Text(S.of(context).clear),
-              onPressed: () => setState(
-                  () => chosen.forEach((model, _) => chosen[model] = false)),
-            ),
-            TextButton(
-              child: Text(S.of(context).save),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
         ),
       ),
     );
@@ -392,15 +425,18 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
     }
 
     if (apiPair != null) Config.apis.remove(apiPair.key);
-
     final modelList = models.split(",").map((e) => e.trim()).toList();
-    Config.apis[name] = ApiConfig(
-      url: apiUrl,
-      key: apiKey,
-      models: modelList,
-    );
+    Config.apis[name] = ApiConfig(url: apiUrl, key: apiKey, models: modelList);
 
-    ref.read(apisProvider.notifier).notify();
     return true;
+  }
+}
+
+void _fixCore(CoreConfig core) {
+  final models = Config.apis[core.api]?.models;
+  if (models == null) {
+    core.api = core.model = null;
+  } else if (!models.contains(core.model)) {
+    core.model = null;
   }
 }

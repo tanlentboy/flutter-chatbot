@@ -16,6 +16,7 @@
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../chat/current.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -205,8 +206,9 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
               children: [
                 Flexible(
                   child: SwitchListTile(
-                    title: Text(S.of(context).streaming_response),
                     value: _stream ?? true,
+                    title: Text(S.of(context).streaming_response),
+                    contentPadding: const EdgeInsets.only(left: 8, right: 8),
                     onChanged: (value) => setState(() => _stream = value),
                   ),
                 ),
@@ -228,7 +230,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                if (botPair != null) ...[
+                if (botPair != null)
                   Expanded(
                     flex: 1,
                     child: FilledButton(
@@ -239,13 +241,16 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                       child: Text(S.of(context).delete),
                       onPressed: () async {
                         Config.bots.remove(botPair.key);
+
+                        _fixCore(Config.core);
+                        _fixCore(CurrentChat.core);
                         ref.read(botsProvider.notifier).notify();
+
                         Navigator.of(context).pop();
                         await Config.save();
                       },
                     ),
                   ),
-                ],
                 const SizedBox(width: 8),
                 Expanded(
                   flex: 1,
@@ -253,6 +258,11 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     child: Text(S.of(context).save),
                     onPressed: () async {
                       if (!_save(context)) return;
+
+                      _fixCore(Config.core);
+                      _fixCore(CurrentChat.core);
+                      ref.read(botsProvider.notifier).notify();
+
                       Navigator.of(context).pop();
                       await Config.save();
                     },
@@ -268,7 +278,6 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
 
   bool _save(BuildContext context) {
     final name = _nameCtrl.text;
-    final botPair = widget.botPair;
 
     if (name.isEmpty) {
       Util.showSnackBar(
@@ -278,6 +287,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
       return false;
     }
 
+    final botPair = widget.botPair;
     if (Config.bots.containsKey(name) &&
         (botPair == null || name != botPair.key)) {
       Util.showSnackBar(
@@ -308,20 +318,21 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
 
     if (botPair != null) Config.bots.remove(botPair.key);
 
-    final systemPrompts = _systemPromptsCtrl.text;
+    final text = _systemPromptsCtrl.text;
+    final systemPrompts = text.isEmpty ? null : text;
     Config.bots[name] = BotConfig(
       stream: _stream,
       maxTokens: maxTokens,
       temperature: temperature,
-      systemPrompts: systemPrompts.isEmpty ? null : systemPrompts,
+      systemPrompts: systemPrompts,
     );
 
-    Util.showSnackBar(
-      context: context,
-      content: Text(S.of(context).saved_successfully),
-    );
-
-    ref.read(botsProvider.notifier).notify();
     return true;
+  }
+}
+
+void _fixCore(CoreConfig core) {
+  if (!Config.bots.containsKey(core.bot)) {
+    core.bot = null;
   }
 }
