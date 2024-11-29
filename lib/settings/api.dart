@@ -16,7 +16,6 @@
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
-import "../chat/current.dart";
 
 import "dart:convert";
 import "package:flutter/material.dart";

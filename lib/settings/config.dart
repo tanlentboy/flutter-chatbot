@@ -79,7 +79,6 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             if (api == null) return;
 
             setState(() => Config.core.api = api);
-            ref.read(chatProvider.notifier).notify();
             await Config.save();
           },
         ),
@@ -150,12 +149,16 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           title: Text(s.voice),
           subtitle: Text(Config.tts.voice ?? s.empty),
           onTap: () async {
-            final voice = await _input(
+            var text = await _input(
               title: s.voice,
               hint: s.please_input,
               text: Config.tts.voice,
             );
-            if (voice == null) return;
+            if (text == null) return;
+
+            String? voice;
+            text = text.trim();
+            if (text.isNotEmpty) voice = text;
 
             setState(() => Config.tts.voice = voice);
             await Config.save();
@@ -184,12 +187,19 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           title: Text(s.quality),
           subtitle: Text(Config.img.quality?.toString() ?? s.empty),
           onTap: () async {
-            final text = await _input(
+            var text = await _input(
               title: s.quality,
               hint: s.please_input,
               text: Config.img.quality?.toString(),
             );
-            final quality = int.tryParse(text ?? "");
+            if (text == null) return;
+
+            int? quality;
+            text = text.trim();
+            if (text.isNotEmpty) {
+              quality = int.tryParse(text);
+              if (quality == null) return;
+            }
 
             setState(() => Config.img.quality = quality);
             await Config.save();
@@ -200,12 +210,19 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           title: Text(s.minWidth),
           subtitle: Text(Config.img.minWidth?.toString() ?? s.empty),
           onTap: () async {
-            final text = await _input(
+            var text = await _input(
               title: s.minWidth,
               hint: s.please_input,
               text: Config.img.minWidth?.toString(),
             );
-            final minWidth = int.tryParse(text ?? "");
+            if (text == null) return;
+
+            int? minWidth;
+            text = text.trim();
+            if (text.isNotEmpty) {
+              minWidth = int.tryParse(text);
+              if (minWidth == null) return;
+            }
 
             setState(() => Config.img.minWidth = minWidth);
             await Config.save();
@@ -216,12 +233,19 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           title: Text(s.minHeight),
           subtitle: Text(Config.img.minHeight?.toString() ?? s.empty),
           onTap: () async {
-            final text = await _input(
+            var text = await _input(
               title: s.minHeight,
               hint: s.please_input,
               text: Config.img.minHeight?.toString(),
             );
-            final minHeight = int.tryParse(text ?? "");
+            if (text == null) return;
+
+            int? minHeight;
+            text = text.trim();
+            if (text.isNotEmpty) {
+              minHeight = int.tryParse(text);
+              if (minHeight == null) return;
+            }
 
             setState(() => Config.img.minHeight = minHeight);
             await Config.save();
@@ -415,7 +439,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
     String? text,
     String? hint,
   }) async {
-    final result = await showDialog<String>(
+    return await showDialog<String>(
       context: context,
       builder: (context) => Dialog(
         child: _InputDialog(
@@ -425,7 +449,6 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ),
       ),
     );
-    return (result?.isNotEmpty ?? false) ? result : null;
   }
 }
 
