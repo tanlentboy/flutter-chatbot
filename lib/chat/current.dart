@@ -214,7 +214,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -231,7 +231,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _api,
@@ -251,7 +251,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _model,
               items: modelList,
@@ -265,7 +265,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -279,7 +279,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                     }),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 24),
                 Expanded(
                   flex: 1,
                   child: FilledButton(

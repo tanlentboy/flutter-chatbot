@@ -174,7 +174,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   child: TextField(
                     controller: _maxTokensCtrl,
@@ -201,7 +201,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Flexible(
@@ -214,7 +214,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -229,7 +229,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 if (botPair != null)
                   Expanded(
                     flex: 1,
@@ -248,7 +248,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                       },
                     ),
                   ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   flex: 1,
                   child: FilledButton(

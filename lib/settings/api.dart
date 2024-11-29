@@ -157,7 +157,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   flex: 2,
                   child: TextField(
@@ -200,7 +200,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Column(
                   children: [
                     Spin(
@@ -221,7 +221,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                 )
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -231,7 +231,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 if (apiPair != null)
                   Expanded(
                     flex: 1,
@@ -250,7 +250,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                       },
                     ),
                   ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 12),
                 Expanded(
                   flex: 1,
                   child: FilledButton(
@@ -336,10 +336,10 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
               const SizedBox(height: 24),
               Text(S.of(context).select_models,
                   style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               const Padding(
                 padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(height: 1),
+                child: Divider(),
               ),
               ConstrainedBox(
                 constraints: BoxConstraints(
@@ -358,7 +358,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
               ),
               const Padding(
                 padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(height: 1),
+                child: Divider(),
               ),
               const SizedBox(height: 16),
               Row(
