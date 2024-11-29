@@ -181,34 +181,82 @@ class ChatPageState extends ConsumerState<ChatPage> {
       actions: [
         PopupMenuButton(
           icon: const Icon(Icons.more_horiz),
-          menuPadding: const EdgeInsets.all(0),
-          onSelected: (value) async => await _onSelected(context, value),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
+          constraints: BoxConstraints(maxWidth: 2.5 * 56),
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           itemBuilder: (context) => <PopupMenuItem<int>>[
             PopupMenuItem(
-              value: 1,
+              padding: const EdgeInsets.only(left: 16),
               child: ListTile(
                 leading: const Icon(Icons.file_copy, size: 20),
                 title: Text(S.of(context).clone_chat),
+                contentPadding: EdgeInsets.zero,
                 minTileHeight: 32,
               ),
+              onTap: () async {
+                InputWidget.unFocus();
+                if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
+
+                CurrentChat.file = null;
+                CurrentChat.initChat(CurrentChat.title!);
+
+                await CurrentChat.save();
+                ref.read(chatsProvider.notifier).notify();
+
+                if (!context.mounted) return;
+                Util.showSnackBar(
+                  context: context,
+                  content: Text(S.of(context).cloned_successfully),
+                );
+              },
             ),
             PopupMenuItem(
-              value: 2,
+              padding: const EdgeInsets.only(left: 16),
               child: ListTile(
                 leading: const Icon(Icons.delete, size: 24),
                 title: Text(S.of(context).clear_chat),
+                contentPadding: EdgeInsets.zero,
                 minTileHeight: 32,
               ),
+              onTap: () async {
+                InputWidget.unFocus();
+                if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
+
+                final result = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(S.of(context).clear_chat),
+                    content: Text(S.of(context).ensure_clear_chat),
+                    actions: [
+                      TextButton(
+                        child: Text(S.of(context).cancel),
+                        onPressed: () => Navigator.of(context).pop(false),
+                      ),
+                      TextButton(
+                        child: Text(S.of(context).clear),
+                        onPressed: () => Navigator.of(context).pop(true),
+                      ),
+                    ],
+                  ),
+                );
+                if (!(result ?? false)) return;
+                CurrentChat.messages.clear();
+
+                await CurrentChat.save();
+                ref.read(messagesProvider.notifier).notify();
+              },
             ),
             PopupMenuItem(
-              value: 3,
+              padding: const EdgeInsets.only(left: 16),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const CurrentChatSettings(),
+              )),
               child: ListTile(
                 leading: const Icon(Icons.settings, size: 24),
                 title: Text(S.of(context).chat_settings),
+                contentPadding: EdgeInsets.zero,
                 minTileHeight: 32,
               ),
             ),
@@ -318,60 +366,5 @@ class ChatPageState extends ConsumerState<ChatPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _onSelected(BuildContext context, int value) async {
-    InputWidget.unFocus();
-
-    switch (value) {
-      case 1:
-        if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
-
-        CurrentChat.file = null;
-        CurrentChat.initChat(CurrentChat.title!);
-
-        await CurrentChat.save();
-        ref.read(chatsProvider.notifier).notify();
-
-        if (!context.mounted) return;
-        Util.showSnackBar(
-          context: context,
-          content: Text(S.of(context).cloned_successfully),
-        );
-        break;
-
-      case 2:
-        if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
-
-        final result = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(S.of(context).clear_chat),
-            content: Text(S.of(context).ensure_clear_chat),
-            actions: [
-              TextButton(
-                child: Text(S.of(context).cancel),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              TextButton(
-                child: Text(S.of(context).clear),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
-        );
-        if (!(result ?? false)) return;
-        CurrentChat.messages.clear();
-
-        await CurrentChat.save();
-        ref.read(messagesProvider.notifier).notify();
-        break;
-
-      case 3:
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const CurrentChatSettings(),
-        ));
-        break;
-    }
   }
 }
