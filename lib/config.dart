@@ -311,7 +311,7 @@ class Backup {
     if (root == null) return false;
 
     final time = DateTime.now().millisecondsSinceEpoch.toString();
-    final path = "root${Config._sep}chatbot-backup-$time.zip";
+    final path = "$root${Config._sep}chatbot-backup-$time.zip";
 
     final dir = Directory(Config._dir);
     final encoder = ZipFileEncoder();

@@ -32,8 +32,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "camera": MessageLookupByLibrary.simpleMessage("Camera"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "cannot_open": MessageLookupByLibrary.simpleMessage("Cannot Open"),
+        "chat_image_compress":
+            MessageLookupByLibrary.simpleMessage("Chat Image Compress"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
+        "choose_api": MessageLookupByLibrary.simpleMessage("Choose API"),
+        "choose_bot": MessageLookupByLibrary.simpleMessage("Choose Bot"),
+        "choose_model": MessageLookupByLibrary.simpleMessage("Choose Model"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clear_chat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
         "clone_chat": MessageLookupByLibrary.simpleMessage("Clone Chat"),
@@ -42,6 +47,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "complete_all_fields":
             MessageLookupByLibrary.simpleMessage("Please complete all fields"),
         "config": MessageLookupByLibrary.simpleMessage("Config"),
+        "config_hint": MessageLookupByLibrary.simpleMessage(
+            "To avoid export failures, it\'s recommended to export the configuration to the Documents directory, or create a ChatBot subdirectory within your Downloads folder."),
+        "config_import_export":
+            MessageLookupByLibrary.simpleMessage("Config Import and Export"),
         "copied_successfully":
             MessageLookupByLibrary.simpleMessage("Copied Successfully"),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
@@ -53,7 +62,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicate_bot_name":
             MessageLookupByLibrary.simpleMessage("Duplicate Bot name"),
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "empty": MessageLookupByLibrary.simpleMessage("Empty"),
         "empty_link": MessageLookupByLibrary.simpleMessage("Empty Link"),
+        "enable": MessageLookupByLibrary.simpleMessage("Enable"),
         "ensure_clear_chat": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to clear the chat?"),
         "enter_a_name":
@@ -67,10 +78,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "exported_successfully":
             MessageLookupByLibrary.simpleMessage("Exported Successfully"),
         "failed_to_export": MessageLookupByLibrary.simpleMessage(
-            "Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually)."),
+            "Can\'t write to that directory."),
         "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
         "image_compress_failed":
             MessageLookupByLibrary.simpleMessage("Failed to comprese image"),
+        "image_hint": MessageLookupByLibrary.simpleMessage(
+            "The quality setting should be between 1 and 100, with lower values resulting in higher compression. Minimum width and minimum height restrict image resizing. Leave these fields blank if you\'re unsure."),
+        "img_enable": MessageLookupByLibrary.simpleMessage(
+            "The original image will be used if compression fails."),
         "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
         "imported_successfully":
             MessageLookupByLibrary.simpleMessage("Imported Successfully"),
@@ -80,6 +95,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Invalid Temperature"),
         "link": MessageLookupByLibrary.simpleMessage("Link"),
         "max_tokens": MessageLookupByLibrary.simpleMessage("Max Tokens"),
+        "minHeight": MessageLookupByLibrary.simpleMessage("Minimal Height"),
+        "minWidth": MessageLookupByLibrary.simpleMessage("Minimal Width"),
         "model": MessageLookupByLibrary.simpleMessage("Model"),
         "model_list": MessageLookupByLibrary.simpleMessage("Model List"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
@@ -92,6 +109,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "open": MessageLookupByLibrary.simpleMessage("Open"),
         "play": MessageLookupByLibrary.simpleMessage("Play"),
+        "please_input": MessageLookupByLibrary.simpleMessage("Please Input"),
+        "quality": MessageLookupByLibrary.simpleMessage("Quality"),
         "reanswer": MessageLookupByLibrary.simpleMessage("Reanswer"),
         "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "restart_app": MessageLookupByLibrary.simpleMessage(

@@ -420,66 +420,6 @@ class S {
     );
   }
 
-  /// `Export Config`
-  String get export_config {
-    return Intl.message(
-      'Export Config',
-      name: 'export_config',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import Config`
-  String get import_config {
-    return Intl.message(
-      'Import Config',
-      name: 'import_config',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exported Successfully`
-  String get exported_successfully {
-    return Intl.message(
-      'Exported Successfully',
-      name: 'exported_successfully',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Imported Successfully`
-  String get imported_successfully {
-    return Intl.message(
-      'Imported Successfully',
-      name: 'imported_successfully',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please restart App to load the new settings.`
-  String get restart_app {
-    return Intl.message(
-      'Please restart App to load the new settings.',
-      name: 'restart_app',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually).`
-  String get failed_to_export {
-    return Intl.message(
-      'Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually).',
-      name: 'failed_to_export',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Please enter a name`
   String get enter_a_name {
     return Intl.message(
@@ -575,6 +515,206 @@ class S {
     return Intl.message(
       'Text To Speech',
       name: 'text_to_speech',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat Image Compress`
+  String get chat_image_compress {
+    return Intl.message(
+      'Chat Image Compress',
+      name: 'chat_image_compress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Config Import and Export`
+  String get config_import_export {
+    return Intl.message(
+      'Config Import and Export',
+      name: 'config_import_export',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose Bot`
+  String get choose_bot {
+    return Intl.message(
+      'Choose Bot',
+      name: 'choose_bot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose API`
+  String get choose_api {
+    return Intl.message(
+      'Choose API',
+      name: 'choose_api',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose Model`
+  String get choose_model {
+    return Intl.message(
+      'Choose Model',
+      name: 'choose_model',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quality`
+  String get quality {
+    return Intl.message(
+      'Quality',
+      name: 'quality',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minimal Width`
+  String get minWidth {
+    return Intl.message(
+      'Minimal Width',
+      name: 'minWidth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minimal Height`
+  String get minHeight {
+    return Intl.message(
+      'Minimal Height',
+      name: 'minHeight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export Config`
+  String get export_config {
+    return Intl.message(
+      'Export Config',
+      name: 'export_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import Config`
+  String get import_config {
+    return Intl.message(
+      'Import Config',
+      name: 'import_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Empty`
+  String get empty {
+    return Intl.message(
+      'Empty',
+      name: 'empty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable`
+  String get enable {
+    return Intl.message(
+      'Enable',
+      name: 'enable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please Input`
+  String get please_input {
+    return Intl.message(
+      'Please Input',
+      name: 'please_input',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The original image will be used if compression fails.`
+  String get img_enable {
+    return Intl.message(
+      'The original image will be used if compression fails.',
+      name: 'img_enable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The quality setting should be between 1 and 100, with lower values resulting in higher compression. Minimum width and minimum height restrict image resizing. Leave these fields blank if you're unsure.`
+  String get image_hint {
+    return Intl.message(
+      'The quality setting should be between 1 and 100, with lower values resulting in higher compression. Minimum width and minimum height restrict image resizing. Leave these fields blank if you\'re unsure.',
+      name: 'image_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To avoid export failures, it's recommended to export the configuration to the Documents directory, or create a ChatBot subdirectory within your Downloads folder.`
+  String get config_hint {
+    return Intl.message(
+      'To avoid export failures, it\'s recommended to export the configuration to the Documents directory, or create a ChatBot subdirectory within your Downloads folder.',
+      name: 'config_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exported Successfully`
+  String get exported_successfully {
+    return Intl.message(
+      'Exported Successfully',
+      name: 'exported_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Imported Successfully`
+  String get imported_successfully {
+    return Intl.message(
+      'Imported Successfully',
+      name: 'imported_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please restart App to load the new settings.`
+  String get restart_app {
+    return Intl.message(
+      'Please restart App to load the new settings.',
+      name: 'restart_app',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can't write to that directory.`
+  String get failed_to_export {
+    return Intl.message(
+      'Can\'t write to that directory.',
+      name: 'failed_to_export',
       desc: '',
       args: [],
     );

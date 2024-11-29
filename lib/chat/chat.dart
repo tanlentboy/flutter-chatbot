@@ -183,6 +183,9 @@ class ChatPageState extends ConsumerState<ChatPage> {
           icon: const Icon(Icons.more_horiz),
           menuPadding: const EdgeInsets.all(0),
           onSelected: (value) async => await _onSelected(context, value),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           itemBuilder: (context) => <PopupMenuItem<int>>[
             PopupMenuItem(

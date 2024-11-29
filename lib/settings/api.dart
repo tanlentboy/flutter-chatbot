@@ -374,7 +374,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                         chosen.forEach((model, _) => chosen[model] = false)),
                   ),
                   TextButton(
-                    child: Text(S.of(context).save),
+                    child: Text(S.of(context).ok),
                     onPressed: () => Navigator.of(context).pop(true),
                   ),
                 ],

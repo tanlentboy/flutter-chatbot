@@ -43,13 +43,6 @@
     "model_list": "Model List",
     "select_models": "Select Models",
 
-    "export_config": "Export Config",
-    "import_config": "Import Config",
-    "exported_successfully": "Exported Successfully",
-    "imported_successfully": "Imported Successfully",
-    "restart_app": "Please restart App to load the new settings.",
-    "failed_to_export": "Due to system permission constraints, writing files in the current directory is not allowed. It is recommended to choose the Documents or Download/ChatBot directory (if these directories do not exist, please create them manually).",
-
     "enter_a_name": "Please enter a name",
     "enter_a_title": "Please enter a title",
     "duplicate_bot_name": "Duplicate Bot name",
@@ -59,8 +52,32 @@
     "no_model": "no model",
     "all_chats": "All Chats",
     "chat_title": "Chat Title",
+
     "default_config": "Default Config",
     "text_to_speech": "Text To Speech",
+    "chat_image_compress": "Chat Image Compress",
+    "config_import_export": "Config Import and Export",
+
+    "choose_bot": "Choose Bot",
+    "choose_api": "Choose API",
+    "choose_model": "Choose Model",
+    "quality": "Quality",
+    "minWidth": "Minimal Width",
+    "minHeight": "Minimal Height",
+    "export_config": "Export Config",
+    "import_config": "Import Config",
+
+    "empty": "Empty",
+    "enable": "Enable",
+    "please_input": "Please Input",
+    "img_enable": "The original image will be used if compression fails.",
+    "image_hint": "The quality setting should be between 1 and 100, with lower values resulting in higher compression. Minimum width and minimum height restrict image resizing. Leave these fields blank if you're unsure.",
+    "config_hint": "To avoid export failures, it's recommended to export the configuration to the Documents directory, or create a ChatBot subdirectory within your Downloads folder.",
+
+    "exported_successfully": "Exported Successfully",
+    "imported_successfully": "Imported Successfully",
+    "restart_app": "Please restart App to load the new settings.",
+    "failed_to_export": "Can't write to that directory.",
 
     "clone_chat": "Clone Chat",
     "clear_chat": "Clear Chat",

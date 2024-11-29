@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "dart:io";
-
 import "bot.dart";
 import "api.dart";
 import "../util.dart";
@@ -22,6 +20,7 @@ import "../config.dart";
 import "../gen/l10n.dart";
 import "../chat/chat.dart";
 
+import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -34,273 +33,474 @@ class ConfigTab extends ConsumerStatefulWidget {
 }
 
 class _ConfigTabState extends ConsumerState<ConfigTab> {
-  String? _bot = Config.core.bot;
-  String? _chatApi = Config.core.api;
-  String? _chatModel = Config.core.model;
-
-  String? _ttsApi = Config.tts.api;
-  String? _ttsModel = Config.tts.model;
-  final TextEditingController _ttsVoice =
-      TextEditingController(text: Config.tts.voice);
-
-  @override
-  void dispose() {
-    _ttsVoice.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.watch(botsProvider);
     ref.watch(apisProvider);
 
-    final bots = Config.bots.keys;
-    final apis = Config.apis.keys;
-    final ttsModels = Config.apis[_ttsApi]?.models ?? [];
-    final chatModels = Config.apis[_chatApi]?.models ?? [];
+    final s = S.of(context);
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
-    if (!bots.contains(_bot)) _bot = null;
-    if (!apis.contains(_ttsApi)) _ttsApi = null;
-    if (!apis.contains(_chatApi)) _chatApi = null;
-    if (!ttsModels.contains(_ttsModel)) _ttsModel = null;
-    if (!chatModels.contains(_chatModel)) _chatModel = null;
-
-    final botList = <DropdownMenuItem<String>>[];
-    final apiList = <DropdownMenuItem<String>>[];
-    final ttsModelList = <DropdownMenuItem<String>>[];
-    final chatModelList = <DropdownMenuItem<String>>[];
-
-    for (final bot in bots) {
-      botList.add(DropdownMenuItem(
-        value: bot,
-        child: Text(bot, overflow: TextOverflow.ellipsis),
-      ));
-    }
-    for (final api in apis) {
-      apiList.add(DropdownMenuItem(
-        value: api,
-        child: Text(api, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    for (final model in ttsModels) {
-      ttsModelList.add(DropdownMenuItem(
-        value: model,
-        child: Text(model, overflow: TextOverflow.ellipsis),
-      ));
-    }
-    for (final model in chatModels) {
-      chatModelList.add(DropdownMenuItem(
-        value: model,
-        child: Text(model, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    return Stack(
+    return ListView(
       children: [
-        ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Text(" ${S.of(context).default_config}"),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _bot,
-                    items: botList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).bot),
-                    onChanged: (it) => setState(() => _bot = it),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _chatApi,
-                    items: apiList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).api),
-                    onChanged: (it) => setState(() {
-                      _chatModel = null;
-                      _chatApi = it;
-                    }),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _chatModel,
-              items: chatModelList,
-              isExpanded: true,
-              menuMaxHeight: 480,
-              hint: Text(S.of(context).model),
-              onChanged: (it) => setState(() => _chatModel = it),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(" ${S.of(context).text_to_speech}"),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _ttsVoice,
-                    decoration: InputDecoration(
-                      hintText: S.of(context).voice,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _ttsApi,
-                    items: apiList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).api),
-                    onChanged: (it) => setState(() {
-                      _ttsModel = null;
-                      _ttsApi = it;
-                    }),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _ttsModel,
-              items: ttsModelList,
-              isExpanded: true,
-              menuMaxHeight: 480,
-              hint: Text(S.of(context).model),
-              onChanged: (it) => setState(() => _ttsModel = it),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: FilledButton.tonal(
-                    child: Text(S.of(context).export_config),
-                    onPressed: () async {
-                      try {
-                        final result = await Backup.exportConfig();
-                        if (!result || !context.mounted) return;
-
-                        Util.showSnackBar(
-                          context: context,
-                          content: Text(S.of(context).exported_successfully),
-                        );
-                      } on PathAccessException {
-                        await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(S.of(context).error),
-                            content: Text(S.of(context).failed_to_export),
-                            actions: [
-                              TextButton(
-                                child: Text(S.of(context).ok),
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                            ],
-                          ),
-                        );
-                      } catch (e) {
-                        await Util.handleError(context: context, error: e);
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 1,
-                  child: FilledButton(
-                    child: Text(S.of(context).import_config),
-                    onPressed: () async {
-                      try {
-                        final result = await Backup.importConfig();
-                        if (!result || !context.mounted) return;
-
-                        await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(S.of(context).imported_successfully),
-                            content: Text(S.of(context).restart_app),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: Text(S.of(context).ok),
-                              )
-                            ],
-                          ),
-                        );
-
-                        await SystemNavigator.pop();
-                      } catch (e) {
-                        if (!context.mounted) return;
-                        await Util.handleError(context: context, error: e);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Text(
+            s.default_config,
+            style: TextStyle(color: primaryColor),
+          ),
         ),
-        Positioned(
-          right: 16,
-          bottom: 16,
-          child: FloatingActionButton.extended(
-            icon: const Icon(Icons.save),
-            label: Text(S.of(context).save),
-            onPressed: () async {
-              Config.core.bot = _bot;
-              Config.core.api = _chatApi;
-              Config.core.model = _chatModel;
+        ListTile(
+          title: Text(s.bot),
+          subtitle: Text(Config.core.bot ?? s.empty),
+          onTap: () async {
+            final bot = await _select(
+              list: Config.bots.keys.toList(),
+              selected: Config.core.bot,
+              title: s.choose_bot,
+            );
+            if (bot == null) return;
 
-              Config.tts.api = _ttsApi;
-              Config.tts.model = _ttsModel;
-              final voice = _ttsVoice.text;
-              Config.tts.voice = voice.isEmpty ? null : voice;
+            setState(() => Config.core.bot = bot);
+            await Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.api),
+          subtitle: Text(Config.core.api ?? s.empty),
+          onTap: () async {
+            final api = await _select(
+              list: Config.apis.keys.toList(),
+              selected: Config.core.api,
+              title: s.choose_api,
+            );
+            if (api == null) return;
+
+            setState(() => Config.core.api = api);
+            ref.read(chatProvider.notifier).notify();
+            await Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.model),
+          subtitle: Text(Config.core.model ?? s.empty),
+          onTap: () async {
+            final models = Config.apis[Config.core.api]?.models;
+            if (models == null) return;
+
+            final model = await _select(
+              selected: Config.core.model,
+              title: s.choose_model,
+              list: models,
+            );
+            if (model == null) return;
+
+            setState(() => Config.core.model = model);
+            ref.read(chatProvider.notifier).notify();
+            await Config.save();
+          },
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Text(
+            s.text_to_speech,
+            style: TextStyle(color: primaryColor),
+          ),
+        ),
+        ListTile(
+          title: Text(s.api),
+          subtitle: Text(Config.tts.api ?? s.empty),
+          onTap: () async {
+            final api = await _select(
+              list: Config.apis.keys.toList(),
+              selected: Config.tts.api,
+              title: s.choose_api,
+            );
+            if (api == null) return;
+
+            setState(() => Config.tts.api = api);
+            await Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.model),
+          subtitle: Text(Config.tts.model ?? s.empty),
+          onTap: () async {
+            final models = Config.apis[Config.tts.api]?.models;
+            if (models == null) return;
+
+            final model = await _select(
+              selected: Config.tts.model,
+              title: s.choose_model,
+              list: models,
+            );
+            if (model == null) return;
+
+            setState(() => Config.tts.model = model);
+            await Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.voice),
+          subtitle: Text(Config.tts.voice ?? s.empty),
+          onTap: () async {
+            final voice = await _input(
+              title: s.voice,
+              hint: s.please_input,
+              text: Config.tts.voice,
+            );
+            if (voice == null) return;
+
+            setState(() => Config.tts.voice = voice);
+            await Config.save();
+          },
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Text(
+            s.chat_image_compress,
+            style: TextStyle(color: primaryColor),
+          ),
+        ),
+        CheckboxListTile(
+          title: Text(s.enable),
+          value: Config.img.enable ?? true,
+          subtitle: Text(s.img_enable),
+          contentPadding: const EdgeInsets.only(left: 16, right: 8),
+          onChanged: (value) async {
+            setState(() => Config.img.enable = value);
+            await Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.quality),
+          subtitle: Text(Config.img.quality?.toString() ?? s.empty),
+          onTap: () async {
+            final text = await _input(
+              title: s.quality,
+              hint: s.please_input,
+              text: Config.img.quality?.toString(),
+            );
+            final quality = int.tryParse(text ?? "");
+
+            setState(() => Config.img.quality = quality);
+            await Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.minWidth),
+          subtitle: Text(Config.img.minWidth?.toString() ?? s.empty),
+          onTap: () async {
+            final text = await _input(
+              title: s.minWidth,
+              hint: s.please_input,
+              text: Config.img.minWidth?.toString(),
+            );
+            final minWidth = int.tryParse(text ?? "");
+
+            setState(() => Config.img.minWidth = minWidth);
+            await Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.minHeight),
+          subtitle: Text(Config.img.minHeight?.toString() ?? s.empty),
+          onTap: () async {
+            final text = await _input(
+              title: s.minHeight,
+              hint: s.please_input,
+              text: Config.img.minHeight?.toString(),
+            );
+            final minHeight = int.tryParse(text ?? "");
+
+            setState(() => Config.img.minHeight = minHeight);
+            await Config.save();
+          },
+        ),
+        Card.outlined(
+          margin: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
+          child: Padding(
+            padding:
+                const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outlined,
+                  color: primaryColor,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    s.image_hint,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Text(
+            s.config_import_export,
+            style: TextStyle(color: primaryColor),
+          ),
+        ),
+        ListTile(
+          title: Text(s.import_config),
+          onTap: () async {
+            try {
+              final result = await Backup.importConfig();
+              if (!result || !context.mounted) return;
+
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(s.imported_successfully),
+                  content: Text(s.restart_app),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(s.ok),
+                    )
+                  ],
+                ),
+              );
+
+              await SystemNavigator.pop();
+            } catch (e) {
+              if (!context.mounted) return;
+              await Util.handleError(context: context, error: e);
+            }
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.export_config),
+          onTap: () async {
+            try {
+              final result = await Backup.exportConfig();
+              if (!result || !context.mounted) return;
 
               Util.showSnackBar(
                 context: context,
-                content: Text(S.of(context).saved_successfully),
+                content: Text(s.exported_successfully),
               );
-
-              ref.read(chatProvider.notifier).notify();
-              await Config.save();
-            },
+            } on PathAccessException {
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(s.error),
+                  content: Text(s.failed_to_export),
+                  actions: [
+                    TextButton(
+                      child: Text(s.ok),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              );
+            } catch (e) {
+              await Util.handleError(context: context, error: e);
+            }
+          },
+        ),
+        Card.outlined(
+          margin:
+              const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
+          child: Padding(
+            padding:
+                const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outlined,
+                  color: primaryColor,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    s.config_hint,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  Future<String?> _select({
+    required List<String> list,
+    required String title,
+    String? selected,
+  }) async {
+    return await showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 24),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 16),
+              const Padding(
+                padding: EdgeInsets.only(left: 24, right: 24),
+                child: Divider(),
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.5),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: list.length,
+                  itemBuilder: (context, index) => RadioListTile(
+                    value: list[index],
+                    groupValue: selected,
+                    title: Text(list[index]),
+                    contentPadding: const EdgeInsets.only(left: 16, right: 24),
+                    onChanged: (value) => setState(() => selected = value),
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(left: 24, right: 24),
+                child: Divider(),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    child: Text(S.of(context).cancel),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    child: Text(S.of(context).ok),
+                    onPressed: () => Navigator.of(context).pop(selected),
+                  ),
+                  const SizedBox(width: 24),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<String?> _input({
+    required String title,
+    String? text,
+    String? hint,
+  }) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => Dialog(
+        child: _InputDialog(
+          title: title,
+          text: text,
+          hint: hint,
+        ),
+      ),
+    );
+    return (result?.isNotEmpty ?? false) ? result : null;
+  }
+}
+
+class _InputDialog extends StatefulWidget {
+  final String title;
+  final String? text;
+  final String? hint;
+
+  const _InputDialog({
+    required this.title,
+    this.text,
+    this.hint,
+  });
+
+  @override
+  State<_InputDialog> createState() => _InputDialogState();
+}
+
+class _InputDialogState extends State<_InputDialog> {
+  late final TextEditingController ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    ctrl = TextEditingController(text: widget.text);
+  }
+
+  @override
+  void dispose() {
+    ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.only(left: 24),
+          child: Text(
+            widget.title,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 24, right: 24),
+          child: TextField(
+            controller: ctrl,
+            decoration: InputDecoration(
+              labelText: widget.hint,
+              border: UnderlineInputBorder(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              child: Text(S.of(context).cancel),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              child: Text(S.of(context).ok),
+              onPressed: () => Navigator.of(context).pop(ctrl.text),
+            ),
+            const SizedBox(width: 24),
+          ],
+        ),
+        const SizedBox(height: 24),
       ],
     );
   }
