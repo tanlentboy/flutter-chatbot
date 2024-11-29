@@ -184,7 +184,6 @@ class ChatPageState extends ConsumerState<ChatPage> {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
-          constraints: BoxConstraints(maxWidth: 2.5 * 56),
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           itemBuilder: (context) => <PopupMenuItem<int>>[
             PopupMenuItem(

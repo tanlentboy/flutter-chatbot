@@ -285,9 +285,7 @@ class Config {
       final data = await _file.readAsString();
       fromJson(jsonDecode(data));
     } else {
-      core = CoreConfig();
-      tts = TtsConfig();
-      save();
+      fromJson({});
     }
   }
 
