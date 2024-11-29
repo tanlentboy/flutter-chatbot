@@ -58,15 +58,23 @@ class CoreConfig {
 }
 
 class TtsConfig {
-  String? api;
-  String? model;
+  String? _api;
+  String? _model;
   String? voice;
 
   TtsConfig({
-    this.api,
-    this.model,
+    String? api,
+    String? model,
     this.voice,
-  });
+  })  : _api = api,
+        _model = model;
+
+  String? get api => Config.apis.containsKey(_api) ? _api : null;
+  String? get model =>
+      (Config.apis[_api]?.models.contains(_model) ?? false) ? _model : null;
+
+  set api(String? value) => _api = value;
+  set model(String? value) => _model = value;
 
   Map toJson() => {
         "api": api,
@@ -78,6 +86,34 @@ class TtsConfig {
         api: json["api"],
         model: json["model"],
         voice: json["voice"],
+      );
+}
+
+class ImgConfig {
+  bool? enable;
+  int? quality;
+  int? minWidth;
+  int? minHeight;
+
+  ImgConfig({
+    this.enable,
+    this.quality,
+    this.minWidth,
+    this.minHeight,
+  });
+
+  Map toJson() => {
+        "enable": enable,
+        "quality": quality,
+        "minWidth": minWidth,
+        "minHeight": minHeight,
+      };
+
+  factory ImgConfig.fromJson(Map json) => ImgConfig(
+        enable: json["enable"],
+        quality: json["quality"],
+        minWidth: json["minWidth"],
+        minHeight: json["minHeight"],
       );
 }
 
@@ -159,6 +195,7 @@ class ApiConfig {
 
 class Config {
   static late final TtsConfig tts;
+  static late final ImgConfig img;
   static late final CoreConfig core;
   static final List<ChatConfig> chats = [];
   static final Map<String, BotConfig> bots = {};
@@ -196,6 +233,7 @@ class Config {
 
   static Map toJson() => {
         "tts": tts,
+        "img": img,
         "core": core,
         "bots": bots,
         "apis": apis,
@@ -204,12 +242,14 @@ class Config {
 
   static void fromJson(Map json) {
     final ttsJson = json["tts"] ?? {};
+    final imgJson = json["img"] ?? {};
     final coreJson = json["core"] ?? {};
     final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
     final chatsJson = json["chats"] ?? [];
 
     tts = TtsConfig.fromJson(ttsJson);
+    img = ImgConfig.fromJson(imgJson);
     core = CoreConfig.fromJson(coreJson);
 
     for (final chat in chatsJson) {

@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:chatbot/config.dart";
+
 import "chat.dart";
 import "message.dart";
 import "current.dart";
@@ -172,18 +174,22 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       return;
     }
 
-    try {
-      compressed = await FlutterImageCompress.compressWithFile(
-        result.path,
-        quality: 60,
-      );
-      if (compressed == null) throw false;
-    } catch (e) {
-      if (context.mounted) {
-        Util.showSnackBar(
-          context: context,
-          content: Text(S.of(context).image_compress_failed),
+    if (Config.img.enable ?? true) {
+      try {
+        compressed = await FlutterImageCompress.compressWithFile(
+          result.path,
+          quality: Config.img.quality ?? 95,
+          minWidth: Config.img.minWidth ?? 1920,
+          minHeight: Config.img.minHeight ?? 1080,
         );
+        if (compressed == null) throw false;
+      } catch (e) {
+        if (context.mounted) {
+          Util.showSnackBar(
+            context: context,
+            content: Text(S.of(context).image_compress_failed),
+          );
+        }
       }
     }
 
