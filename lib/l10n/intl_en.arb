@@ -71,7 +71,7 @@
     "enable": "Enable",
     "please_input": "Please Input",
     "image_enable_hint": "The original image will be used if compression fails.",
-    "image_hint": "The quality setting should be between 1 and 100, with lower values resulting in higher compression. Minimum width and minimum height restrict image resizing. Leave these fields blank if you're unsure.",
+    "image_hint": "The Quality should be between 1 and 100, with lower values resulting in higher compression. Minimum Width and Minimum Height restrict image resizing. Leave these fields empty if you're unsure.",
     "config_hint": "To avoid export failures, it's recommended to export the configuration to the Documents directory, or create a ChatBot subdirectory within your Downloads folder.",
 
     "exported_successfully": "Exported Successfully",

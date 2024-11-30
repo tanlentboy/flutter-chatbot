@@ -23,6 +23,7 @@ import "../settings/api.dart";
 
 import "dart:io";
 import "package:flutter/material.dart";
+import "package:animate_do/animate_do.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final chatProvider =
@@ -63,7 +64,14 @@ class ChatPageState extends ConsumerState<ChatPage> {
   final ScrollController _scrollCtrl = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  @override
   void dispose() {
+    _scrollCtrl.removeListener(_onScroll);
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -86,14 +94,19 @@ class ChatPageState extends ConsumerState<ChatPage> {
                 Consumer(
                   builder: (context, ref, child) {
                     ref.watch(messagesProvider);
+                    final messages = CurrentChat.messages;
+                    final length = messages.length;
 
                     return ListView.builder(
+                      reverse: true,
+                      shrinkWrap: true,
                       controller: _scrollCtrl,
                       padding: const EdgeInsets.only(
                           top: 4, left: 16, right: 16, bottom: 16),
-                      itemCount: CurrentChat.messages.length,
+                      itemCount: length,
                       itemBuilder: (context, index) {
-                        final message = CurrentChat.messages[index];
+                        final message =
+                            CurrentChat.messages[length - index - 1];
                         return MessageWidget(
                           message: message,
                           key: ValueKey(message),
@@ -102,13 +115,46 @@ class ChatPageState extends ConsumerState<ChatPage> {
                     );
                   },
                 ),
+                Positioned(
+                  right: 16,
+                  bottom: 16,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final show = ref.watch(_toBottomProvider);
+
+                      final child = ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(8),
+                          elevation: 2,
+                        ),
+                        onPressed: () => _scrollCtrl.jumpTo(0),
+                        child: Icon(Icons.arrow_downward_rounded, size: 20),
+                      );
+
+                      return show
+                          ? ZoomIn(child: child)
+                          : ZoomOut(child: child);
+                    },
+                  ),
+                ),
               ],
             ),
           ),
-          InputWidget(scrollCtrl: _scrollCtrl),
+          InputWidget(),
         ],
       ),
     );
+  }
+
+  void _onScroll() {
+    final show = ref.read(_toBottomProvider);
+
+    if (_scrollCtrl.position.pixels < 100) {
+      if (show) ref.read(_toBottomProvider.notifier).hide();
+    } else {
+      if (!show) ref.read(_toBottomProvider.notifier).show();
+    }
   }
 
   AppBar _buildAppBar() {
@@ -249,9 +295,12 @@ class ChatPageState extends ConsumerState<ChatPage> {
             ),
             PopupMenuItem(
               padding: const EdgeInsets.only(left: 16),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const CurrentChatSettings(),
-              )),
+              onTap: () {
+                InputWidget.unFocus();
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const CurrentChatSettings(),
+                ));
+              },
               child: ListTile(
                 leading: const Icon(Icons.settings, size: 24),
                 title: Text(S.of(context).chat_settings),
@@ -366,4 +415,20 @@ class ChatPageState extends ConsumerState<ChatPage> {
       ),
     );
   }
+}
+
+final _toBottomProvider =
+    AutoDisposeNotifierProvider<_ToBottomNotifier, bool>(_ToBottomNotifier.new);
+
+class _ToBottomNotifier extends AutoDisposeNotifier<bool> {
+  @override
+  bool build() {
+    ref.listen(messagesProvider, (prev, next) {
+      if (state) hide();
+    });
+    return false;
+  }
+
+  void show() => state = true;
+  void hide() => state = false;
 }

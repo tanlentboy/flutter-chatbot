@@ -85,7 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "image_enable_hint": MessageLookupByLibrary.simpleMessage(
             "The original image will be used if compression fails."),
         "image_hint": MessageLookupByLibrary.simpleMessage(
-            "The quality setting should be between 1 and 100, with lower values resulting in higher compression. Minimum width and minimum height restrict image resizing. Leave these fields blank if you\'re unsure."),
+            "The Quality should be between 1 and 100, with lower values resulting in higher compression. Minimum Width and Minimum Height restrict image resizing. Leave these fields empty if you\'re unsure."),
         "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
         "imported_successfully":
             MessageLookupByLibrary.simpleMessage("Imported Successfully"),

@@ -32,13 +32,9 @@ import "package:langchain_openai/langchain_openai.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
 
 class InputWidget extends ConsumerStatefulWidget {
-  final ScrollController scrollCtrl;
   static final FocusNode focusNode = FocusNode();
 
-  const InputWidget({
-    super.key,
-    required this.scrollCtrl,
-  });
+  const InputWidget({super.key});
 
   @override
   ConsumerState<InputWidget> createState() => _InputWidgetState();
@@ -224,7 +220,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       image: CurrentChat.image,
     )));
 
-    final scrollCtrl = widget.scrollCtrl;
     final chatContext = buildChatContext(messages);
     final item = MessageItem(
       text: "",
@@ -261,13 +256,11 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
         await for (final chunk in stream) {
           item.text += chunk.output.content;
           ref.read(messageProvider(assistant).notifier).notify();
-          scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
         }
       } else {
         final result = await llm.invoke(PromptValue.chat(chatContext));
         item.text += result.output.content;
         ref.read(messageProvider(assistant).notifier).notify();
-        scrollCtrl.jumpTo(scrollCtrl.position.maxScrollExtent);
       }
     } catch (e) {
       if (CurrentChat.chatStatus.isResponding && context.mounted) {
