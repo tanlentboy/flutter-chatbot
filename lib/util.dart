@@ -37,13 +37,13 @@ class Util {
     required String? link,
   }) async {
     if (link == null) {
-      return Util.showSnackBar(
+      Util.showSnackBar(
         context: context,
         content: Text(S.of(context).empty_link),
       );
+      return;
     }
 
-    if (!context.mounted) return;
     final result = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
@@ -51,16 +51,16 @@ class Util {
         content: Text(link),
         actions: [
           TextButton(
+            onPressed: Navigator.of(context).pop,
             child: Text(S.of(context).cancel),
-            onPressed: () => Navigator.of(context).pop(0),
           ),
           TextButton(
-            child: Text(S.of(context).copy),
             onPressed: () => Navigator.of(context).pop(1),
+            child: Text(S.of(context).copy),
           ),
           TextButton(
-            child: Text(S.of(context).open),
             onPressed: () => Navigator.of(context).pop(2),
+            child: Text(S.of(context).open),
           ),
         ],
       ),
@@ -69,13 +69,13 @@ class Util {
     switch (result) {
       case 1:
         if (!context.mounted) return;
-        await copyText(context: context, text: link);
+        copyText(context: context, text: link);
         break;
 
       case 2:
         final uri = Uri.parse(link);
         if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.platformDefault);
+          launchUrl(uri, mode: LaunchMode.platformDefault);
         } else {
           if (!context.mounted) return;
           Util.showSnackBar(
@@ -92,26 +92,26 @@ class Util {
     required dynamic error,
   }) async {
     final info = error.toString();
-    final result = await showDialog<int>(
+    final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(S.of(context).error),
         content: Text(info),
         actions: [
           TextButton(
+            onPressed: Navigator.of(context).pop,
             child: Text(S.of(context).cancel),
-            onPressed: () => Navigator.of(context).pop(0),
           ),
           TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
             child: Text(S.of(context).copy),
-            onPressed: () => Navigator.of(context).pop(1),
           ),
         ],
       ),
     );
 
-    if (result == 1 && context.mounted) {
-      await Util.copyText(context: context, text: info);
+    if (result == true && context.mounted) {
+      Util.copyText(context: context, text: info);
     }
   }
 

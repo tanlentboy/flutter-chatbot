@@ -57,7 +57,10 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.core.bot ?? s.empty),
           onTap: () async {
+            if (Config.bots.isEmpty) return;
+
             final bot = await _select(
+              context: context,
               list: Config.bots.keys.toList(),
               selected: Config.core.bot,
               title: s.choose_bot,
@@ -65,7 +68,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             if (bot == null) return;
 
             setState(() => Config.core.bot = bot);
-            await Config.save();
+            Config.save();
           },
         ),
         const Divider(height: 1),
@@ -74,7 +77,10 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.core.api ?? s.empty),
           onTap: () async {
+            if (Config.apis.isEmpty) return;
+
             final api = await _select(
+              context: context,
               list: Config.apis.keys.toList(),
               selected: Config.core.api,
               title: s.choose_api,
@@ -83,7 +89,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
 
             setState(() => Config.core.api = api);
             ref.read(chatProvider.notifier).notify();
-            await Config.save();
+            Config.save();
           },
         ),
         const Divider(height: 1),
@@ -96,6 +102,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             if (models == null) return;
 
             final model = await _select(
+              context: context,
               selected: Config.core.model,
               title: s.choose_model,
               list: models,
@@ -104,7 +111,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
 
             setState(() => Config.core.model = model);
             ref.read(chatProvider.notifier).notify();
-            await Config.save();
+            Config.save();
           },
         ),
         const SizedBox(height: 8),
@@ -120,7 +127,10 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.tts.api ?? s.empty),
           onTap: () async {
+            if (Config.apis.isEmpty) return;
+
             final api = await _select(
+              context: context,
               list: Config.apis.keys.toList(),
               selected: Config.tts.api,
               title: s.choose_api,
@@ -128,7 +138,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             if (api == null) return;
 
             setState(() => Config.tts.api = api);
-            await Config.save();
+            Config.save();
           },
         ),
         const Divider(height: 1),
@@ -141,6 +151,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             if (models == null) return;
 
             final model = await _select(
+              context: context,
               selected: Config.tts.model,
               title: s.choose_model,
               list: models,
@@ -148,7 +159,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             if (model == null) return;
 
             setState(() => Config.tts.model = model);
-            await Config.save();
+            Config.save();
           },
         ),
         const Divider(height: 1),
@@ -158,6 +169,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           subtitle: Text(Config.tts.voice ?? s.empty),
           onTap: () async {
             var text = await _input(
+              context: context,
               title: s.voice,
               hint: s.please_input,
               text: Config.tts.voice,
@@ -169,7 +181,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             if (text.isNotEmpty) voice = text;
 
             setState(() => Config.tts.voice = voice);
-            await Config.save();
+            Config.save();
           },
         ),
         const SizedBox(height: 8),
@@ -182,12 +194,12 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ),
         CheckboxListTile(
           title: Text(s.enable),
-          contentPadding: padding,
+          contentPadding: const EdgeInsets.only(left: 24, right: 16),
           value: Config.img.enable ?? true,
           subtitle: Text(s.image_enable_hint),
           onChanged: (value) async {
             setState(() => Config.img.enable = value);
-            await Config.save();
+            Config.save();
           },
         ),
         const Divider(height: 1),
@@ -197,6 +209,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           subtitle: Text(Config.img.quality?.toString() ?? s.empty),
           onTap: () async {
             var text = await _input(
+              context: context,
               title: s.quality,
               hint: s.please_input,
               text: Config.img.quality?.toString(),
@@ -211,7 +224,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             }
 
             setState(() => Config.img.quality = quality);
-            await Config.save();
+            Config.save();
           },
         ),
         const Divider(height: 1),
@@ -221,6 +234,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           subtitle: Text(Config.img.minWidth?.toString() ?? s.empty),
           onTap: () async {
             var text = await _input(
+              context: context,
               title: s.min_width,
               hint: s.please_input,
               text: Config.img.minWidth?.toString(),
@@ -235,7 +249,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             }
 
             setState(() => Config.img.minWidth = minWidth);
-            await Config.save();
+            Config.save();
           },
         ),
         const Divider(height: 1),
@@ -245,6 +259,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           subtitle: Text(Config.img.minHeight?.toString() ?? s.empty),
           onTap: () async {
             var text = await _input(
+              context: context,
               title: s.min_height,
               hint: s.please_input,
               text: Config.img.minHeight?.toString(),
@@ -259,7 +274,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             }
 
             setState(() => Config.img.minHeight = minHeight);
-            await Config.save();
+            Config.save();
           },
         ),
         Card.outlined(
@@ -299,26 +314,28 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           onTap: () async {
             try {
               final result = await Backup.importConfig();
-              if (!result || !context.mounted) return;
+              if (!result) return;
 
-              await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text(s.imported_successfully),
-                  content: Text(s.restart_app),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(s.ok),
-                    )
-                  ],
-                ),
-              );
+              if (context.mounted) {
+                await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(s.imported_successfully),
+                    content: Text(s.restart_app),
+                    actions: [
+                      TextButton(
+                        onPressed: Navigator.of(context).pop,
+                        child: Text(s.ok),
+                      )
+                    ],
+                  ),
+                );
+              }
 
-              await SystemNavigator.pop();
+              SystemNavigator.pop();
             } catch (e) {
               if (!context.mounted) return;
-              await Util.handleError(context: context, error: e);
+              Util.handleError(context: context, error: e);
             }
           },
         ),
@@ -329,14 +346,17 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           onTap: () async {
             try {
               final result = await Backup.exportConfig();
-              if (!result || !context.mounted) return;
+              if (!result) return;
 
-              Util.showSnackBar(
-                context: context,
-                content: Text(s.exported_successfully),
-              );
+              if (context.mounted) {
+                Util.showSnackBar(
+                  context: context,
+                  content: Text(s.exported_successfully),
+                );
+              }
             } on PathAccessException {
-              await showDialog(
+              if (!context.mounted) return;
+              showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
                   title: Text(s.error),
@@ -350,7 +370,8 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
                 ),
               );
             } catch (e) {
-              await Util.handleError(context: context, error: e);
+              if (!context.mounted) return;
+              Util.handleError(context: context, error: e);
             }
           },
         ),
@@ -383,6 +404,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
   }
 
   Future<String?> _select({
+    required BuildContext context,
     required List<String> list,
     required String title,
     String? selected,
@@ -447,6 +469,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
   }
 
   Future<String?> _input({
+    required BuildContext context,
     required String title,
     String? text,
     String? hint,

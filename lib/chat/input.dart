@@ -61,13 +61,13 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       child: Padding(
-        padding: const EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 8),
+        padding: const EdgeInsets.only(top: 8, left: 4, right: 4, bottom: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -75,21 +75,17 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               icon: Badge(
                 smallSize: 8,
                 isLabelVisible: hasImage,
-                child:
-                    Icon(hasImage ? Icons.delete : Icons.add_photo_alternate),
+                child: Icon(
+                  hasImage ? Icons.delete : Icons.add_photo_alternate,
+                ),
               ),
-              onPressed: () async {
-                if (hasImage) {
-                  _clearImage(context);
-                } else {
-                  await _addImage(context);
-                }
-              },
+              onPressed: _addImage,
             ),
             Expanded(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height / 4),
+                  maxHeight: MediaQuery.of(context).size.height / 4,
+                ),
                 child: TextField(
                   maxLines: null,
                   autofocus: false,
@@ -104,13 +100,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               ),
             ),
             IconButton(
-              onPressed: () async {
-                if (isResponding) {
-                  await _stopResponding(context);
-                } else {
-                  await _sendMessage(context);
-                }
-              },
+              onPressed: _sendMessage,
               icon: Icon(isResponding ? Icons.stop_circle : Icons.send),
             ),
           ],
@@ -119,9 +109,13 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     );
   }
 
-  Future<void> _addImage(BuildContext context) async {
-    InputWidget.unFocus();
+  Future<void> _addImage() async {
+    if (CurrentChat.image != null) {
+      setState(() => CurrentChat.image = null);
+      return;
+    }
 
+    InputWidget.unFocus();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (context) => Padding(
@@ -179,7 +173,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
         );
         if (compressed == null) throw false;
       } catch (e) {
-        if (context.mounted) {
+        if (mounted) {
           Util.showSnackBar(
             context: context,
             content: Text(S.of(context).image_compress_failed),
@@ -192,12 +186,14 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     setState(() => CurrentChat.image = base64Encode(bytes));
   }
 
-  void _clearImage(BuildContext context) {
-    setState(() => CurrentChat.image = null);
-  }
+  Future<void> _sendMessage() async {
+    if (!CurrentChat.chatStatus.isNothing) {
+      CurrentChat.chatStatus = ChatStatus.nothing;
+      client?.close();
+      client = null;
+      return;
+    }
 
-  Future<void> _sendMessage(BuildContext context) async {
-    if (!CurrentChat.chatStatus.isNothing) return;
     final text = _inputCtrl.text;
     if (text.isEmpty) return;
 
@@ -263,8 +259,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
         ref.read(messageProvider(assistant).notifier).notify();
       }
     } catch (e) {
-      if (CurrentChat.chatStatus.isResponding && context.mounted) {
-        await Util.handleError(context: context, error: e);
+      if (CurrentChat.chatStatus.isResponding && mounted) {
+        Util.handleError(context: context, error: e);
       }
       if (item.text.isEmpty) {
         messages.length -= 2;
@@ -275,16 +271,14 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     setState(() => CurrentChat.chatStatus = ChatStatus.nothing);
     ref.read(messageProvider(assistant).notifier).notify();
-    if (await CurrentChat.save()) {
+
+    final hasFile = CurrentChat.hasFile;
+    CurrentChat.save();
+
+    if (!hasFile) {
       ref.read(chatsProvider.notifier).notify();
       ref.read(chatProvider.notifier).notify();
     }
-  }
-
-  Future<void> _stopResponding(BuildContext context) async {
-    CurrentChat.chatStatus = ChatStatus.nothing;
-    client?.close();
-    client = null;
   }
 }
 

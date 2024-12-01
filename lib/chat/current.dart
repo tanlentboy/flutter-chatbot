@@ -61,43 +61,36 @@ class CurrentChat {
   }
 
   static Future<void> load(ChatConfig chat) async {
-    clear();
-    CurrentChat.chat = chat;
     file = File(Config.chatFilePath(chat.fileName));
 
     final json = jsonDecode(await file!.readAsString());
     final messagesJson = json["messages"] ?? [];
     final coreJson = json["core"];
 
-    if (coreJson != null) {
-      core = CoreConfig.fromJson(coreJson);
-    }
-
+    messages.clear();
     for (final message in messagesJson) {
       messages.add(Message.fromJson(message));
     }
+
+    core = coreJson != null ? CoreConfig.fromJson(coreJson) : Config.core;
   }
 
-  static Future<bool> save() async {
-    var isNew = false;
-
+  static Future<void> save() async {
     if (chat == null) {
-      if (messages.isEmpty) return false;
+      if (messages.isEmpty) return;
       initChat(messages.first.item.text);
     }
 
     if (file == null) {
-      initFile();
-      isNew = true;
       Config.chats.insert(0, chat!);
-      await Config.save();
+      Config.save();
+      initFile();
     }
 
     await file!.writeAsString(jsonEncode({
       "core": core,
       "messages": messages,
     }));
-    return isNew;
   }
 
   static void initChat(String title) {
@@ -167,10 +160,6 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
     final apis = Config.apis.keys;
     final models = Config.apis[_api]?.models ?? [];
 
-    if (!bots.contains(_bot)) _bot = null;
-    if (!apis.contains(_api)) _api = null;
-    if (!models.contains(_model)) _model = null;
-
     for (final bot in bots) {
       botList.add(DropdownMenuItem(
         value: bot,
@@ -194,10 +183,6 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         title: Text(S.of(context).chat_settings),
       ),
       body: Container(
@@ -209,7 +194,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
               controller: _titleCtrl,
               decoration: InputDecoration(
                 labelText: S.of(context).chat_title,
-                border: OutlineInputBorder(
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
               ),
@@ -269,26 +254,20 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
             Row(
               children: [
                 Expanded(
-                  flex: 1,
                   child: FilledButton.tonal(
                     child: Text(S.of(context).reset),
                     onPressed: () => setState(() {
-                      _bot = null;
-                      _api = null;
                       _model = null;
+                      _api = null;
+                      _bot = null;
                     }),
                   ),
                 ),
                 const SizedBox(width: 24),
                 Expanded(
-                  flex: 1,
                   child: FilledButton(
+                    onPressed: _save,
                     child: Text(S.of(context).save),
-                    onPressed: () async {
-                      if (!_save(context)) return;
-                      Navigator.of(context).pop();
-                      await CurrentChat.save();
-                    },
                   ),
                 ),
               ],
@@ -299,7 +278,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
     );
   }
 
-  bool _save(BuildContext context) {
+  void _save() {
     final title = _titleCtrl.text;
     final oldModel = CurrentChat.model;
     final oldTitle = CurrentChat.title;
@@ -309,7 +288,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
         context: context,
         content: Text(S.of(context).enter_a_title),
       );
-      return false;
+      return;
     }
 
     if (CurrentChat.hasChat) {
@@ -324,6 +303,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
       model: _model,
     );
 
+    CurrentChat.save();
     Util.showSnackBar(
       context: context,
       content: Text(S.of(context).saved_successfully),
@@ -331,12 +311,10 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
 
     if (title != oldTitle && CurrentChat.hasFile) {
       ref.read(chatsProvider.notifier).notify();
+    }
+    if (title != oldTitle || _model != oldModel) {
       ref.read(chatProvider.notifier).notify();
     }
-    if (_model != oldModel) {
-      ref.read(chatProvider.notifier).notify();
-    }
-
-    return true;
+    if (mounted) Navigator.of(context).pop();
   }
 }

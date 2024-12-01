@@ -96,31 +96,30 @@ class ApiSettings extends ConsumerStatefulWidget {
 class ApiSettingsState extends ConsumerState<ApiSettings> {
   bool isFetching = false;
   http.Client? fetchClient;
-  final TextEditingController _nameCtrl = TextEditingController();
-  final TextEditingController _modelsCtrl = TextEditingController();
-  final TextEditingController _apiUrlCtrl = TextEditingController();
-  final TextEditingController _apiKeyCtrl = TextEditingController();
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _modelsCtrl;
+  late final TextEditingController _apiUrlCtrl;
+  late final TextEditingController _apiKeyCtrl;
 
   @override
   void initState() {
     super.initState();
 
     final apiPair = widget.apiPair;
+    final api = apiPair?.value;
 
-    if (apiPair != null) {
-      _nameCtrl.text = apiPair.key;
-      _apiUrlCtrl.text = apiPair.value.url;
-      _apiKeyCtrl.text = apiPair.value.key;
-      _modelsCtrl.text = apiPair.value.models.join(", ");
-    }
+    _nameCtrl = TextEditingController(text: apiPair?.key);
+    _apiUrlCtrl = TextEditingController(text: api?.url);
+    _apiKeyCtrl = TextEditingController(text: api?.key);
+    _modelsCtrl = TextEditingController(text: api?.models.join(", "));
   }
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
-    _apiUrlCtrl.dispose();
-    _apiKeyCtrl.dispose();
     _modelsCtrl.dispose();
+    _apiKeyCtrl.dispose();
+    _apiUrlCtrl.dispose();
+    _nameCtrl.dispose();
     super.dispose();
   }
 
@@ -130,10 +129,6 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         title: Text(S.of(context).api),
       ),
       body: Container(
@@ -149,9 +144,8 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     controller: _nameCtrl,
                     decoration: InputDecoration(
                       labelText: S.of(context).name,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
                     ),
                   ),
@@ -163,9 +157,8 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     controller: _apiUrlCtrl,
                     decoration: InputDecoration(
                       labelText: S.of(context).api_url,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
                     ),
                   ),
@@ -177,8 +170,8 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
               controller: _apiKeyCtrl,
               decoration: InputDecoration(
                 labelText: S.of(context).api_key,
-                border: OutlineInputBorder(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
               ),
             ),
@@ -192,29 +185,29 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     decoration: InputDecoration(
                       labelText: S.of(context).model_list,
                       alignLabelWithHint: true,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Spin(
                       infinite: true,
                       animate: isFetching,
                       duration: Duration(seconds: 1),
                       child: IconButton.outlined(
-                        onPressed: () async => _fetchModels(context),
                         icon: const Icon(Icons.sync),
+                        onPressed: _fetchModels,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     IconButton.outlined(
-                      onPressed: () async => _editModels(context),
                       icon: const Icon(Icons.edit),
+                      onPressed: _editModels,
                     ),
                   ],
                 )
@@ -226,8 +219,8 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                 Expanded(
                   flex: 1,
                   child: FilledButton.tonal(
+                    onPressed: Navigator.of(context).pop,
                     child: Text(S.of(context).cancel),
-                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -240,12 +233,12 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                         foregroundColor: Theme.of(context).colorScheme.onError,
                       ),
                       child: Text(S.of(context).delete),
-                      onPressed: () async {
+                      onPressed: () {
                         Config.apis.remove(apiPair.key);
+                        Config.save();
 
                         ref.read(apisProvider.notifier).notify();
                         Navigator.of(context).pop();
-                        await Config.save();
                       },
                     ),
                   ),
@@ -253,14 +246,8 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                 Expanded(
                   flex: 1,
                   child: FilledButton(
+                    onPressed: _save,
                     child: Text(S.of(context).save),
-                    onPressed: () async {
-                      if (!_save(context)) return;
-
-                      ref.read(apisProvider.notifier).notify();
-                      Navigator.of(context).pop();
-                      await Config.save();
-                    },
                   ),
                 ),
               ],
@@ -271,11 +258,11 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
     );
   }
 
-  Future<void> _fetchModels(BuildContext context) async {
+  Future<void> _fetchModels() async {
     if (isFetching) {
-      setState(() => isFetching = false);
       fetchClient?.close();
       fetchClient = null;
+      isFetching = false;
       return;
     }
 
@@ -309,15 +296,15 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
 
       _modelsCtrl.text = models.join(", ");
     } catch (e) {
-      if (isFetching && context.mounted) {
-        await Util.handleError(context: context, error: e);
+      if (isFetching && mounted) {
+        Util.handleError(context: context, error: e);
       }
     }
 
     setState(() => isFetching = false);
   }
 
-  Future<void> _editModels(BuildContext context) async {
+  Future<void> _editModels() async {
     final text = _modelsCtrl.text;
     if (text.isEmpty) return;
 
@@ -333,8 +320,10 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 16),
-              Text(S.of(context).select_models,
-                  style: Theme.of(context).textTheme.headlineSmall),
+              Text(
+                S.of(context).select_models,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
               const SizedBox(height: 8),
               const Padding(
                 padding: EdgeInsets.only(left: 24, right: 24),
@@ -363,13 +352,13 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextButton(
+                    onPressed: Navigator.of(context).pop,
                     child: Text(S.of(context).cancel),
-                    onPressed: () => Navigator.of(context).pop(false),
                   ),
                   TextButton(
                     child: Text(S.of(context).clear),
-                    onPressed: () => setState(() =>
-                        chosen.forEach((model, _) => chosen[model] = false)),
+                    onPressed: () => setState(
+                        () => chosen.forEach((it, _) => chosen[it] = false)),
                   ),
                   TextButton(
                     child: Text(S.of(context).ok),
@@ -383,7 +372,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
         ),
       ),
     );
-    if (result == null || !result) return;
+    if (!(result ?? false)) return;
 
     _modelsCtrl.text = [
       for (final pair in chosen.entries)
@@ -391,7 +380,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
     ].join(", ");
   }
 
-  bool _save(BuildContext context) {
+  void _save() {
     final name = _nameCtrl.text;
     final models = _modelsCtrl.text;
     final apiUrl = _apiUrlCtrl.text;
@@ -402,7 +391,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
         context: context,
         content: Text(S.of(context).complete_all_fields),
       );
-      return false;
+      return;
     }
 
     final apiPair = widget.apiPair;
@@ -412,13 +401,20 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
         context: context,
         content: Text(S.of(context).duplicate_api_name),
       );
-      return false;
+      return;
     }
 
     if (apiPair != null) Config.apis.remove(apiPair.key);
     final modelList = models.split(",").map((e) => e.trim()).toList();
-    Config.apis[name] = ApiConfig(url: apiUrl, key: apiKey, models: modelList);
 
-    return true;
+    Config.apis[name] = ApiConfig(
+      url: apiUrl,
+      key: apiKey,
+      models: modelList,
+    );
+    Config.save();
+
+    ref.read(apisProvider.notifier).notify();
+    Navigator.of(context).pop();
   }
 }

@@ -192,12 +192,13 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             ],
             SizedBox(height: role.isAssistant ? 8 : 12),
             GestureDetector(
-              onLongPress: () async => await _longPress(context),
+              onLongPress: _longPress,
               child: Container(
                 padding: const EdgeInsets.all(12),
                 constraints: role.isUser
                     ? BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8)
+                        maxWidth: MediaQuery.of(context).size.width * 0.8,
+                      )
                     : null,
                 decoration: BoxDecoration(
                   color: background,
@@ -213,8 +214,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                       data: content,
                       shrinkWrap: true,
                       extensionSet: _extensionSet,
-                      onTapLink: (text, href, title) async =>
-                          await Util.openLink(context: context, link: href),
+                      onTapLink: (text, href, title) =>
+                          Util.openLink(context: context, link: href),
                       builders: {
                         "pre": _CodeBlockBuilder(context: context),
                         "latex": LatexElementBuilder(textScaleFactor: 1.2),
@@ -258,8 +259,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             children: [
               Text(
                 item.model ?? CurrentChat.model ?? S.of(context).model,
-                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleSmall,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
               Text(
@@ -281,10 +282,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               child: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_rounded),
                 iconSize: 16,
-                onPressed: () async {
+                onPressed: () {
                   if (item == message.list.first) return;
                   setState(() => message.index--);
-                  await CurrentChat.save();
+                  CurrentChat.save();
                 },
               ),
             ),
@@ -295,10 +296,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               child: IconButton(
                 icon: const Icon(Icons.arrow_forward_ios_rounded),
                 iconSize: 16,
-                onPressed: () async {
+                onPressed: () {
                   if (item == message.list.last) return;
                   setState(() => message.index++);
-                  await CurrentChat.save();
+                  CurrentChat.save();
                 },
               ),
             ),
@@ -311,7 +312,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               child: IconButton(
                 icon: const Icon(Icons.pause_outlined),
                 iconSize: 18,
-                onPressed: () async => await _reanswerStop(context),
+                onPressed: _reanswer,
               ),
             ),
         ],
@@ -327,65 +328,72 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         if (role.isAssistant) ...[
           SizedBox(
             width: 36,
-            height: 36,
-            child: switch (CurrentChat.ttsStatus) {
-              TtsStatus.nothing => IconButton(
-                  icon: const Icon(Icons.volume_up_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _tts(context),
-                ),
-              TtsStatus.loading || TtsStatus.playing => IconButton(
-                  icon: Icon(CurrentChat.ttsStatus.isPlaying
-                      ? Icons.pause_circle_outlined
-                      : Icons.cancel_outlined),
-                  iconSize: 18,
-                  onPressed: () async => await _ttsStop(),
-                ),
-            },
+            height: 26,
+            child: IconButton(
+              icon: Icon(switch (CurrentChat.ttsStatus) {
+                TtsStatus.loading => Icons.cancel_outlined,
+                TtsStatus.nothing => Icons.volume_up_outlined,
+                TtsStatus.playing => Icons.pause_circle_outlined,
+              }),
+              iconSize: 18,
+              onPressed: _tts,
+              padding: EdgeInsets.zero,
+            ),
           ),
           SizedBox(
             width: 36,
-            height: 36,
+            height: 26,
             child: IconButton(
               icon: const Icon(Icons.sync_outlined),
               iconSize: 18,
-              onPressed: () async => await _reanswer(context),
+              onPressed: _reanswer,
+              padding: EdgeInsets.zero,
             ),
           ),
         ],
         SizedBox(
           width: 36,
-          height: 36,
+          height: 26,
           child: IconButton(
             icon: const Icon(Icons.paste_outlined),
             iconSize: 16,
-            onPressed: () async => await _copy(context),
+            onPressed: _copy,
+            padding: EdgeInsets.zero,
           ),
         ),
         SizedBox(
           width: 36,
-          height: 36,
+          height: 26,
           child: IconButton(
             icon: const Icon(Icons.edit_outlined),
             iconSize: 18,
-            onPressed: () async => await _edit(context),
+            onPressed: _edit,
+            padding: EdgeInsets.zero,
           ),
         ),
         SizedBox(
           width: 36,
-          height: 36,
+          height: 26,
           child: IconButton(
             icon: const Icon(Icons.delete_outlined),
             iconSize: 18,
-            onPressed: () async => await _delete(context),
+            onPressed: _delete,
+            padding: EdgeInsets.zero,
           ),
         ),
       ],
     );
   }
 
-  Future<void> _tts(BuildContext context) async {
-    if (!CurrentChat.ttsStatus.isNothing) return;
+  Future<void> _tts() async {
+    if (!CurrentChat.ttsStatus.isNothing) {
+      CurrentChat.ttsStatus = TtsStatus.nothing;
+      ttsClient?.close();
+      ttsClient = null;
+      _player.stop();
+      return;
+    }
+
     final text = widget.message.item.text;
     if (text.isEmpty) return;
 
@@ -395,7 +403,6 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final api = Config.apis[tts.api];
 
     if (model == null || voice == null || api == null) {
-      if (!context.mounted) return;
       Util.showSnackBar(
         context: context,
         content: Text(
@@ -439,54 +446,30 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
       if (CurrentChat.ttsStatus.isLoading) {
         setState(() => CurrentChat.ttsStatus = TtsStatus.playing);
-        await _ttsPlay(path);
+        await _player.play(DeviceFileSource(path));
+        await _player.onPlayerStateChanged.first;
       }
     } catch (e) {
-      if (!CurrentChat.ttsStatus.isNothing && context.mounted) {
-        await Util.handleError(context: context, error: e);
+      if (!CurrentChat.ttsStatus.isNothing && mounted) {
+        Util.handleError(context: context, error: e);
       }
     }
 
     setState(() => CurrentChat.ttsStatus = TtsStatus.nothing);
   }
 
-  Future<void> _ttsPlay(String path) async {
-    await _player.play(DeviceFileSource(path));
-    await _player.onPlayerStateChanged.first;
+  void _copy() {
+    Util.copyText(context: context, text: widget.message.item.text);
   }
 
-  Future<void> _ttsStop() async {
-    if (CurrentChat.ttsStatus.isLoading) {
-      ttsClient?.close();
-      ttsClient = null;
-    }
-    if (CurrentChat.ttsStatus.isPlaying) {
-      await _player.stop();
-    }
-    CurrentChat.ttsStatus = TtsStatus.nothing;
-  }
-
-  Future<void> _copy(BuildContext context) async {
-    await Util.copyText(context: context, text: widget.message.item.text);
-  }
-
-  Future<void> _edit(BuildContext context) async {
-    if (!CurrentChat.chatStatus.isNothing) return;
-    if (!CurrentChat.ttsStatus.isNothing) return;
+  void _edit() {
     InputWidget.unFocus();
-
-    final message = widget.message;
-    final result = await Navigator.of(context).push<String>(MaterialPageRoute(
-      builder: (context) => _MessageEditor(text: message.item.text),
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => _MessageEditor(message: widget.message),
     ));
-
-    if (result != null) {
-      setState(() => message.item.text = result);
-      await CurrentChat.save();
-    }
   }
 
-  Future<void> _delete(BuildContext context) async {
+  void _delete() {
     if (!CurrentChat.chatStatus.isNothing) return;
     if (!CurrentChat.ttsStatus.isNothing) return;
 
@@ -502,13 +485,13 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       setState(() => list.remove(item));
     }
 
-    await CurrentChat.save();
+    CurrentChat.save();
   }
 
-  Future<void> _source(BuildContext context) async {
+  void _source() {
     InputWidget.unFocus();
 
-    await showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       enableDrag: true,
       useSafeArea: true,
@@ -560,8 +543,13 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     );
   }
 
-  Future<void> _reanswer(BuildContext context) async {
-    if (!CurrentChat.chatStatus.isNothing) return;
+  Future<void> _reanswer() async {
+    if (!CurrentChat.chatStatus.isNothing) {
+      CurrentChat.chatStatus = ChatStatus.nothing;
+      chatClient?.close();
+      chatClient = null;
+      return;
+    }
 
     final messages = CurrentChat.messages;
     final apiUrl = CurrentChat.apiUrl;
@@ -614,8 +602,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         setState(() => item.text += result.output.content);
       }
     } catch (e) {
-      if (CurrentChat.chatStatus.isResponding && context.mounted) {
-        await Util.handleError(context: context, error: e);
+      if (CurrentChat.chatStatus.isResponding && mounted) {
+        Util.handleError(context: context, error: e);
       }
       if (item.text.isEmpty) {
         setState(() {
@@ -626,19 +614,13 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     }
 
     setState(() => CurrentChat.chatStatus = ChatStatus.nothing);
-    await CurrentChat.save();
+    CurrentChat.save();
   }
 
-  Future<void> _reanswerStop(BuildContext context) async {
-    CurrentChat.chatStatus = ChatStatus.nothing;
-    chatClient?.close();
-    chatClient = null;
-  }
-
-  Future<void> _longPress(BuildContext context) async {
+  Future<void> _longPress() async {
     InputWidget.unFocus();
 
-    final event = await showModalBottomSheet<_LongPressEvent>(
+    final event = await showModalBottomSheet<int>(
       context: context,
       builder: (context) => Padding(
         padding: const EdgeInsets.all(8),
@@ -660,28 +642,28 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               shape: StadiumBorder(),
               title: Text(S.of(context).copy),
               leading: const Icon(Icons.copy_all),
-              onTap: () => Navigator.pop(context, _LongPressEvent.copy),
-            ),
-            ListTile(
-              minTileHeight: 48,
-              shape: const StadiumBorder(),
-              title: Text(S.of(context).source),
-              leading: const Icon(Icons.code_outlined),
-              onTap: () => Navigator.pop(context, _LongPressEvent.source),
+              onTap: () => Navigator.pop(context, 1),
             ),
             ListTile(
               minTileHeight: 48,
               shape: const StadiumBorder(),
               title: Text(S.of(context).edit),
               leading: const Icon(Icons.edit_outlined),
-              onTap: () => Navigator.pop(context, _LongPressEvent.edit),
+              onTap: () => Navigator.pop(context, 2),
+            ),
+            ListTile(
+              minTileHeight: 48,
+              shape: const StadiumBorder(),
+              title: Text(S.of(context).source),
+              leading: const Icon(Icons.code_outlined),
+              onTap: () => Navigator.pop(context, 3),
             ),
             ListTile(
               minTileHeight: 48,
               shape: const StadiumBorder(),
               title: Text(S.of(context).delete),
               leading: const Icon(Icons.delete_outlined),
-              onTap: () => Navigator.pop(context, _LongPressEvent.delete),
+              onTap: () => Navigator.pop(context, 4),
             ),
           ],
         ),
@@ -690,33 +672,23 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     if (event == null || !context.mounted) return;
 
     switch (event) {
-      case _LongPressEvent.copy:
-        await _copy(context);
+      case 1:
+        _copy();
         break;
 
-      case _LongPressEvent.edit:
-        await _edit(context);
+      case 2:
+        _edit();
         break;
 
-      case _LongPressEvent.source:
-        await _source(context);
+      case 3:
+        _source();
         break;
 
-      case _LongPressEvent.delete:
-        await _delete(context);
-        break;
-
-      default:
+      case 4:
+        _delete();
         break;
     }
   }
-}
-
-enum _LongPressEvent {
-  source,
-  delete,
-  copy,
-  edit,
 }
 
 final _extensionSet = ExtensionSet(
@@ -787,26 +759,29 @@ String _elementToText(md.Element element) {
   return buff.toString();
 }
 
-class _MessageEditor extends StatefulWidget {
-  final String text;
+class _MessageEditor extends ConsumerStatefulWidget {
+  final Message message;
 
   const _MessageEditor({
-    required this.text,
+    required this.message,
   });
 
   @override
-  State<_MessageEditor> createState() => _MessageEditorState();
+  ConsumerState<_MessageEditor> createState() => _MessageEditorState();
 }
 
-class _MessageEditorState extends State<_MessageEditor> {
+class _MessageEditorState extends ConsumerState<_MessageEditor> {
+  late final Message message;
   late final UndoHistoryController _undoCtrl;
   late final TextEditingController _editCtrl;
 
   @override
   void initState() {
     super.initState();
+    message = widget.message;
     _undoCtrl = UndoHistoryController();
-    _editCtrl = TextEditingController(text: widget.text);
+    final text = widget.message.item.text;
+    _editCtrl = TextEditingController(text: text);
   }
 
   @override
@@ -820,10 +795,6 @@ class _MessageEditorState extends State<_MessageEditor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         title: Text(S.of(context).edit),
         actions: [
           IconButton(
@@ -836,7 +807,13 @@ class _MessageEditorState extends State<_MessageEditor> {
           ),
           IconButton(
             icon: const Icon(Icons.save_outlined),
-            onPressed: () => Navigator.of(context).pop(_editCtrl.text),
+            onPressed: () {
+              message.item.text = _editCtrl.text;
+              ref.read(messageProvider(message).notifier).notify();
+
+              CurrentChat.save();
+              Navigator.of(context).pop();
+            },
           ),
         ],
       ),
@@ -899,7 +876,7 @@ class _CodeBlockBuilder extends MarkdownElementBuilder {
             children: [
               Text(language),
               InkWell(
-                onTap: () async => await Util.copyText(
+                onTap: () => Util.copyText(
                   context: context,
                   text: content,
                 ),
