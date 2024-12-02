@@ -77,6 +77,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "export_config": MessageLookupByLibrary.simpleMessage("Export Config"),
         "exported_successfully":
             MessageLookupByLibrary.simpleMessage("Exported Successfully"),
+        "exporting": MessageLookupByLibrary.simpleMessage("Exporting..."),
         "failed_to_export": MessageLookupByLibrary.simpleMessage(
             "Can\'t write to that directory."),
         "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
@@ -89,6 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
         "imported_successfully":
             MessageLookupByLibrary.simpleMessage("Imported Successfully"),
+        "importing": MessageLookupByLibrary.simpleMessage("Importing..."),
         "invalid_max_tokens":
             MessageLookupByLibrary.simpleMessage("Invalid Max Tokens"),
         "invalid_temperature":

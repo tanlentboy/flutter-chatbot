@@ -64,6 +64,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("错误"),
         "export_config": MessageLookupByLibrary.simpleMessage("导出配置"),
         "exported_successfully": MessageLookupByLibrary.simpleMessage("导出成功"),
+        "exporting": MessageLookupByLibrary.simpleMessage("正在导出..."),
         "failed_to_export":
             MessageLookupByLibrary.simpleMessage("无法在该目录下写入文件。"),
         "gallery": MessageLookupByLibrary.simpleMessage("图库"),
@@ -73,6 +74,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "质量范围应在 1-100，质量越低压缩率越高。最小宽度与最小高度用于限制图片缩放，如不清楚，请留空。"),
         "import_config": MessageLookupByLibrary.simpleMessage("导入配置"),
         "imported_successfully": MessageLookupByLibrary.simpleMessage("导入成功"),
+        "importing": MessageLookupByLibrary.simpleMessage("正在导入..."),
         "invalid_max_tokens": MessageLookupByLibrary.simpleMessage("非法的最大输出"),
         "invalid_temperature": MessageLookupByLibrary.simpleMessage("非法的温度"),
         "link": MessageLookupByLibrary.simpleMessage("链接"),

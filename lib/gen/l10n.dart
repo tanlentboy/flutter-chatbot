@@ -620,6 +620,26 @@ class S {
     );
   }
 
+  /// `Exporting...`
+  String get exporting {
+    return Intl.message(
+      'Exporting...',
+      name: 'exporting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Importing...`
+  String get importing {
+    return Intl.message(
+      'Importing...',
+      name: 'importing',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Empty`
   String get empty {
     return Intl.message(

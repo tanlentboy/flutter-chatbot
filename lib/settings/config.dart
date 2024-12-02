@@ -23,6 +23,7 @@ import "../chat/chat.dart";
 import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/material.dart";
+import "package:file_picker/file_picker.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 class ConfigTab extends ConsumerStatefulWidget {
@@ -313,28 +314,33 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           onTap: () async {
             try {
-              final result = await Backup.importConfig();
-              if (!result) return;
+              final result = await FilePicker.platform.pickFiles();
+              if (result == null || !context.mounted) return;
 
-              if (context.mounted) {
-                await showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(s.imported_successfully),
-                    content: Text(s.restart_app),
-                    actions: [
-                      TextButton(
-                        onPressed: Navigator.of(context).pop,
-                        child: Text(s.ok),
-                      )
-                    ],
-                  ),
-                );
-              }
+              _loading(context: context, hint: s.importing);
+              final from = result.files.single.path!;
+              await Backup.importConfig(from);
+
+              if (!context.mounted) return;
+              Navigator.of(context).pop();
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(s.imported_successfully),
+                  content: Text(s.restart_app),
+                  actions: [
+                    TextButton(
+                      onPressed: Navigator.of(context).pop,
+                      child: Text(s.ok),
+                    )
+                  ],
+                ),
+              );
 
               SystemNavigator.pop();
             } catch (e) {
               if (!context.mounted) return;
+              Navigator.of(context).pop();
               Util.handleError(context: context, error: e);
             }
           },
@@ -345,17 +351,20 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           onTap: () async {
             try {
-              final result = await Backup.exportConfig();
-              if (!result) return;
+              final to = await FilePicker.platform.getDirectoryPath();
+              if (to == null || !context.mounted) return;
 
-              if (context.mounted) {
-                Util.showSnackBar(
-                  context: context,
-                  content: Text(s.exported_successfully),
-                );
-              }
-            } on PathAccessException {
+              _loading(context: context, hint: s.exporting);
+              await Backup.exportConfig(to);
+
               if (!context.mounted) return;
+              Navigator.of(context).pop();
+              Util.showSnackBar(
+                context: context,
+                content: Text(s.exported_successfully),
+              );
+            } on PathAccessException {
+              Navigator.of(context).pop();
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -370,7 +379,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
                 ),
               );
             } catch (e) {
-              if (!context.mounted) return;
+              Navigator.of(context).pop();
               Util.handleError(context: context, error: e);
             }
           },
@@ -402,89 +411,115 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
       ],
     );
   }
+}
 
-  Future<String?> _select({
-    required BuildContext context,
-    required List<String> list,
-    required String title,
-    String? selected,
-  }) async {
-    return await showDialog<String>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+void _loading({
+  required BuildContext context,
+  required String hint,
+  bool canPop = false,
+}) {
+  showDialog(
+    context: context,
+    barrierDismissible: canPop,
+    builder: (context) => PopScope(
+      canPop: canPop,
+      child: Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
             children: [
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              const Padding(
-                padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(),
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.6),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: list.length,
-                  itemBuilder: (context, index) => RadioListTile(
-                    value: list[index],
-                    groupValue: selected,
-                    title: Text(list[index]),
-                    contentPadding: const EdgeInsets.only(left: 16, right: 24),
-                    onChanged: (value) => setState(() => selected = value),
-                  ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    child: Text(S.of(context).cancel),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    child: Text(S.of(context).ok),
-                    onPressed: () => Navigator.of(context).pop(selected),
-                  ),
-                  const SizedBox(width: 24),
-                ],
-              ),
-              const SizedBox(height: 12),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 24),
+              Text(hint),
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Future<String?> _input({
-    required BuildContext context,
-    required String title,
-    String? text,
-    String? hint,
-  }) async {
-    return await showDialog<String>(
-      context: context,
-      builder: (context) => Dialog(
-        child: _InputDialog(
-          title: title,
-          text: text,
-          hint: hint,
+Future<String?> _select({
+  required BuildContext context,
+  required List<String> list,
+  required String title,
+  String? selected,
+}) async {
+  return await showDialog<String>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => Dialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            const Padding(
+              padding: EdgeInsets.only(left: 24, right: 24),
+              child: Divider(),
+            ),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: list.length,
+                itemBuilder: (context, index) => RadioListTile(
+                  value: list[index],
+                  groupValue: selected,
+                  title: Text(list[index]),
+                  contentPadding: const EdgeInsets.only(left: 16, right: 24),
+                  onChanged: (value) => setState(() => selected = value),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(left: 24, right: 24),
+              child: Divider(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).cancel),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(selected),
+                  child: Text(S.of(context).ok),
+                ),
+                const SizedBox(width: 24),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+Future<String?> _input({
+  required BuildContext context,
+  required String title,
+  String? text,
+  String? hint,
+}) async {
+  return await showDialog<String>(
+    context: context,
+    builder: (context) => Dialog(
+      child: _InputDialog(
+        title: title,
+        text: text,
+        hint: hint,
+      ),
+    ),
+  );
 }
 
 class _InputDialog extends StatefulWidget {

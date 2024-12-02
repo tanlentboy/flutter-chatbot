@@ -66,6 +66,8 @@
     "min_height": "Minimal Height",
     "export_config": "Export Config",
     "import_config": "Import Config",
+    "exporting": "Exporting...",
+    "importing": "Importing...",
 
     "empty": "Empty",
     "enable": "Enable",

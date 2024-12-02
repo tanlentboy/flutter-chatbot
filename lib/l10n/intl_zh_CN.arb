@@ -66,6 +66,8 @@
     "min_height": "最小高度",
     "export_config": "导出配置",
     "import_config": "导入配置",
+    "exporting": "正在导出...",
+    "importing": "正在导入...",
 
     "empty": "空",
     "enable": "启用",
