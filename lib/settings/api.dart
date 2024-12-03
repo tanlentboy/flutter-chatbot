@@ -297,7 +297,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
       _modelsCtrl.text = models.join(", ");
     } catch (e) {
       if (isFetching && mounted) {
-        Util.handleError(context: context, error: e);
+        Dialogs.error(context: context, error: e);
       }
     }
 

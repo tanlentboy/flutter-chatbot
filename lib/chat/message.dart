@@ -215,7 +215,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                       shrinkWrap: true,
                       extensionSet: _extensionSet,
                       onTapLink: (text, href, title) =>
-                          Util.openLink(context: context, link: href),
+                          Dialogs.openLink(context: context, link: href),
                       builders: {
                         "pre": _CodeBlockBuilder(context: context),
                         "latex": LatexElementBuilder(textScaleFactor: 1.2),
@@ -451,7 +451,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       }
     } catch (e) {
       if (!CurrentChat.ttsStatus.isNothing && mounted) {
-        Util.handleError(context: context, error: e);
+        Dialogs.error(context: context, error: e);
       }
     }
 
@@ -603,7 +603,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       }
     } catch (e) {
       if (CurrentChat.chatStatus.isResponding && mounted) {
-        Util.handleError(context: context, error: e);
+        Dialogs.error(context: context, error: e);
       }
       if (item.text.isEmpty) {
         setState(() {

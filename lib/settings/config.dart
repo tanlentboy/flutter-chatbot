@@ -60,7 +60,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           onTap: () async {
             if (Config.bots.isEmpty) return;
 
-            final bot = await _select(
+            final bot = await Dialogs.select(
               context: context,
               list: Config.bots.keys.toList(),
               selected: Config.core.bot,
@@ -80,7 +80,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           onTap: () async {
             if (Config.apis.isEmpty) return;
 
-            final api = await _select(
+            final api = await Dialogs.select(
               context: context,
               list: Config.apis.keys.toList(),
               selected: Config.core.api,
@@ -102,7 +102,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final models = Config.apis[Config.core.api]?.models;
             if (models == null) return;
 
-            final model = await _select(
+            final model = await Dialogs.select(
               context: context,
               selected: Config.core.model,
               title: s.choose_model,
@@ -130,7 +130,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           onTap: () async {
             if (Config.apis.isEmpty) return;
 
-            final api = await _select(
+            final api = await Dialogs.select(
               context: context,
               list: Config.apis.keys.toList(),
               selected: Config.tts.api,
@@ -151,7 +151,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final models = Config.apis[Config.tts.api]?.models;
             if (models == null) return;
 
-            final model = await _select(
+            final model = await Dialogs.select(
               context: context,
               selected: Config.tts.model,
               title: s.choose_model,
@@ -169,7 +169,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.tts.voice ?? s.empty),
           onTap: () async {
-            var text = await _input(
+            var text = await Dialogs.input(
               context: context,
               title: s.voice,
               hint: s.please_input,
@@ -209,7 +209,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.cic.quality?.toString() ?? s.empty),
           onTap: () async {
-            var text = await _input(
+            var text = await Dialogs.input(
               context: context,
               title: s.quality,
               hint: s.please_input,
@@ -234,7 +234,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.cic.minWidth?.toString() ?? s.empty),
           onTap: () async {
-            var text = await _input(
+            var text = await Dialogs.input(
               context: context,
               title: s.min_width,
               hint: s.please_input,
@@ -259,7 +259,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.cic.minHeight?.toString() ?? s.empty),
           onTap: () async {
-            var text = await _input(
+            var text = await Dialogs.input(
               context: context,
               title: s.min_height,
               hint: s.please_input,
@@ -317,7 +317,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               final result = await FilePicker.platform.pickFiles();
               if (result == null || !context.mounted) return;
 
-              _loading(context: context, hint: s.importing);
+              Dialogs.loading(context: context, hint: s.importing);
               final from = result.files.single.path!;
               await Backup.importConfig(from);
 
@@ -341,7 +341,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             } catch (e) {
               if (!context.mounted) return;
               Navigator.of(context).pop();
-              Util.handleError(context: context, error: e);
+              Dialogs.error(context: context, error: e);
             }
           },
         ),
@@ -354,7 +354,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               final to = await FilePicker.platform.getDirectoryPath();
               if (to == null || !context.mounted) return;
 
-              _loading(context: context, hint: s.exporting);
+              Dialogs.loading(context: context, hint: s.exporting);
               await Backup.exportConfig(to);
 
               if (!context.mounted) return;
@@ -380,7 +380,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               );
             } catch (e) {
               Navigator.of(context).pop();
-              Util.handleError(context: context, error: e);
+              Dialogs.error(context: context, error: e);
             }
           },
         ),
@@ -408,192 +408,6 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-void _loading({
-  required BuildContext context,
-  required String hint,
-  bool canPop = false,
-}) {
-  showDialog(
-    context: context,
-    barrierDismissible: canPop,
-    builder: (context) => PopScope(
-      canPop: canPop,
-      child: Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: 24),
-              Text(hint),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Future<String?> _select({
-  required BuildContext context,
-  required List<String> list,
-  required String title,
-  String? selected,
-}) async {
-  return await showDialog<String>(
-    context: context,
-    builder: (context) => StatefulBuilder(
-      builder: (context, setState) => Dialog(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.only(left: 24, right: 24),
-              child: Divider(),
-            ),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.6),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: list.length,
-                itemBuilder: (context, index) => RadioListTile(
-                  value: list[index],
-                  groupValue: selected,
-                  title: Text(list[index]),
-                  contentPadding: const EdgeInsets.only(left: 16, right: 24),
-                  onChanged: (value) => setState(() => selected = value),
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(left: 24, right: 24),
-              child: Divider(),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: Navigator.of(context).pop,
-                  child: Text(S.of(context).cancel),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(selected),
-                  child: Text(S.of(context).ok),
-                ),
-                const SizedBox(width: 24),
-              ],
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Future<String?> _input({
-  required BuildContext context,
-  required String title,
-  String? text,
-  String? hint,
-}) async {
-  return await showDialog<String>(
-    context: context,
-    builder: (context) => Dialog(
-      child: _InputDialog(
-        title: title,
-        text: text,
-        hint: hint,
-      ),
-    ),
-  );
-}
-
-class _InputDialog extends StatefulWidget {
-  final String title;
-  final String? text;
-  final String? hint;
-
-  const _InputDialog({
-    required this.title,
-    this.text,
-    this.hint,
-  });
-
-  @override
-  State<_InputDialog> createState() => _InputDialogState();
-}
-
-class _InputDialogState extends State<_InputDialog> {
-  late final TextEditingController ctrl;
-
-  @override
-  void initState() {
-    super.initState();
-    ctrl = TextEditingController(text: widget.text);
-  }
-
-  @override
-  void dispose() {
-    ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.only(left: 24),
-          child: Text(
-            widget.title,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Padding(
-          padding: const EdgeInsets.only(left: 24, right: 24),
-          child: TextField(
-            controller: ctrl,
-            decoration: InputDecoration(
-              labelText: widget.hint,
-              border: UnderlineInputBorder(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              child: Text(S.of(context).cancel),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              child: Text(S.of(context).ok),
-              onPressed: () => Navigator.of(context).pop(ctrl.text),
-            ),
-            const SizedBox(width: 24),
-          ],
-        ),
-        const SizedBox(height: 16),
       ],
     );
   }

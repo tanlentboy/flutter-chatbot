@@ -260,7 +260,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       }
     } catch (e) {
       if (CurrentChat.chatStatus.isResponding && mounted) {
-        Util.handleError(context: context, error: e);
+        Dialogs.error(context: context, error: e);
       }
       if (item.text.isEmpty) {
         messages.length -= 2;
