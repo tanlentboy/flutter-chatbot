@@ -196,10 +196,10 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         CheckboxListTile(
           title: Text(s.enable),
           contentPadding: const EdgeInsets.only(left: 24, right: 16),
-          value: Config.img.enable ?? true,
+          value: Config.cic.enable ?? true,
           subtitle: Text(s.image_enable_hint),
           onChanged: (value) async {
-            setState(() => Config.img.enable = value);
+            setState(() => Config.cic.enable = value);
             Config.save();
           },
         ),
@@ -207,13 +207,13 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ListTile(
           title: Text(s.quality),
           contentPadding: padding,
-          subtitle: Text(Config.img.quality?.toString() ?? s.empty),
+          subtitle: Text(Config.cic.quality?.toString() ?? s.empty),
           onTap: () async {
             var text = await _input(
               context: context,
               title: s.quality,
               hint: s.please_input,
-              text: Config.img.quality?.toString(),
+              text: Config.cic.quality?.toString(),
             );
             if (text == null) return;
 
@@ -224,7 +224,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               if (quality == null) return;
             }
 
-            setState(() => Config.img.quality = quality);
+            setState(() => Config.cic.quality = quality);
             Config.save();
           },
         ),
@@ -232,13 +232,13 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ListTile(
           title: Text(s.min_width),
           contentPadding: padding,
-          subtitle: Text(Config.img.minWidth?.toString() ?? s.empty),
+          subtitle: Text(Config.cic.minWidth?.toString() ?? s.empty),
           onTap: () async {
             var text = await _input(
               context: context,
               title: s.min_width,
               hint: s.please_input,
-              text: Config.img.minWidth?.toString(),
+              text: Config.cic.minWidth?.toString(),
             );
             if (text == null) return;
 
@@ -249,7 +249,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               if (minWidth == null) return;
             }
 
-            setState(() => Config.img.minWidth = minWidth);
+            setState(() => Config.cic.minWidth = minWidth);
             Config.save();
           },
         ),
@@ -257,13 +257,13 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ListTile(
           title: Text(s.min_height),
           contentPadding: padding,
-          subtitle: Text(Config.img.minHeight?.toString() ?? s.empty),
+          subtitle: Text(Config.cic.minHeight?.toString() ?? s.empty),
           onTap: () async {
             var text = await _input(
               context: context,
               title: s.min_height,
               hint: s.please_input,
-              text: Config.img.minHeight?.toString(),
+              text: Config.cic.minHeight?.toString(),
             );
             if (text == null) return;
 
@@ -274,7 +274,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               if (minHeight == null) return;
             }
 
-            setState(() => Config.img.minHeight = minHeight);
+            setState(() => Config.cic.minHeight = minHeight);
             Config.save();
           },
         ),

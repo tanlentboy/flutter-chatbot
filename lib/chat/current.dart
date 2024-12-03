@@ -20,17 +20,10 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "dart:io";
+import "dart:isolate";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
-enum ChatStatus {
-  nothing,
-  responding;
-
-  bool get isNothing => this == ChatStatus.nothing;
-  bool get isResponding => this == ChatStatus.responding;
-}
 
 enum TtsStatus {
   nothing,
@@ -40,6 +33,14 @@ enum TtsStatus {
   bool get isNothing => this == TtsStatus.nothing;
   bool get isLoading => this == TtsStatus.loading;
   bool get isPlaying => this == TtsStatus.playing;
+}
+
+enum ChatStatus {
+  nothing,
+  responding;
+
+  bool get isNothing => this == ChatStatus.nothing;
+  bool get isResponding => this == ChatStatus.responding;
 }
 
 class CurrentChat {
@@ -62,8 +63,12 @@ class CurrentChat {
 
   static Future<void> load(ChatConfig chat) async {
     file = File(Config.chatFilePath(chat.fileName));
+    final from = file;
 
-    final json = jsonDecode(await file!.readAsString());
+    final json = await Isolate.run(() async {
+      return jsonDecode(await from!.readAsString());
+    });
+
     final messagesJson = json["messages"] ?? [];
     final coreJson = json["core"];
 
