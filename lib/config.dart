@@ -70,8 +70,8 @@ class Config {
         "core": core,
         "bots": bots,
         "apis": apis,
-        "chats": chats,
         "image": image,
+        "chats": chats,
       };
 
   static void fromJson(Map json) {
@@ -80,8 +80,8 @@ class Config {
     final coreJson = json["core"] ?? {};
     final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
-    final chatsJson = json["chats"] ?? [];
     final imageJson = json["image"] ?? {};
+    final chatsJson = json["chats"] ?? [];
 
     tts = TtsConfig.fromJson(ttsJson);
     cic = CicConfig.fromJson(imgJson);

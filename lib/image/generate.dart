@@ -43,7 +43,8 @@ class GenerateTab extends ConsumerStatefulWidget {
   ConsumerState<GenerateTab> createState() => _GenerateTabState();
 }
 
-class _GenerateTabState extends ConsumerState<GenerateTab> {
+class _GenerateTabState extends ConsumerState<GenerateTab>
+    with AutomaticKeepAliveClientMixin<GenerateTab> {
   final TextEditingController _ctrl = TextEditingController();
   final FocusNode _node = FocusNode();
   _Status _status = _Status.nothing;
@@ -58,7 +59,12 @@ class _GenerateTabState extends ConsumerState<GenerateTab> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     final decoration = BoxDecoration(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -127,6 +133,7 @@ class _GenerateTabState extends ConsumerState<GenerateTab> {
     final apiKey = api.key;
     final endPoint = "$apiUrl/images/generations";
 
+    if (!mounted) return;
     setState(() {
       _images.clear();
       _status = _Status.generating;
@@ -175,6 +182,7 @@ class _GenerateTabState extends ConsumerState<GenerateTab> {
       final file = File(path);
       await file.writeAsBytes(loadRes.bodyBytes);
 
+      if (!mounted) return;
       setState(() => _images.add(path));
     } catch (e) {
       if (_status.isGenerating && mounted) {
@@ -182,6 +190,7 @@ class _GenerateTabState extends ConsumerState<GenerateTab> {
       }
     }
 
+    if (!mounted) return;
     setState(() => _status = _Status.nothing);
   }
 
