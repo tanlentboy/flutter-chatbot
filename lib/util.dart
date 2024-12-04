@@ -75,12 +75,12 @@ class Dialogs {
     );
   }
 
-  static Future<void> error({
+  static void error({
     required BuildContext context,
     required dynamic error,
-  }) async {
+  }) {
     final info = error.toString();
-    final result = await showDialog<bool>(
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(S.of(context).error),
@@ -91,16 +91,15 @@ class Dialogs {
             child: Text(S.of(context).cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              Util.copyText(context: context, text: info);
+              Navigator.of(context).pop();
+            },
             child: Text(S.of(context).copy),
           ),
         ],
       ),
     );
-
-    if (result == true && context.mounted) {
-      Util.copyText(context: context, text: info);
-    }
   }
 
   static Future<String?> select({
@@ -301,7 +300,7 @@ class _InputDialogState extends State<_InputDialog> {
             controller: ctrl,
             decoration: InputDecoration(
               labelText: widget.hint,
-              border: UnderlineInputBorder(),
+              border: const UnderlineInputBorder(),
             ),
           ),
         ),
@@ -310,13 +309,13 @@ class _InputDialogState extends State<_InputDialog> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
+              onPressed: Navigator.of(context).pop,
               child: Text(S.of(context).cancel),
-              onPressed: () => Navigator.of(context).pop(),
             ),
             const SizedBox(width: 8),
             TextButton(
-              child: Text(S.of(context).ok),
               onPressed: () => Navigator.of(context).pop(ctrl.text),
+              child: Text(S.of(context).ok),
             ),
             const SizedBox(width: 24),
           ],
