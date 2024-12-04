@@ -94,7 +94,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                   keyboardType: TextInputType.multiline,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    hintText: S.of(context).enter_your_message,
+                    hintText: S.of(context).enter_message,
                   ),
                 ),
               ),
@@ -205,7 +205,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     if (apiUrl == null || apiKey == null || model == null) {
       Util.showSnackBar(
         context: context,
-        content: Text(S.of(context).setup_bot_api_first),
+        content: Text(S.of(context).setup_api_model_first),
       );
       return;
     }

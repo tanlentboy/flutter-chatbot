@@ -405,9 +405,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     if (model == null || voice == null || api == null) {
       Util.showSnackBar(
         context: context,
-        content: Text(
-          S.of(context).setup_tts_first,
-        ),
+        content: Text(S.of(context).setup_tts_first),
       );
       return;
     }
@@ -559,7 +557,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     if (apiUrl == null || apiKey == null || model == null) {
       Util.showSnackBar(
         context: context,
-        content: Text(S.of(context).setup_bot_api_first),
+        content: Text(S.of(context).setup_api_model_first),
       );
       return;
     }
@@ -828,7 +826,7 @@ class _MessageEditorState extends ConsumerState<_MessageEditor> {
           keyboardType: TextInputType.multiline,
           decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: S.of(context).enter_your_message,
+            hintText: S.of(context).enter_message,
           ),
         ),
       ),

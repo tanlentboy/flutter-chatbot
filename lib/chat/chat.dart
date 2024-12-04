@@ -62,6 +62,8 @@ class ChatPage extends ConsumerStatefulWidget {
 
 class ChatPageState extends ConsumerState<ChatPage> {
   final ScrollController _scrollCtrl = ScrollController();
+  final messages = CurrentChat.messages;
+  final chats = Config.chats;
 
   @override
   void initState() {
@@ -90,13 +92,13 @@ class ChatPageState extends ConsumerState<ChatPage> {
         children: [
           Expanded(
             child: Stack(
+              alignment: Alignment.topCenter,
               children: [
                 Consumer(
                   builder: (context, ref, child) {
                     ref.watch(messagesProvider);
-                    final messages = CurrentChat.messages;
-                    final length = messages.length;
 
+                    final length = messages.length;
                     return ListView.builder(
                       reverse: true,
                       shrinkWrap: true,
@@ -105,8 +107,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
                           top: 4, left: 16, right: 16, bottom: 16),
                       itemCount: length,
                       itemBuilder: (context, index) {
-                        final message =
-                            CurrentChat.messages[length - index - 1];
+                        final message = messages[length - index - 1];
                         return MessageWidget(
                           message: message,
                           key: ValueKey(message),
@@ -116,17 +117,16 @@ class ChatPageState extends ConsumerState<ChatPage> {
                   },
                 ),
                 Positioned(
-                  right: 16,
-                  bottom: 16,
+                  bottom: 8,
                   child: Consumer(
                     builder: (context, ref, child) {
                       final show = ref.watch(_toBottomProvider);
 
                       final child = ElevatedButton(
                         style: ElevatedButton.styleFrom(
+                          elevation: 2,
                           shape: const CircleBorder(),
                           padding: const EdgeInsets.all(8),
-                          elevation: 2,
                         ),
                         onPressed: () => _scrollCtrl.jumpTo(0),
                         child: Icon(Icons.arrow_downward_rounded, size: 20),
@@ -150,7 +150,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
   void _onScroll() {
     final show = ref.read(_toBottomProvider);
 
-    if (_scrollCtrl.position.pixels < 100) {
+    if (_scrollCtrl.position.pixels < 200) {
       if (show) ref.read(_toBottomProvider.notifier).hide();
     } else {
       if (!show) ref.read(_toBottomProvider.notifier).show();
@@ -189,15 +189,15 @@ class ChatPageState extends ConsumerState<ChatPage> {
 
             return PopupMenuButton<String>(
               icon: const Icon(Icons.swap_vert),
-              onSelected: (value) async {
+              onSelected: (value) {
                 InputWidget.unFocus();
                 CurrentChat.core = CoreConfig(
                   bot: CurrentChat.bot,
                   api: CurrentChat.api,
                   model: value,
                 );
+                CurrentChat.save();
                 ref.read(chatProvider.notifier).notify();
-                await CurrentChat.save();
               },
               itemBuilder: (context) {
                 final models = Config.apis[CurrentChat.api]?.models ?? [];
@@ -231,7 +231,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
             borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
           color: Theme.of(context).colorScheme.surfaceContainerLow,
-          itemBuilder: (context) => <PopupMenuItem<int>>[
+          itemBuilder: (context) => <PopupMenuItem>[
             PopupMenuItem(
               padding: const EdgeInsets.only(left: 16),
               child: ListTile(
@@ -240,21 +240,19 @@ class ChatPageState extends ConsumerState<ChatPage> {
                 contentPadding: EdgeInsets.zero,
                 minTileHeight: 32,
               ),
-              onTap: () async {
+              onTap: () {
                 InputWidget.unFocus();
                 if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
 
+                CurrentChat.chat = null;
                 CurrentChat.file = null;
-                CurrentChat.initChat(CurrentChat.title!);
+                CurrentChat.save();
 
-                await CurrentChat.save();
-                ref.read(chatsProvider.notifier).notify();
-
-                if (!context.mounted) return;
                 Util.showSnackBar(
                   context: context,
                   content: Text(S.of(context).cloned_successfully),
                 );
+                ref.read(chatsProvider.notifier).notify();
               },
             ),
             PopupMenuItem(
@@ -276,37 +274,38 @@ class ChatPageState extends ConsumerState<ChatPage> {
                     content: Text(S.of(context).ensure_clear_chat),
                     actions: [
                       TextButton(
+                        onPressed: Navigator.of(context).pop,
                         child: Text(S.of(context).cancel),
-                        onPressed: () => Navigator.of(context).pop(false),
                       ),
                       TextButton(
-                        child: Text(S.of(context).clear),
                         onPressed: () => Navigator.of(context).pop(true),
+                        child: Text(S.of(context).clear),
                       ),
                     ],
                   ),
                 );
                 if (!(result ?? false)) return;
-                CurrentChat.messages.clear();
 
-                await CurrentChat.save();
+                CurrentChat.messages.clear();
+                CurrentChat.save();
+
                 ref.read(messagesProvider.notifier).notify();
               },
             ),
             PopupMenuItem(
               padding: const EdgeInsets.only(left: 16),
-              onTap: () {
-                InputWidget.unFocus();
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const CurrentChatSettings(),
-                ));
-              },
               child: ListTile(
                 leading: const Icon(Icons.settings, size: 24),
                 title: Text(S.of(context).chat_settings),
                 contentPadding: EdgeInsets.zero,
                 minTileHeight: 32,
               ),
+              onTap: () {
+                InputWidget.unFocus();
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const CurrentChatSettings(),
+                ));
+              },
             ),
           ],
         ),
@@ -329,21 +328,31 @@ class ChatPageState extends ConsumerState<ChatPage> {
           contentPadding: const EdgeInsets.only(left: 16, right: 8),
         ),
         Divider(),
-        Container(
+        ListView(
+          shrinkWrap: true,
           padding: EdgeInsets.only(left: 8, right: 8),
-          child: ListTile(
-            minTileHeight: 48,
-            shape: const StadiumBorder(),
-            title: Text(S.of(context).new_chat),
-            leading: const Icon(Icons.post_add),
-            onTap: () {
-              if (CurrentChat.chatStatus.isResponding) return;
-              CurrentChat.clear();
-              ref.read(chatProvider.notifier).notify();
-              ref.read(chatsProvider.notifier).notify();
-              ref.read(messagesProvider.notifier).notify();
-            },
-          ),
+          children: [
+            ListTile(
+              minTileHeight: 48,
+              shape: const StadiumBorder(),
+              title: Text(S.of(context).new_chat),
+              leading: const Icon(Icons.article_outlined),
+              onTap: () {
+                if (CurrentChat.chatStatus.isResponding) return;
+                CurrentChat.clear();
+                ref.read(chatProvider.notifier).notify();
+                ref.read(chatsProvider.notifier).notify();
+                ref.read(messagesProvider.notifier).notify();
+              },
+            ),
+            ListTile(
+              minTileHeight: 48,
+              shape: const StadiumBorder(),
+              title: Text(S.of(context).image_generation),
+              leading: const Icon(Icons.image_outlined),
+              onTap: () => Navigator.of(context).pushNamed("/image"),
+            ),
+          ],
         ),
         Container(
           alignment: Alignment.topLeft,
@@ -359,9 +368,9 @@ class ChatPageState extends ConsumerState<ChatPage> {
               ref.watch(chatsProvider);
 
               return ListView.builder(
-                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                itemCount: Config.chats.length,
+                itemCount: chats.length,
                 itemBuilder: (context, index) => _buildChatItem(index),
+                padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
               );
             },
           ),
@@ -371,7 +380,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
   }
 
   Widget _buildChatItem(int index) {
-    final chat = Config.chats[index];
+    final chat = chats[index];
 
     return Container(
       margin: EdgeInsets.only(top: 4),
@@ -392,24 +401,27 @@ class ChatPageState extends ConsumerState<ChatPage> {
         onTap: () async {
           if (CurrentChat.chat == chat) return;
 
+          CurrentChat.chat = chat;
+          ref.read(chatsProvider.notifier).notify();
+
           await CurrentChat.load(chat);
           ref.read(chatProvider.notifier).notify();
-          ref.read(chatsProvider.notifier).notify();
           ref.read(messagesProvider.notifier).notify();
         },
         trailing: IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () async {
+          onPressed: () {
+            chats.removeAt(index);
+            ref.read(chatsProvider.notifier).notify();
+
+            Config.save();
+            File(Config.chatFilePath(chat.fileName)).delete();
+
             if (CurrentChat.chat == chat) {
               CurrentChat.clear();
               ref.read(chatProvider.notifier).notify();
               ref.read(messagesProvider.notifier).notify();
             }
-
-            await File(Config.chatFilePath(chat.fileName)).delete();
-            ref.read(chatsProvider.notifier).notify();
-            Config.chats.removeAt(index);
-            await Config.save();
           },
         ),
       ),

@@ -16,6 +16,7 @@
 import "config.dart";
 import "gen/l10n.dart";
 import "chat/chat.dart";
+import "image/image.dart";
 import "settings/settings.dart";
 
 import "package:flutter/material.dart";
@@ -39,6 +40,7 @@ class App extends StatelessWidget {
       themeMode: ThemeMode.system,
       routes: {
         "/": (context) => ChatPage(),
+        "/image": (context) => ImagePage(),
         "/settings": (context) => SettingsPage(),
       },
       localizationsDelegates: const [
