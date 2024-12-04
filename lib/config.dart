@@ -26,6 +26,7 @@ class Config {
   static late final TtsConfig tts;
   static late final CicConfig cic;
   static late final CoreConfig core;
+  static late final ImageConfig image;
   static final List<ChatConfig> chats = [];
   static final Map<String, BotConfig> bots = {};
   static final Map<String, ApiConfig> apis = {};
@@ -70,6 +71,7 @@ class Config {
         "bots": bots,
         "apis": apis,
         "chats": chats,
+        "image": image,
       };
 
   static void fromJson(Map json) {
@@ -79,10 +81,12 @@ class Config {
     final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
     final chatsJson = json["chats"] ?? [];
+    final imageJson = json["image"] ?? {};
 
     tts = TtsConfig.fromJson(ttsJson);
     cic = CicConfig.fromJson(imgJson);
     core = CoreConfig.fromJson(coreJson);
+    image = ImageConfig.fromJson(imageJson);
 
     for (final chat in chatsJson) {
       chats.add(ChatConfig.fromJson(chat));
@@ -339,6 +343,34 @@ class CicConfig {
         quality: json["quality"],
         minWidth: json["minWidth"],
         minHeight: json["minHeight"],
+      );
+}
+
+class ImageConfig {
+  String? _api;
+  String? _model;
+
+  ImageConfig({
+    String? api,
+    String? model,
+  })  : _api = api,
+        _model = model;
+
+  String? get api => Config.apis.containsKey(_api) ? _api : null;
+  String? get model =>
+      (Config.apis[_api]?.models.contains(_model) ?? false) ? _model : null;
+
+  set api(String? value) => _api = value;
+  set model(String? value) => _model = value;
+
+  Map toJson() => {
+        "api": api,
+        "model": model,
+      };
+
+  factory ImageConfig.fromJson(Map json) => ImageConfig(
+        api: json["api"],
+        model: json["model"],
       );
 }
 
