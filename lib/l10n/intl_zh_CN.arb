@@ -21,6 +21,7 @@
     "save": "保存",
     "reset": "重置",
     "error": "错误",
+    "share": "分享",
     "clear": "清空",
     "cancel": "取消",
     "reanswer": "重答",
@@ -81,6 +82,11 @@
     "restart_app": "请重启应用以加载新配置。",
     "failed_to_export": "无法在该目录下写入文件。",
 
+    "generate": "生成",
+    "base_config": "基本配置",
+    "image_generation": "图像生成",
+    "enter_prompts": "请输入提示词",
+
     "clone_chat": "复制对话",
     "clear_chat": "清空对话",
     "chat_settings": "对话设置",
@@ -96,8 +102,8 @@
     "invalid_max_tokens": "非法的最大输出",
     "invalid_temperature": "非法的温度",
 
-    "enter_your_message": "输入你的消息",
+    "enter_message": "输入你的消息",
     "image_compress_failed": "图片压缩失败",
     "setup_tts_first": "请先配置文本转语音",
-    "setup_bot_api_first": "请先配置接口和模型"
+    "setup_api_model_first": "请先配置接口和模型"
 }

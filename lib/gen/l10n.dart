@@ -230,6 +230,16 @@ class S {
     );
   }
 
+  /// `Share`
+  String get share {
+    return Intl.message(
+      'Share',
+      name: 'share',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Clear`
   String get clear {
     return Intl.message(
@@ -740,6 +750,46 @@ class S {
     );
   }
 
+  /// `Generate`
+  String get generate {
+    return Intl.message(
+      'Generate',
+      name: 'generate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Base Config`
+  String get base_config {
+    return Intl.message(
+      'Base Config',
+      name: 'base_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image Generation`
+  String get image_generation {
+    return Intl.message(
+      'Image Generation',
+      name: 'image_generation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your prompts`
+  String get enter_prompts {
+    return Intl.message(
+      'Enter your prompts',
+      name: 'enter_prompts',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Clone Chat`
   String get clone_chat {
     return Intl.message(
@@ -861,10 +911,10 @@ class S {
   }
 
   /// `Enter your message`
-  String get enter_your_message {
+  String get enter_message {
     return Intl.message(
       'Enter your message',
-      name: 'enter_your_message',
+      name: 'enter_message',
       desc: '',
       args: [],
     );
@@ -890,11 +940,11 @@ class S {
     );
   }
 
-  /// `Set up the Bot and API first`
-  String get setup_bot_api_first {
+  /// `Set up the API and Model first`
+  String get setup_api_model_first {
     return Intl.message(
-      'Set up the Bot and API first',
-      name: 'setup_bot_api_first',
+      'Set up the API and Model first',
+      name: 'setup_api_model_first',
       desc: '',
       args: [],
     );

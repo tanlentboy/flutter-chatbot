@@ -27,6 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "api_key": MessageLookupByLibrary.simpleMessage("接口密钥"),
         "api_url": MessageLookupByLibrary.simpleMessage("接口地址"),
         "apis": MessageLookupByLibrary.simpleMessage("接口"),
+        "base_config": MessageLookupByLibrary.simpleMessage("基本配置"),
         "bot": MessageLookupByLibrary.simpleMessage("角色"),
         "bots": MessageLookupByLibrary.simpleMessage("角色"),
         "camera": MessageLookupByLibrary.simpleMessage("相机"),
@@ -60,7 +61,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "ensure_clear_chat": MessageLookupByLibrary.simpleMessage("确定要清空对话？"),
         "enter_a_name": MessageLookupByLibrary.simpleMessage("请输入名称"),
         "enter_a_title": MessageLookupByLibrary.simpleMessage("请输入标题"),
-        "enter_your_message": MessageLookupByLibrary.simpleMessage("输入你的消息"),
+        "enter_message": MessageLookupByLibrary.simpleMessage("输入你的消息"),
+        "enter_prompts": MessageLookupByLibrary.simpleMessage("请输入提示词"),
         "error": MessageLookupByLibrary.simpleMessage("错误"),
         "export_config": MessageLookupByLibrary.simpleMessage("导出配置"),
         "exported_successfully": MessageLookupByLibrary.simpleMessage("导出成功"),
@@ -68,8 +70,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "failed_to_export":
             MessageLookupByLibrary.simpleMessage("无法在该目录下写入文件。"),
         "gallery": MessageLookupByLibrary.simpleMessage("图库"),
+        "generate": MessageLookupByLibrary.simpleMessage("生成"),
         "image_compress_failed": MessageLookupByLibrary.simpleMessage("图片压缩失败"),
         "image_enable_hint": MessageLookupByLibrary.simpleMessage("压缩失败将使用原图"),
+        "image_generation": MessageLookupByLibrary.simpleMessage("图像生成"),
         "image_hint": MessageLookupByLibrary.simpleMessage(
             "质量范围应在 1-100，质量越低压缩率越高。最小宽度与最小高度用于限制图片缩放，如不清楚，请留空。"),
         "import_config": MessageLookupByLibrary.simpleMessage("导入配置"),
@@ -101,9 +105,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "saved_successfully": MessageLookupByLibrary.simpleMessage("保存成功"),
         "select_models": MessageLookupByLibrary.simpleMessage("选择模型"),
         "settings": MessageLookupByLibrary.simpleMessage("设置"),
-        "setup_bot_api_first":
+        "setup_api_model_first":
             MessageLookupByLibrary.simpleMessage("请先配置接口和模型"),
         "setup_tts_first": MessageLookupByLibrary.simpleMessage("请先配置文本转语音"),
+        "share": MessageLookupByLibrary.simpleMessage("分享"),
         "source": MessageLookupByLibrary.simpleMessage("源码"),
         "streaming_response": MessageLookupByLibrary.simpleMessage("流式响应"),
         "system_prompts": MessageLookupByLibrary.simpleMessage("系统提示词"),

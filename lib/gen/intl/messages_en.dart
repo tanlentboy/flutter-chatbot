@@ -27,6 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "api_key": MessageLookupByLibrary.simpleMessage("API Key"),
         "api_url": MessageLookupByLibrary.simpleMessage("API Url"),
         "apis": MessageLookupByLibrary.simpleMessage("APIs"),
+        "base_config": MessageLookupByLibrary.simpleMessage("Base Config"),
         "bot": MessageLookupByLibrary.simpleMessage("Bot"),
         "bots": MessageLookupByLibrary.simpleMessage("Bots"),
         "camera": MessageLookupByLibrary.simpleMessage("Camera"),
@@ -71,8 +72,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please enter a name"),
         "enter_a_title":
             MessageLookupByLibrary.simpleMessage("Please enter a title"),
-        "enter_your_message":
+        "enter_message":
             MessageLookupByLibrary.simpleMessage("Enter your message"),
+        "enter_prompts":
+            MessageLookupByLibrary.simpleMessage("Enter your prompts"),
         "error": MessageLookupByLibrary.simpleMessage("Error"),
         "export_config": MessageLookupByLibrary.simpleMessage("Export Config"),
         "exported_successfully":
@@ -81,10 +84,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "failed_to_export": MessageLookupByLibrary.simpleMessage(
             "Can\'t write to that directory."),
         "gallery": MessageLookupByLibrary.simpleMessage("Gallery"),
+        "generate": MessageLookupByLibrary.simpleMessage("Generate"),
         "image_compress_failed":
             MessageLookupByLibrary.simpleMessage("Failed to comprese image"),
         "image_enable_hint": MessageLookupByLibrary.simpleMessage(
             "The original image will be used if compression fails."),
+        "image_generation":
+            MessageLookupByLibrary.simpleMessage("Image Generation"),
         "image_hint": MessageLookupByLibrary.simpleMessage(
             "The Quality should be between 1 and 100, with lower values resulting in higher compression. Minimum Width and Minimum Height restrict image resizing. Leave these fields empty if you\'re unsure."),
         "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
@@ -122,10 +128,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Saved Successfully"),
         "select_models": MessageLookupByLibrary.simpleMessage("Select Models"),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
-        "setup_bot_api_first": MessageLookupByLibrary.simpleMessage(
-            "Set up the Bot and API first"),
+        "setup_api_model_first": MessageLookupByLibrary.simpleMessage(
+            "Set up the API and Model first"),
         "setup_tts_first":
             MessageLookupByLibrary.simpleMessage("Set up the TTS first"),
+        "share": MessageLookupByLibrary.simpleMessage("Share"),
         "source": MessageLookupByLibrary.simpleMessage("Source"),
         "streaming_response":
             MessageLookupByLibrary.simpleMessage("Streaming Response"),

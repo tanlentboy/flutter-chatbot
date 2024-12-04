@@ -21,6 +21,7 @@
     "save": "Save",
     "reset": "Reset",
     "error": "Error",
+    "share": "Share",
     "clear": "Clear",
     "cancel": "Cancel",
     "reanswer": "Reanswer",
@@ -81,6 +82,11 @@
     "restart_app": "Please restart App to load the new settings.",
     "failed_to_export": "Can't write to that directory.",
 
+    "generate": "Generate",
+    "base_config": "Base Config",
+    "image_generation": "Image Generation",
+    "enter_prompts": "Enter your prompts",
+
     "clone_chat": "Clone Chat",
     "clear_chat": "Clear Chat",
     "chat_settings": "Chat Settings",
@@ -96,8 +102,8 @@
     "invalid_max_tokens": "Invalid Max Tokens",
     "invalid_temperature": "Invalid Temperature",
 
-    "enter_your_message": "Enter your message",
+    "enter_message": "Enter your message",
     "image_compress_failed": "Failed to comprese image",
     "setup_tts_first": "Set up the TTS first",
-    "setup_bot_api_first": "Set up the Bot and API first"
+    "setup_api_model_first": "Set up the API and Model first"
 }
