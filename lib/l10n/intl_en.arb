@@ -83,7 +83,11 @@
     "failed_to_export": "Can't write to that directory.",
 
     "generate": "Generate",
+    "image_size": "Image Size",
+    "image_style": "Image Style",
+    "image_quality": "Image Quality",
     "base_config": "Base Config",
+    "optional_config": "Optional Config",
     "image_generation": "Image Generation",
     "enter_prompts": "Enter your prompts",
 

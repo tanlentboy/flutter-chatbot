@@ -349,10 +349,16 @@ class CicConfig {
 class ImageConfig {
   String? _api;
   String? _model;
+  String? size;
+  String? style;
+  String? quality;
 
   ImageConfig({
     String? api,
     String? model,
+    this.size,
+    this.style,
+    this.quality,
   })  : _api = api,
         _model = model;
 
@@ -366,11 +372,17 @@ class ImageConfig {
   Map toJson() => {
         "api": api,
         "model": model,
+        "size": size,
+        "style": style,
+        "quality": quality,
       };
 
   factory ImageConfig.fromJson(Map json) => ImageConfig(
         api: json["api"],
         model: json["model"],
+        size: json["size"],
+        style: json["style"],
+        quality: json["quality"],
       );
 }
 

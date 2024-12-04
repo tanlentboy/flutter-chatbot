@@ -760,11 +760,51 @@ class S {
     );
   }
 
+  /// `Image Size`
+  String get image_size {
+    return Intl.message(
+      'Image Size',
+      name: 'image_size',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image Style`
+  String get image_style {
+    return Intl.message(
+      'Image Style',
+      name: 'image_style',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image Quality`
+  String get image_quality {
+    return Intl.message(
+      'Image Quality',
+      name: 'image_quality',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Base Config`
   String get base_config {
     return Intl.message(
       'Base Config',
       name: 'base_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Optional Config`
+  String get optional_config {
+    return Intl.message(
+      'Optional Config',
+      name: 'optional_config',
       desc: '',
       args: [],
     );

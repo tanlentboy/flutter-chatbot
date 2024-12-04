@@ -132,6 +132,15 @@ class _GenerateTabState extends ConsumerState<GenerateTab> {
       _status = _Status.generating;
     });
 
+    final size = image.size;
+    final style = image.style;
+    final quality = image.quality;
+    final optional = <String, String>{};
+
+    if (size != null) optional["size"] = size;
+    if (style != null) optional["style"] = style;
+    if (quality != null) optional["quality"] = quality;
+
     try {
       _client ??= Client();
       final genRes = await _client!.post(
@@ -141,6 +150,7 @@ class _GenerateTabState extends ConsumerState<GenerateTab> {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
+          ...optional,
           "model": model,
           "prompt": prompt,
         }),

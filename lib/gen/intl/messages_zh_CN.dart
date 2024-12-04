@@ -76,6 +76,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "image_generation": MessageLookupByLibrary.simpleMessage("图像生成"),
         "image_hint": MessageLookupByLibrary.simpleMessage(
             "质量范围应在 1-100，质量越低压缩率越高。最小宽度与最小高度用于限制图片缩放，如不清楚，请留空。"),
+        "image_quality": MessageLookupByLibrary.simpleMessage("图像质量"),
+        "image_size": MessageLookupByLibrary.simpleMessage("图像尺寸"),
+        "image_style": MessageLookupByLibrary.simpleMessage("图像风格"),
         "import_config": MessageLookupByLibrary.simpleMessage("导入配置"),
         "imported_successfully": MessageLookupByLibrary.simpleMessage("导入成功"),
         "importing": MessageLookupByLibrary.simpleMessage("正在导入..."),
@@ -95,6 +98,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "not_implemented_yet": MessageLookupByLibrary.simpleMessage("还未实现"),
         "ok": MessageLookupByLibrary.simpleMessage("确定"),
         "open": MessageLookupByLibrary.simpleMessage("打开"),
+        "optional_config": MessageLookupByLibrary.simpleMessage("可选配置"),
         "play": MessageLookupByLibrary.simpleMessage("播放"),
         "please_input": MessageLookupByLibrary.simpleMessage("请输入"),
         "quality": MessageLookupByLibrary.simpleMessage("质量"),

@@ -88,6 +88,70 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           },
         ),
         const SizedBox(height: 8),
+        Padding(
+          padding: padding,
+          child: Text(
+            s.optional_config,
+            style: TextStyle(color: primaryColor),
+          ),
+        ),
+        ListTile(
+          title: Text(s.image_size),
+          contentPadding: padding,
+          subtitle: Text(Config.image.size ?? s.empty),
+          onTap: () async {
+            var text = await Dialogs.input(
+              context: context,
+              title: s.image_size,
+              hint: s.please_input,
+              text: Config.image.size,
+            );
+            if (text == null) return;
+
+            final size = text.isEmpty ? null : text;
+            setState(() => Config.image.size = size);
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.image_style),
+          contentPadding: padding,
+          subtitle: Text(Config.image.style ?? s.empty),
+          onTap: () async {
+            var text = await Dialogs.input(
+              context: context,
+              title: s.image_style,
+              hint: s.please_input,
+              text: Config.image.style,
+            );
+            if (text == null) return;
+
+            final style = text.isEmpty ? null : text;
+            setState(() => Config.image.style = style);
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.image_quality),
+          contentPadding: padding,
+          subtitle: Text(Config.image.quality ?? s.empty),
+          onTap: () async {
+            var text = await Dialogs.input(
+              context: context,
+              title: s.image_quality,
+              hint: s.please_input,
+              text: Config.image.quality,
+            );
+            if (text == null) return;
+
+            final quality = text.isEmpty ? null : text;
+            setState(() => Config.image.quality = quality);
+            Config.save();
+          },
+        ),
+        const SizedBox(height: 8),
       ],
     );
   }

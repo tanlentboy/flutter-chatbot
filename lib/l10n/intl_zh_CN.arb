@@ -83,7 +83,11 @@
     "failed_to_export": "无法在该目录下写入文件。",
 
     "generate": "生成",
+    "image_size": "图像尺寸",
+    "image_style": "图像风格",
+    "image_quality": "图像质量",
     "base_config": "基本配置",
+    "optional_config": "可选配置",
     "image_generation": "图像生成",
     "enter_prompts": "请输入提示词",
 

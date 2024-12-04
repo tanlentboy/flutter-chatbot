@@ -93,6 +93,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Image Generation"),
         "image_hint": MessageLookupByLibrary.simpleMessage(
             "The Quality should be between 1 and 100, with lower values resulting in higher compression. Minimum Width and Minimum Height restrict image resizing. Leave these fields empty if you\'re unsure."),
+        "image_quality": MessageLookupByLibrary.simpleMessage("Image Quality"),
+        "image_size": MessageLookupByLibrary.simpleMessage("Image Size"),
+        "image_style": MessageLookupByLibrary.simpleMessage("Image Style"),
         "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
         "imported_successfully":
             MessageLookupByLibrary.simpleMessage("Imported Successfully"),
@@ -116,6 +119,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Not implemented yet"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "open": MessageLookupByLibrary.simpleMessage("Open"),
+        "optional_config":
+            MessageLookupByLibrary.simpleMessage("Optional Config"),
         "play": MessageLookupByLibrary.simpleMessage("Play"),
         "please_input": MessageLookupByLibrary.simpleMessage("Please Input"),
         "quality": MessageLookupByLibrary.simpleMessage("Quality"),
