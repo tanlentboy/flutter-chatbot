@@ -1,3 +1,13 @@
+0.2.5 (2024-12-04)
+
+    * Add: Image Generation.
+    * Improve: Message List.
+    * Improve: Configuration Loading and Export.
+
+    * 增加：图像生成
+    * 改进：消息列表
+    * 改进：配置加载及导出
+
 0.2.4 (2024-11-29)
 
     * Add: Image compression controls.
