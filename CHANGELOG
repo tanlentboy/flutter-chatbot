@@ -1,5 +1,12 @@
 0.2.5 (2024-12-04)
 
+    * Improve: LaTeX Rendering.
+
+    * 改进：LaTeX 渲染
+
+
+0.2.5 (2024-12-04)
+
     * Add: Image Generation.
     * Improve: Message List.
     * Improve: Configuration Loading and Export.
