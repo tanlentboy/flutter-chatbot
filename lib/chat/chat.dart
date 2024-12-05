@@ -23,6 +23,7 @@ import "../settings/api.dart";
 
 import "dart:io";
 import "package:flutter/material.dart";
+import "package:screenshot/screenshot.dart";
 import "package:animate_do/animate_do.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -234,6 +235,16 @@ class ChatPageState extends ConsumerState<ChatPage> {
           itemBuilder: (context) => <PopupMenuItem>[
             PopupMenuItem(
               padding: const EdgeInsets.only(left: 16),
+              onTap: _exportChatAsImage,
+              child: ListTile(
+                leading: const Icon(Icons.photo_library, size: 20),
+                title: Text(S.of(context).export_chat_as_image),
+                contentPadding: EdgeInsets.zero,
+                minTileHeight: 32,
+              ),
+            ),
+            PopupMenuItem(
+              padding: const EdgeInsets.only(left: 16),
               child: ListTile(
                 leading: const Icon(Icons.file_copy, size: 20),
                 title: Text(S.of(context).clone_chat),
@@ -426,6 +437,59 @@ class ChatPageState extends ConsumerState<ChatPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _exportChatAsImage() async {
+    InputWidget.unFocus();
+    if (CurrentChat.messages.isEmpty) return;
+
+    try {
+      Dialogs.loading(
+        context: context,
+        hint: S.of(context).exporting,
+      );
+
+      final page = Container(
+        padding: const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
+        child: Column(
+          children: [
+            for (final message in messages)
+              MediaQuery(
+                data: MediaQueryData.fromView(View.of(context)).copyWith(
+                  size: Size(
+                    MediaQuery.of(context).size.width * 1.2,
+                    MediaQuery.of(context).size.height,
+                  ),
+                ),
+                child: MessageView(message: message),
+              ),
+          ],
+        ),
+      );
+
+      final png = await ScreenshotController().captureFromLongWidget(
+        InheritedTheme.captureAll(
+          context,
+          Material(child: page),
+        ),
+        context: context,
+        pixelRatio: MediaQuery.of(context).devicePixelRatio,
+      );
+
+      final time = DateTime.now().millisecondsSinceEpoch.toString();
+      final path = Config.cacheFilePath("$time.png");
+
+      final file = File(path);
+      await file.writeAsBytes(png.toList());
+
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      Dialogs.handleImage(context: context, path: path);
+    } catch (e) {
+      Navigator.of(context).pop();
+      Dialogs.error(context: context, error: e);
+    }
   }
 }
 

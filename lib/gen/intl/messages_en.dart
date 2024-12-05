@@ -77,6 +77,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enter_prompts":
             MessageLookupByLibrary.simpleMessage("Enter your prompts"),
         "error": MessageLookupByLibrary.simpleMessage("Error"),
+        "export_chat_as_image":
+            MessageLookupByLibrary.simpleMessage("Export Image"),
         "export_config": MessageLookupByLibrary.simpleMessage("Export Config"),
         "exported_successfully":
             MessageLookupByLibrary.simpleMessage("Exported Successfully"),

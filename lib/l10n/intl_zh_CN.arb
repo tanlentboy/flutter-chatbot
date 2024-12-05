@@ -94,6 +94,7 @@
     "clone_chat": "复制对话",
     "clear_chat": "清空对话",
     "chat_settings": "对话设置",
+    "export_chat_as_image": "导出图片",
     "cloned_successfully": "复制成功",
     "ensure_clear_chat": "确定要清空对话？",
 

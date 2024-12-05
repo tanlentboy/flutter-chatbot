@@ -94,6 +94,7 @@
     "clone_chat": "Clone Chat",
     "clear_chat": "Clear Chat",
     "chat_settings": "Chat Settings",
+    "export_chat_as_image": "Export Image",
     "cloned_successfully": "Cloned Successfully",
     "ensure_clear_chat": "Are you sure you want to clear the chat?",
 

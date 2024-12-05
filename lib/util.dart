@@ -15,9 +15,12 @@
 
 import "../gen/l10n.dart";
 
+import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/material.dart";
+import "package:share_plus/share_plus.dart";
 import "package:url_launcher/url_launcher.dart";
+import "package:image_gallery_saver_plus/image_gallery_saver_plus.dart";
 
 class Util {
   static Future<void> copyText({
@@ -242,6 +245,71 @@ class Dialogs {
           Util.showSnackBar(
             context: context,
             content: Text(S.of(context).cannot_open),
+          );
+        }
+        break;
+    }
+  }
+
+  static Future<void> handleImage({
+    required BuildContext context,
+    required String path,
+  }) async {
+    final action = await showModalBottomSheet<int>(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: const BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.all(Radius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              minTileHeight: 48,
+              shape: StadiumBorder(),
+              title: Text(S.of(context).share),
+              onTap: () => Navigator.pop(context, 1),
+              leading: const Icon(Icons.share_outlined),
+            ),
+            ListTile(
+              minTileHeight: 48,
+              shape: StadiumBorder(),
+              title: Text(S.of(context).save),
+              onTap: () => Navigator.pop(context, 2),
+              leading: const Icon(Icons.save_outlined),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == null) return;
+
+    if (!Platform.isAndroid) {
+      final uri = Uri.file(path);
+      launchUrl(uri);
+      return;
+    }
+
+    switch (action) {
+      case 1:
+        Share.shareXFiles([XFile(path)]);
+        break;
+
+      case 2:
+        final result = await ImageGallerySaverPlus.saveFile(path);
+        if (!context.mounted) return;
+        if (result is Map && result["isSuccess"] == true) {
+          Util.showSnackBar(
+            context: context,
+            content: Text(S.of(context).saved_successfully),
           );
         }
         break;

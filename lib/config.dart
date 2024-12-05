@@ -32,6 +32,7 @@ class Config {
   static late final File _file;
   static late final String _dir;
   static late final String _sep;
+  static late final String _cache;
 
   static const String _chatDir = "chat";
   static const String _audioDir = "audio";
@@ -40,6 +41,7 @@ class Config {
 
   static Future<void> init() async {
     _sep = Platform.pathSeparator;
+    _cache = (await getTemporaryDirectory()).path;
     if (Platform.isAndroid) {
       _dir = (await getExternalStorageDirectory())!.path;
     } else {
@@ -61,6 +63,7 @@ class Config {
       "$_dir$_sep$_audioDir$_sep$fileName";
   static String imageFilePath(String fileName) =>
       "$_dir$_sep$_imageDir$_sep$fileName";
+  static String cacheFilePath(String fileName) => "$_cache$_sep$fileName";
 
   static Map toJson() => {
         "tts": tts,

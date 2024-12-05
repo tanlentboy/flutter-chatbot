@@ -64,6 +64,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enter_message": MessageLookupByLibrary.simpleMessage("输入你的消息"),
         "enter_prompts": MessageLookupByLibrary.simpleMessage("请输入提示词"),
         "error": MessageLookupByLibrary.simpleMessage("错误"),
+        "export_chat_as_image": MessageLookupByLibrary.simpleMessage("导出图片"),
         "export_config": MessageLookupByLibrary.simpleMessage("导出配置"),
         "exported_successfully": MessageLookupByLibrary.simpleMessage("导出成功"),
         "exporting": MessageLookupByLibrary.simpleMessage("正在导出..."),

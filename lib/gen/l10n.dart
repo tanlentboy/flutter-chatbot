@@ -860,6 +860,16 @@ class S {
     );
   }
 
+  /// `Export Image`
+  String get export_chat_as_image {
+    return Intl.message(
+      'Export Image',
+      name: 'export_chat_as_image',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Cloned Successfully`
   String get cloned_successfully {
     return Intl.message(

@@ -684,6 +684,133 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
   }
 }
 
+class MessageView extends StatelessWidget {
+  final Message message;
+
+  const MessageView({
+    required this.message,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final item = message.item;
+    var content = item.text;
+    final role = item.role;
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final markdownStyleSheet = MarkdownStyleSheet(
+      codeblockPadding: EdgeInsets.all(0),
+      codeblockDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.surfaceContainer,
+      ),
+      blockquoteDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.brightness == Brightness.light
+            ? Colors.blueGrey.withOpacity(0.3)
+            : Colors.black.withOpacity(0.3),
+      ),
+    );
+
+    final background = role.isUser
+        ? colorScheme.secondaryContainer
+        : colorScheme.surfaceContainerHighest;
+
+    if (item.image != null) {
+      content = "![image](data:image/jpeg;base64,${item.image})\n\n$content";
+    }
+
+    return Container(
+      alignment: role.isAssistant ? Alignment.topLeft : Alignment.topRight,
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+      child: Column(
+        crossAxisAlignment: role.isAssistant
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.end,
+        children: [
+          if (role.isAssistant) ...[
+            const SizedBox(height: 12),
+            _buildHeader(context, message, item),
+          ],
+          SizedBox(height: role.isAssistant ? 8 : 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            constraints: role.isUser
+                ? BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.8,
+                  )
+                : null,
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(16),
+                bottomLeft: const Radius.circular(16),
+                bottomRight: const Radius.circular(16),
+                topRight: Radius.circular(role.isUser ? 2 : 16),
+              ),
+            ),
+            child: switch (item.text.isNotEmpty) {
+              true => MarkdownBody(
+                  data: content,
+                  shrinkWrap: true,
+                  extensionSet: mdExtensionSet,
+                  onTapLink: (text, href, title) =>
+                      Dialogs.openLink(context: context, link: href),
+                  builders: {
+                    "pre": CodeBlockBuilder(context: context),
+                    "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                  },
+                  styleSheet: markdownStyleSheet,
+                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                ),
+              false => SizedBox(
+                  width: 36,
+                  height: 18,
+                  child: SpinKitWave(
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, Message message, MessageItem item) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        CircleAvatar(
+          child: const Icon(Icons.smart_toy),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.model ?? CurrentChat.model ?? S.of(context).no_model,
+                style: Theme.of(context).textTheme.titleSmall,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item.time ??
+                    CurrentChat.chat?.time ??
+                    Util.formatDateTime(DateTime.now()),
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _MessageEditor extends ConsumerStatefulWidget {
   final Message message;
 
