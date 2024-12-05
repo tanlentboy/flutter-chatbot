@@ -133,7 +133,6 @@ class _GenerateTabState extends ConsumerState<GenerateTab>
     final apiKey = api.key;
     final endPoint = "$apiUrl/images/generations";
 
-    if (!mounted) return;
     setState(() {
       _images.clear();
       _status = _Status.generating;
@@ -185,7 +184,8 @@ class _GenerateTabState extends ConsumerState<GenerateTab>
       if (!mounted) return;
       setState(() => _images.add(path));
     } catch (e) {
-      if (_status.isGenerating && mounted) {
+      if (!mounted) return;
+      if (_status.isGenerating) {
         Dialogs.error(context: context, error: e);
       }
     }
@@ -236,13 +236,13 @@ class _GenerateTabState extends ConsumerState<GenerateTab>
 
     if (!Platform.isAndroid) {
       final uri = Uri.file(path);
-      await launchUrl(uri);
+      launchUrl(uri);
       return;
     }
 
     switch (action) {
       case 1:
-        await Share.shareXFiles([XFile(path)]);
+        Share.shareXFiles([XFile(path)]);
         break;
 
       case 2:

@@ -19,6 +19,7 @@ import "current.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../markdown/all.dart";
 
 import "dart:io";
 import "dart:async";
@@ -27,15 +28,11 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:langchain/langchain.dart";
 import "package:animate_do/animate_do.dart";
-import "package:markdown/markdown.dart" as md;
 import "package:audioplayers/audioplayers.dart";
 import "package:flutter_spinkit/flutter_spinkit.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:langchain_openai/langchain_openai.dart";
-import "package:markdown/markdown.dart" hide Element, Text;
-import "package:flutter_highlighter/flutter_highlighter.dart";
-import "package:flutter_markdown_latex/flutter_markdown_latex.dart";
 
 final messageProvider = NotifierProvider.autoDispose
     .family<MessageNotifier, void, Message>(MessageNotifier.new);
@@ -180,67 +177,65 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
     return Container(
       alignment: role.isAssistant ? Alignment.topLeft : Alignment.topRight,
-      child: IntrinsicWidth(
-        child: Column(
-          crossAxisAlignment: role.isAssistant
-              ? CrossAxisAlignment.start
-              : CrossAxisAlignment.end,
-          children: [
-            if (role.isAssistant) ...[
-              const SizedBox(height: 12),
-              _buildHeader(message, item),
-            ],
-            SizedBox(height: role.isAssistant ? 8 : 12),
-            GestureDetector(
-              onLongPress: _longPress,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                constraints: role.isUser
-                    ? BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8,
-                      )
-                    : null,
-                decoration: BoxDecoration(
-                  color: background,
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16),
-                    bottomLeft: const Radius.circular(16),
-                    bottomRight: const Radius.circular(16),
-                    topRight: Radius.circular(role.isUser ? 2 : 16),
-                  ),
-                ),
-                child: switch (item.text.isNotEmpty) {
-                  true => MarkdownBody(
-                      data: content,
-                      shrinkWrap: true,
-                      extensionSet: _extensionSet,
-                      onTapLink: (text, href, title) =>
-                          Dialogs.openLink(context: context, link: href),
-                      builders: {
-                        "pre": _CodeBlockBuilder(context: context),
-                        "latex": LatexElementBuilder(textScaleFactor: 1.2),
-                      },
-                      styleSheet: markdownStyleSheet,
-                      styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                    ),
-                  false => SizedBox(
-                      width: 36,
-                      height: 18,
-                      child: SpinKitWave(
-                        size: 18,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                },
-              ),
-            ),
-            if (CurrentChat.messages.lastOrNull == message &&
-                CurrentChat.chatStatus.isNothing) ...[
-              const SizedBox(height: 4),
-              FadeIn(child: _buildToolBar(role)),
-            ],
+      child: Column(
+        crossAxisAlignment: role.isAssistant
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.end,
+        children: [
+          if (role.isAssistant) ...[
+            const SizedBox(height: 12),
+            _buildHeader(message, item),
           ],
-        ),
+          SizedBox(height: role.isAssistant ? 8 : 12),
+          GestureDetector(
+            onLongPress: _longPress,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              constraints: role.isUser
+                  ? BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.8,
+                    )
+                  : null,
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  bottomLeft: const Radius.circular(16),
+                  bottomRight: const Radius.circular(16),
+                  topRight: Radius.circular(role.isUser ? 2 : 16),
+                ),
+              ),
+              child: switch (item.text.isNotEmpty) {
+                true => MarkdownBody(
+                    data: content,
+                    shrinkWrap: true,
+                    extensionSet: mdExtensionSet,
+                    onTapLink: (text, href, title) =>
+                        Dialogs.openLink(context: context, link: href),
+                    builders: {
+                      "pre": CodeBlockBuilder(context: context),
+                      "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                    },
+                    styleSheet: markdownStyleSheet,
+                    styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                  ),
+                false => SizedBox(
+                    width: 36,
+                    height: 18,
+                    child: SpinKitWave(
+                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              },
+            ),
+          ),
+          if (CurrentChat.messages.lastOrNull == message &&
+              CurrentChat.chatStatus.isNothing) ...[
+            const SizedBox(height: 4),
+            FadeIn(child: _buildToolBar(role)),
+          ],
+        ],
       ),
     );
   }
@@ -428,7 +423,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
           "model": model,
           "voice": voice,
           "stream": false,
-          "input": _markdownToText(text),
+          "input": markdownToText(text),
         }),
       );
 
@@ -689,74 +684,6 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
   }
 }
 
-final _extensionSet = ExtensionSet(
-  <BlockSyntax>[
-    LatexBlockSyntax(),
-    const TableSyntax(),
-    const FootnoteDefSyntax(),
-    const FencedCodeBlockSyntax(),
-    const OrderedListWithCheckboxSyntax(),
-    const UnorderedListWithCheckboxSyntax(),
-  ],
-  <InlineSyntax>[
-    InlineHtmlSyntax(),
-    LatexInlineSyntax(),
-    StrikethroughSyntax(),
-    AutolinkExtensionSyntax()
-  ],
-);
-
-String _markdownToText(String markdown) {
-  final doc = md.Document(
-    extensionSet: _extensionSet,
-  );
-  final buff = StringBuffer();
-  final nodes = doc.parse(markdown);
-
-  for (final node in nodes) {
-    if (node is md.Element) {
-      buff.write(_elementToText(node));
-    }
-  }
-
-  return buff.toString().trim();
-}
-
-String _elementToText(md.Element element) {
-  final buff = StringBuffer();
-  final nodes = element.children ?? [];
-
-  if (element.tag == "ul") {
-    for (final node in nodes) {
-      if (node is md.Element && node.tag == "li") {
-        buff.write(_elementToText(node));
-      }
-    }
-  } else if (element.tag == "ol") {
-    int index = 1;
-    for (final node in nodes) {
-      if (node is md.Element && node.tag == "li") {
-        buff.write("${index++}. ${_elementToText(node)}");
-      }
-    }
-  } else {
-    for (final node in nodes) {
-      if (node is md.Text) {
-        buff.write(node.text);
-      } else if (node is md.Element) {
-        final tag = node.tag;
-        if (tag == "code") continue;
-        if (tag == "latex") continue;
-        if (tag == "th" || tag == "td") continue;
-        buff.write(_elementToText(node));
-      }
-      buff.write("\n");
-    }
-  }
-
-  return buff.toString();
-}
-
 class _MessageEditor extends ConsumerStatefulWidget {
   final Message message;
 
@@ -830,76 +757,6 @@ class _MessageEditorState extends ConsumerState<_MessageEditor> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _CodeBlockBuilder extends MarkdownElementBuilder {
-  var language = "";
-  final BuildContext context;
-
-  _CodeBlockBuilder({required this.context});
-
-  @override
-  void visitElementBefore(md.Element element) {
-    final code = element.children?.first;
-    if (code is md.Element) {
-      final lang = code.attributes["class"];
-      if (lang != null) language = lang.substring(9);
-    }
-    super.visitElementBefore(element);
-  }
-
-  @override
-  Widget? visitText(md.Text text, TextStyle? preferredStyle) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final theme = switch (colorScheme.brightness) {
-      Brightness.light => codeLightTheme,
-      Brightness.dark => codeDarkTheme,
-    };
-    final content = text.textContent.trim();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: theme == codeDarkTheme
-                ? Colors.black.withOpacity(0.3)
-                : Colors.blueGrey.withOpacity(0.3),
-          ),
-          padding: EdgeInsets.only(left: 16, right: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(language),
-              InkWell(
-                onTap: () => Util.copyText(
-                  context: context,
-                  text: content,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
-                  child: Text(
-                    S.of(context).copy,
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: HighlightView(
-            content,
-            tabSize: 2,
-            theme: theme,
-            language: language,
-            padding: const EdgeInsets.all(8),
-          ),
-        ),
-      ],
     );
   }
 }

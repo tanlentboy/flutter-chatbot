@@ -307,12 +307,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
       api: _api,
       model: _model,
     );
-
     CurrentChat.save();
-    Util.showSnackBar(
-      context: context,
-      content: Text(S.of(context).saved_successfully),
-    );
 
     if (title != oldTitle && CurrentChat.hasFile) {
       ref.read(chatsProvider.notifier).notify();

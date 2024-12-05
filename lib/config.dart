@@ -19,8 +19,6 @@ import "dart:isolate";
 import "package:flutter/material.dart";
 import "package:archive/archive_io.dart";
 import "package:path_provider/path_provider.dart";
-import "package:flutter_highlighter/themes/atom-one-dark.dart";
-import "package:flutter_highlighter/themes/atom-one-light.dart";
 
 class Config {
   static late final TtsConfig tts;
@@ -413,13 +411,3 @@ final lightTheme = ThemeData.light(useMaterial3: true).copyWith(
   ),
   appBarTheme: AppBarTheme(color: lightColorScheme.primaryContainer),
 );
-
-final codeDarkTheme = Map.of(atomOneDarkTheme)
-  ..["root"] = TextStyle(
-      color: Colors.white.withOpacity(0.7),
-      backgroundColor: Colors.transparent);
-
-final codeLightTheme = Map.of(atomOneLightTheme)
-  ..["root"] = TextStyle(
-      color: Colors.black.withOpacity(0.7),
-      backgroundColor: Colors.transparent);
