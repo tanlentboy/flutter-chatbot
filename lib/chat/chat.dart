@@ -105,7 +105,7 @@ class ChatPageState extends ConsumerState<ChatPage> {
                       shrinkWrap: true,
                       controller: _scrollCtrl,
                       padding: const EdgeInsets.only(
-                          top: 4, left: 16, right: 16, bottom: 16),
+                          top: 0, left: 16, right: 16, bottom: 16),
                       itemCount: length,
                       itemBuilder: (context, index) {
                         final message = messages[length - index - 1];
@@ -234,22 +234,17 @@ class ChatPageState extends ConsumerState<ChatPage> {
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           itemBuilder: (context) => <PopupMenuItem>[
             PopupMenuItem(
-              padding: const EdgeInsets.only(left: 16),
-              onTap: _exportChatAsImage,
-              child: ListTile(
-                leading: const Icon(Icons.photo_library, size: 20),
-                title: Text(S.of(context).export_chat_as_image),
-                contentPadding: EdgeInsets.zero,
-                minTileHeight: 32,
-              ),
-            ),
-            PopupMenuItem(
-              padding: const EdgeInsets.only(left: 16),
-              child: ListTile(
-                leading: const Icon(Icons.file_copy, size: 20),
-                title: Text(S.of(context).clone_chat),
-                contentPadding: EdgeInsets.zero,
-                minTileHeight: 32,
+              padding: EdgeInsets.zero,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.file_copy, size: 20),
+                    const SizedBox(width: 16),
+                    Text(S.of(context).clone_chat),
+                  ],
+                ),
               ),
               onTap: () {
                 InputWidget.unFocus();
@@ -267,12 +262,17 @@ class ChatPageState extends ConsumerState<ChatPage> {
               },
             ),
             PopupMenuItem(
-              padding: const EdgeInsets.only(left: 16),
-              child: ListTile(
-                leading: const Icon(Icons.delete, size: 24),
-                title: Text(S.of(context).clear_chat),
-                contentPadding: EdgeInsets.zero,
-                minTileHeight: 32,
+              padding: EdgeInsets.zero,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete, size: 24),
+                    const SizedBox(width: 16),
+                    Text(S.of(context).clear_chat),
+                  ],
+                ),
               ),
               onTap: () async {
                 InputWidget.unFocus();
@@ -304,12 +304,37 @@ class ChatPageState extends ConsumerState<ChatPage> {
               },
             ),
             PopupMenuItem(
-              padding: const EdgeInsets.only(left: 16),
-              child: ListTile(
-                leading: const Icon(Icons.settings, size: 24),
-                title: Text(S.of(context).chat_settings),
-                contentPadding: EdgeInsets.zero,
-                minTileHeight: 32,
+              height: 1,
+              padding: EdgeInsets.zero,
+              child: const Divider(height: 1),
+            ),
+            PopupMenuItem(
+              padding: EdgeInsets.zero,
+              onTap: _exportChatAsImage,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.photo_library, size: 20),
+                    const SizedBox(width: 16),
+                    Text(S.of(context).export_chat_as_image),
+                  ],
+                ),
+              ),
+            ),
+            PopupMenuItem(
+              padding: EdgeInsets.zero,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.settings, size: 24),
+                    const SizedBox(width: 16),
+                    Text(S.of(context).chat_settings),
+                  ],
+                ),
               ),
               onTap: () {
                 InputWidget.unFocus();
@@ -450,19 +475,10 @@ class ChatPageState extends ConsumerState<ChatPage> {
       );
 
       final page = Container(
-        padding: const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
+        padding: const EdgeInsets.only(top: 0, left: 16, right: 16, bottom: 16),
         child: Column(
           children: [
-            for (final message in messages)
-              MediaQuery(
-                data: MediaQueryData.fromView(View.of(context)).copyWith(
-                  size: Size(
-                    MediaQuery.of(context).size.width * 1.2,
-                    MediaQuery.of(context).size.height,
-                  ),
-                ),
-                child: MessageView(message: message),
-              ),
+            for (final message in messages) MessageView(message: message),
           ],
         ),
       );
@@ -470,7 +486,15 @@ class ChatPageState extends ConsumerState<ChatPage> {
       final png = await ScreenshotController().captureFromLongWidget(
         InheritedTheme.captureAll(
           context,
-          Material(child: page),
+          MediaQuery(
+            data: MediaQueryData.fromView(View.of(context)).copyWith(
+              size: Size(
+                MediaQuery.of(context).size.width * 1.2,
+                MediaQuery.of(context).size.height,
+              ),
+            ),
+            child: Material(child: page),
+          ),
         ),
         context: context,
         pixelRatio: MediaQuery.of(context).devicePixelRatio,

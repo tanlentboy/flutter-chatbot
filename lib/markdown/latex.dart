@@ -55,6 +55,43 @@ class LatexElementBuilder extends MarkdownElementBuilder {
   }
 }
 
+class LatexElementBuilder2 extends MarkdownElementBuilder {
+  final TextStyle? textStyle;
+  final double? textScaleFactor;
+
+  LatexElementBuilder2({
+    this.textStyle,
+    this.textScaleFactor,
+  });
+
+  @override
+  Widget visitElementAfterWithContext(
+    BuildContext context,
+    Element element,
+    TextStyle? preferredStyle,
+    TextStyle? parentStyle,
+  ) {
+    final String text = element.textContent.trim();
+    if (text.isEmpty) return const SizedBox();
+
+    final mathStyle = switch (element.attributes["MathStyle"]) {
+      "display" => MathStyle.display,
+      _ => MathStyle.text,
+    };
+
+    return Wrap(
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: Math.tex(
+        text,
+        mathStyle: mathStyle,
+        textStyle: textStyle,
+        textScaleFactor: textScaleFactor,
+      ).texBreak().parts,
+    );
+  }
+}
+
 class _LatexDelimiter {
   final String left;
   final String right;

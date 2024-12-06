@@ -186,7 +186,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             const SizedBox(height: 12),
             _buildHeader(message, item),
           ],
-          SizedBox(height: role.isAssistant ? 8 : 12),
+          SizedBox(height: role.isAssistant ? 8 : 16),
           GestureDetector(
             onLongPress: _longPress,
             child: Container(
@@ -253,7 +253,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.model ?? CurrentChat.model ?? S.of(context).model,
+                item.model ?? CurrentChat.model ?? S.of(context).no_model,
                 style: Theme.of(context).textTheme.titleSmall,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -733,7 +733,7 @@ class MessageView extends StatelessWidget {
             const SizedBox(height: 12),
             _buildHeader(context, message, item),
           ],
-          SizedBox(height: role.isAssistant ? 8 : 12),
+          SizedBox(height: role.isAssistant ? 8 : 16),
           Container(
             padding: const EdgeInsets.all(12),
             constraints: role.isUser
@@ -758,8 +758,8 @@ class MessageView extends StatelessWidget {
                   onTapLink: (text, href, title) =>
                       Dialogs.openLink(context: context, link: href),
                   builders: {
-                    "pre": CodeBlockBuilder(context: context),
-                    "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                    "pre": CodeBlockBuilder2(context: context),
+                    "latex": LatexElementBuilder2(textScaleFactor: 1.2),
                   },
                   styleSheet: markdownStyleSheet,
                   styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
@@ -792,7 +792,7 @@ class MessageView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.model ?? CurrentChat.model ?? S.of(context).no_model,
+                item.model ?? CurrentChat.model ?? S.current.no_model,
                 style: Theme.of(context).textTheme.titleSmall,
                 overflow: TextOverflow.ellipsis,
               ),
