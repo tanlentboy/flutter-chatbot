@@ -1,4 +1,12 @@
-0.2.5 (2024-12-04)
+0.2.7 (2024-12-06)
+
+    * Add: Export chat as image.
+    * Improve: Refine UI details.
+
+    * 增加：将对话导出为图片
+    * 改进：调整了界面细节
+
+0.2.6 (2024-12-04)
 
     * Improve: LaTeX Rendering.
 
