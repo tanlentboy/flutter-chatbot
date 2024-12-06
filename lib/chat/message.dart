@@ -858,7 +858,7 @@ class _MessageEditorState extends ConsumerState<_MessageEditor> {
             onPressed: () => _undoCtrl.redo(),
           ),
           IconButton(
-            icon: const Icon(Icons.save_outlined),
+            icon: const Icon(Icons.done),
             onPressed: () {
               message.item.text = _editCtrl.text;
               ref.read(messageProvider(message).notifier).notify();

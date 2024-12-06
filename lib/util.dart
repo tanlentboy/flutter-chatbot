@@ -60,19 +60,17 @@ class Util {
 }
 
 class Dialogs {
-  static Future<String?> input({
+  static Future<List<String>?> input({
     required BuildContext context,
     required String title,
-    String? text,
-    String? hint,
+    required List<InputDialogField> fields,
   }) async {
-    return await showDialog<String>(
+    return await showDialog<List<String>>(
       context: context,
       builder: (context) => Dialog(
-        child: _InputDialog(
+        child: InputDialog(
           title: title,
-          text: text,
-          hint: hint,
+          fields: fields,
         ),
       ),
     );
@@ -317,33 +315,39 @@ class Dialogs {
   }
 }
 
-class _InputDialog extends StatefulWidget {
-  final String title;
-  final String? text;
-  final String? hint;
+typedef InputDialogField = ({String? hint, String? text});
 
-  const _InputDialog({
+class InputDialog extends StatefulWidget {
+  final String title;
+  final List<InputDialogField> fields;
+
+  const InputDialog({
     required this.title,
-    this.text,
-    this.hint,
+    required this.fields,
+    super.key,
   });
 
   @override
-  State<_InputDialog> createState() => _InputDialogState();
+  State<InputDialog> createState() => _InputDialogState();
 }
 
-class _InputDialogState extends State<_InputDialog> {
-  late final TextEditingController ctrl;
+class _InputDialogState extends State<InputDialog> {
+  late final List<TextEditingController> _ctrls;
 
   @override
   void initState() {
     super.initState();
-    ctrl = TextEditingController(text: widget.text);
+    _ctrls = [
+      for (final field in widget.fields)
+        TextEditingController(text: field.text),
+    ];
   }
 
   @override
   void dispose() {
-    ctrl.dispose();
+    for (final ctrl in _ctrls) {
+      ctrl.dispose();
+    }
     super.dispose();
   }
 
@@ -362,16 +366,19 @@ class _InputDialogState extends State<_InputDialog> {
           ),
         ),
         const SizedBox(height: 4),
-        Padding(
-          padding: const EdgeInsets.only(left: 24, right: 24),
-          child: TextField(
-            controller: ctrl,
-            decoration: InputDecoration(
-              labelText: widget.hint,
-              border: const UnderlineInputBorder(),
+        for (int i = 0; i < _ctrls.length; i++) ...[
+          SizedBox(height: i == 0 ? 0 : 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 24, right: 24),
+            child: TextField(
+              controller: _ctrls[i],
+              decoration: InputDecoration(
+                labelText: widget.fields[i].hint,
+                border: const UnderlineInputBorder(),
+              ),
             ),
           ),
-        ),
+        ],
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -382,7 +389,9 @@ class _InputDialogState extends State<_InputDialog> {
             ),
             const SizedBox(width: 8),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(ctrl.text),
+              onPressed: () => Navigator.of(context).pop(<String>[
+                for (final ctrl in _ctrls) ctrl.text,
+              ]),
               child: Text(S.of(context).ok),
             ),
             const SizedBox(width: 24),

@@ -89,6 +89,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "max_tokens": MessageLookupByLibrary.simpleMessage("最大输出"),
         "min_height": MessageLookupByLibrary.simpleMessage("最小高度"),
         "min_width": MessageLookupByLibrary.simpleMessage("最小宽度"),
+        "min_width_height": MessageLookupByLibrary.simpleMessage("最小宽高"),
         "model": MessageLookupByLibrary.simpleMessage("模型"),
         "model_list": MessageLookupByLibrary.simpleMessage("模型列表"),
         "name": MessageLookupByLibrary.simpleMessage("名称"),

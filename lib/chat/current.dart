@@ -268,7 +268,7 @@ class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
                     }),
                   ),
                 ),
-                const SizedBox(width: 24),
+                const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton(
                     onPressed: _save,

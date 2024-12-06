@@ -610,6 +610,16 @@ class S {
     );
   }
 
+  /// `Minimal Size`
+  String get min_width_height {
+    return Intl.message(
+      'Minimal Size',
+      name: 'min_width_height',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Export Config`
   String get export_config {
     return Intl.message(

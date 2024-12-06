@@ -110,6 +110,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "max_tokens": MessageLookupByLibrary.simpleMessage("Max Tokens"),
         "min_height": MessageLookupByLibrary.simpleMessage("Minimal Height"),
         "min_width": MessageLookupByLibrary.simpleMessage("Minimal Width"),
+        "min_width_height":
+            MessageLookupByLibrary.simpleMessage("Minimal Size"),
         "model": MessageLookupByLibrary.simpleMessage("Model"),
         "model_list": MessageLookupByLibrary.simpleMessage("Model List"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),

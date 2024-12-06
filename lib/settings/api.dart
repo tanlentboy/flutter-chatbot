@@ -223,8 +223,9 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     child: Text(S.of(context).cancel),
                   ),
                 ),
-                const SizedBox(width: 12),
-                if (apiPair != null)
+                const SizedBox(width: 6),
+                if (apiPair != null) ...[
+                  const SizedBox(width: 6),
                   Expanded(
                     flex: 1,
                     child: FilledButton(
@@ -242,7 +243,9 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                       },
                     ),
                   ),
-                const SizedBox(width: 12),
+                  const SizedBox(width: 6),
+                ],
+                const SizedBox(width: 6),
                 Expanded(
                   flex: 1,
                   child: FilledButton(

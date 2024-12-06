@@ -65,6 +65,7 @@
     "quality": "Quality",
     "min_width": "Minimal Width",
     "min_height": "Minimal Height",
+    "min_width_height": "Minimal Size",
     "export_config": "Export Config",
     "import_config": "Import Config",
     "exporting": "Exporting...",

@@ -65,6 +65,7 @@
     "quality": "质量",
     "min_width": "最小宽度",
     "min_height": "最小高度",
+    "min_width_height": "最小宽高",
     "export_config": "导出配置",
     "import_config": "导入配置",
     "exporting": "正在导出...",

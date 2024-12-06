@@ -212,8 +212,9 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
-                if (botPair != null)
+                const SizedBox(width: 6),
+                if (botPair != null) ...[
+                  const SizedBox(width: 6),
                   Expanded(
                     child: FilledButton(
                       style: FilledButton.styleFrom(
@@ -230,7 +231,9 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                       },
                     ),
                   ),
-                const SizedBox(width: 12),
+                  const SizedBox(width: 6),
+                ],
+                const SizedBox(width: 6),
                 Expanded(
                   child: FilledButton(
                     onPressed: _save,

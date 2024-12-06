@@ -100,14 +100,16 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.image.size ?? s.empty),
           onTap: () async {
-            var text = await Dialogs.input(
+            final texts = await Dialogs.input(
               context: context,
               title: s.image_size,
-              hint: s.please_input,
-              text: Config.image.size,
+              fields: <InputDialogField>[
+                (hint: s.please_input, text: Config.image.size),
+              ],
             );
-            if (text == null) return;
+            if (texts == null) return;
 
+            final text = texts[0].trim();
             final size = text.isEmpty ? null : text;
             setState(() => Config.image.size = size);
             Config.save();
@@ -119,14 +121,16 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.image.style ?? s.empty),
           onTap: () async {
-            var text = await Dialogs.input(
+            final texts = await Dialogs.input(
               context: context,
               title: s.image_style,
-              hint: s.please_input,
-              text: Config.image.style,
+              fields: <InputDialogField>[
+                (hint: s.please_input, text: Config.image.style),
+              ],
             );
-            if (text == null) return;
+            if (texts == null) return;
 
+            final text = texts[0].trim();
             final style = text.isEmpty ? null : text;
             setState(() => Config.image.style = style);
             Config.save();
@@ -138,14 +142,16 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.image.quality ?? s.empty),
           onTap: () async {
-            var text = await Dialogs.input(
+            final texts = await Dialogs.input(
               context: context,
               title: s.image_quality,
-              hint: s.please_input,
-              text: Config.image.quality,
+              fields: <InputDialogField>[
+                (hint: s.please_input, text: Config.image.quality),
+              ],
             );
-            if (text == null) return;
+            if (texts == null) return;
 
+            final text = texts[0].trim();
             final quality = text.isEmpty ? null : text;
             setState(() => Config.image.quality = quality);
             Config.save();

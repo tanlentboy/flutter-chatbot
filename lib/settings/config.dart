@@ -169,16 +169,17 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.tts.voice ?? s.empty),
           onTap: () async {
-            var text = await Dialogs.input(
+            final texts = await Dialogs.input(
               context: context,
               title: s.voice,
-              hint: s.please_input,
-              text: Config.tts.voice,
+              fields: <InputDialogField>[
+                (hint: s.please_input, text: Config.tts.voice)
+              ],
             );
-            if (text == null) return;
+            if (texts == null) return;
 
             String? voice;
-            text = text.trim();
+            final text = texts[0].trim();
             if (text.isNotEmpty) voice = text;
 
             setState(() => Config.tts.voice = voice);
@@ -209,16 +210,17 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: padding,
           subtitle: Text(Config.cic.quality?.toString() ?? s.empty),
           onTap: () async {
-            var text = await Dialogs.input(
+            final texts = await Dialogs.input(
               context: context,
               title: s.quality,
-              hint: s.please_input,
-              text: Config.cic.quality?.toString(),
+              fields: <InputDialogField>[
+                (hint: s.please_input, text: Config.cic.quality?.toString()),
+              ],
             );
-            if (text == null) return;
+            if (texts == null) return;
 
             int? quality;
-            text = text.trim();
+            final text = texts[0].trim();
             if (text.isNotEmpty) {
               quality = int.tryParse(text);
               if (quality == null) return;
@@ -230,51 +232,40 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ),
         const Divider(height: 1),
         ListTile(
-          title: Text(s.min_width),
+          title: Text(s.min_width_height),
           contentPadding: padding,
-          subtitle: Text(Config.cic.minWidth?.toString() ?? s.empty),
+          subtitle: Text(
+            "${Config.cic.minWidth ?? s.empty} x "
+            "${Config.cic.minHeight ?? s.empty}",
+          ),
           onTap: () async {
-            var text = await Dialogs.input(
+            final texts = await Dialogs.input(
               context: context,
-              title: s.min_width,
-              hint: s.please_input,
-              text: Config.cic.minWidth?.toString(),
+              title: s.min_width_height,
+              fields: <InputDialogField>[
+                (hint: s.min_width, text: Config.cic.minWidth?.toString()),
+                (hint: s.min_height, text: Config.cic.minHeight?.toString()),
+              ],
             );
-            if (text == null) return;
+            if (texts == null) return;
 
             int? minWidth;
-            text = text.trim();
-            if (text.isNotEmpty) {
-              minWidth = int.tryParse(text);
+            int? minHeight;
+            final text1 = texts[0].trim();
+            final text2 = texts[1].trim();
+            if (text1.isNotEmpty) {
+              minWidth = int.tryParse(text1);
               if (minWidth == null) return;
             }
-
-            setState(() => Config.cic.minWidth = minWidth);
-            Config.save();
-          },
-        ),
-        const Divider(height: 1),
-        ListTile(
-          title: Text(s.min_height),
-          contentPadding: padding,
-          subtitle: Text(Config.cic.minHeight?.toString() ?? s.empty),
-          onTap: () async {
-            var text = await Dialogs.input(
-              context: context,
-              title: s.min_height,
-              hint: s.please_input,
-              text: Config.cic.minHeight?.toString(),
-            );
-            if (text == null) return;
-
-            int? minHeight;
-            text = text.trim();
-            if (text.isNotEmpty) {
-              minHeight = int.tryParse(text);
+            if (text2.isNotEmpty) {
+              minHeight = int.tryParse(text2);
               if (minHeight == null) return;
             }
 
-            setState(() => Config.cic.minHeight = minHeight);
+            setState(() {
+              Config.cic.minWidth = minWidth;
+              Config.cic.minHeight = minHeight;
+            });
             Config.save();
           },
         ),
