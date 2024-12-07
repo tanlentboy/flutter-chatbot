@@ -22,6 +22,7 @@ import "../gen/l10n.dart";
 import "dart:io";
 import "dart:isolate";
 import "dart:convert";
+import "dart:typed_data";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -45,7 +46,7 @@ enum ChatStatus {
 
 class CurrentChat {
   static File? file;
-  static String? image;
+  static Uint8List? image;
   static ChatConfig? chat;
 
   static CoreConfig core = Config.core;

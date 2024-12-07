@@ -21,7 +21,6 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "dart:io";
-import "dart:convert";
 import "package:http/http.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -183,7 +182,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     }
 
     final bytes = compressed ?? await File(result.path).readAsBytes();
-    setState(() => CurrentChat.image = base64Encode(bytes));
+    setState(() => CurrentChat.image = bytes);
   }
 
   Future<void> _sendMessage() async {
@@ -307,7 +306,7 @@ List<ChatMessage> buildChatContext(List<Message> list) {
             ChatMessageContent.text(item.text),
             ChatMessageContent.image(
               mimeType: "image/jpeg",
-              data: item.image!,
+              data: item.imageBase64!,
             ),
           ])));
         }

@@ -24,6 +24,7 @@ import "../markdown/all.dart";
 import "dart:io";
 import "dart:async";
 import "dart:convert";
+import "dart:typed_data";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:langchain/langchain.dart";
@@ -56,16 +57,24 @@ class MessageItem {
   String text;
   String? time;
   String? model;
-  String? image;
+  Uint8List? image;
   MessageRole role;
+  String? imageBase64;
 
   MessageItem({
     this.time,
     this.image,
     this.model,
+    this.imageBase64,
     required this.role,
     required this.text,
-  });
+  }) {
+    if (image != null) {
+      imageBase64 = base64Encode(image!);
+    } else if (imageBase64 != null) {
+      image = base64Decode(imageBase64!);
+    }
+  }
 
   factory MessageItem.fromJson(Map json) => switch (json["role"]) {
         "assistant" => MessageItem(
@@ -76,8 +85,8 @@ class MessageItem {
           ),
         "user" => MessageItem(
             text: json["text"],
-            image: json["image"],
             role: MessageRole.user,
+            imageBase64: json["image"],
           ),
         _ => throw "bad role",
       };
@@ -87,12 +96,12 @@ class MessageItem {
             "time": time,
             "text": text,
             "model": model,
-            "role": role.name,
+            "role": "assistant",
           },
         MessageRole.user => {
             "text": text,
-            "image": image,
-            "role": role.name,
+            "role": "user",
+            "image": imageBase64,
           },
       };
 }
@@ -171,12 +180,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         ? colorScheme.secondaryContainer
         : colorScheme.surfaceContainerHighest;
 
-    if (item.image != null) {
-      content = "![image](data:image/jpeg;base64,${item.image})\n\n$content";
-    }
-
     return Container(
-      alignment: role.isAssistant ? Alignment.topLeft : Alignment.topRight,
+      alignment: role.isUser ? Alignment.topRight : Alignment.topLeft,
       child: Column(
         crossAxisAlignment: role.isAssistant
             ? CrossAxisAlignment.start
@@ -187,6 +192,18 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             _buildHeader(message, item),
           ],
           SizedBox(height: role.isAssistant ? 8 : 16),
+          if (item.image != null) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+              child: Image.memory(
+                item.image!,
+                fit: BoxFit.cover,
+                height: 100,
+                width: 100,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           GestureDetector(
             onLongPress: _longPress,
             child: Container(
@@ -318,7 +335,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
   Widget _buildToolBar(MessageRole role) {
     return Row(
       mainAxisAlignment:
-          role.isAssistant ? MainAxisAlignment.start : MainAxisAlignment.end,
+          role.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         if (role.isAssistant) ...[
           SizedBox(
@@ -717,13 +734,8 @@ class MessageView extends StatelessWidget {
         ? colorScheme.secondaryContainer
         : colorScheme.surfaceContainerHighest;
 
-    if (item.image != null) {
-      content = "![image](data:image/jpeg;base64,${item.image})\n\n$content";
-    }
-
     return Container(
-      alignment: role.isAssistant ? Alignment.topLeft : Alignment.topRight,
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
+      alignment: role.isUser ? Alignment.topRight : Alignment.topLeft,
       child: Column(
         crossAxisAlignment: role.isAssistant
             ? CrossAxisAlignment.start
@@ -734,6 +746,18 @@ class MessageView extends StatelessWidget {
             _buildHeader(context, message, item),
           ],
           SizedBox(height: role.isAssistant ? 8 : 16),
+          if (item.image != null) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+              child: Image.memory(
+                item.image!,
+                fit: BoxFit.cover,
+                height: 100,
+                width: 100,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           Container(
             padding: const EdgeInsets.all(12),
             constraints: role.isUser
@@ -753,7 +777,6 @@ class MessageView extends StatelessWidget {
             child: switch (item.text.isNotEmpty) {
               true => MarkdownBody(
                   data: content,
-                  shrinkWrap: true,
                   extensionSet: mdExtensionSet,
                   onTapLink: (text, href, title) =>
                       Dialogs.openLink(context: context, link: href),
@@ -787,24 +810,22 @@ class MessageView extends StatelessWidget {
           child: const Icon(Icons.smart_toy),
         ),
         const SizedBox(width: 12),
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.model ?? CurrentChat.model ?? S.current.no_model,
-                style: Theme.of(context).textTheme.titleSmall,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item.time ??
-                    CurrentChat.chat?.time ??
-                    Util.formatDateTime(DateTime.now()),
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-            ],
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              item.model ?? CurrentChat.model ?? S.current.no_model,
+              style: Theme.of(context).textTheme.titleSmall,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              item.time ??
+                  CurrentChat.chat?.time ??
+                  Util.formatDateTime(DateTime.now()),
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
         ),
       ],
     );
