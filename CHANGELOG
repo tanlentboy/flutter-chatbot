@@ -1,3 +1,11 @@
+0.2.8 (2024-12-09)
+
+    * Add: Support Google Gemini API.
+    * Improve: Chat Response.
+
+    * 增加：支持 Google Gemini 接口
+    * 改进：对话响应
+
 0.2.7 (2024-12-06)
 
     * Add: Export chat as image.
