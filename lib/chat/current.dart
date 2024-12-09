@@ -22,24 +22,6 @@ import "dart:isolate";
 import "dart:convert";
 import "dart:typed_data";
 
-enum TtsStatus {
-  nothing,
-  loading,
-  playing;
-
-  bool get isNothing => this == TtsStatus.nothing;
-  bool get isLoading => this == TtsStatus.loading;
-  bool get isPlaying => this == TtsStatus.playing;
-}
-
-enum ChatStatus {
-  nothing,
-  responding;
-
-  bool get isNothing => this == ChatStatus.nothing;
-  bool get isResponding => this == ChatStatus.responding;
-}
-
 class Current {
   static File? file;
   static Uint8List? image;
@@ -122,6 +104,7 @@ class Current {
 
   static String? get apiUrl => Config.apis[api]?.url;
   static String? get apiKey => Config.apis[api]?.key;
+  static String? get apiType => Config.apis[api]?.type;
   static BotConfig? get _bot => Config.bots[core.bot];
 
   static String? get title => chat?.title;
@@ -131,4 +114,22 @@ class Current {
   static String? get systemPrompts => _bot?.systemPrompts;
 
   static bool get isOkToChat => api != null && model != null;
+}
+
+enum TtsStatus {
+  nothing,
+  loading,
+  playing;
+
+  bool get isNothing => this == TtsStatus.nothing;
+  bool get isLoading => this == TtsStatus.loading;
+  bool get isPlaying => this == TtsStatus.playing;
+}
+
+enum ChatStatus {
+  nothing,
+  responding;
+
+  bool get isNothing => this == ChatStatus.nothing;
+  bool get isResponding => this == ChatStatus.responding;
 }

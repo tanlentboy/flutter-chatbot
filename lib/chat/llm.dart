@@ -25,6 +25,7 @@ import "package:http/http.dart";
 import "package:langchain/langchain.dart";
 import "package:audioplayers/audioplayers.dart";
 import "package:langchain_openai/langchain_openai.dart";
+import "package:langchain_google/langchain_google.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 final llmProvider =
@@ -111,6 +112,7 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     final model = Current.model!;
     final apiUrl = Current.apiUrl!;
     final apiKey = Current.apiKey!;
+    final apiType = Current.apiType;
     final messages = Current.messages;
 
     final item = message.item;
@@ -122,16 +124,28 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
 
     try {
       _chatClient ??= Client();
-      final llm = ChatOpenAI(
-        apiKey: apiKey,
-        client: _chatClient,
-        baseUrl: apiUrl,
-        defaultOptions: ChatOpenAIOptions(
-          model: model,
-          maxTokens: Current.maxTokens,
-          temperature: Current.temperature,
-        ),
-      );
+      BaseChatModel llm = switch (apiType) {
+        "google" => ChatGoogleGenerativeAI(
+            apiKey: apiKey,
+            baseUrl: apiUrl,
+            client: _chatClient,
+            defaultOptions: ChatGoogleGenerativeAIOptions(
+              model: model,
+              temperature: Current.temperature,
+              maxOutputTokens: Current.maxTokens,
+            ),
+          ),
+        _ => ChatOpenAI(
+            apiKey: apiKey,
+            client: _chatClient,
+            baseUrl: apiUrl,
+            defaultOptions: ChatOpenAIOptions(
+              model: model,
+              maxTokens: Current.maxTokens,
+              temperature: Current.temperature,
+            ),
+          ),
+      };
 
       if (Current.stream ?? true) {
         final stream = llm.stream(PromptValue.chat(chatContext));
