@@ -16,6 +16,7 @@
 import "input.dart";
 import "message.dart";
 import "current.dart";
+import "settings.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
@@ -63,7 +64,7 @@ class ChatPage extends ConsumerStatefulWidget {
 
 class _ChatPageState extends ConsumerState<ChatPage> {
   final ScrollController _scrollCtrl = ScrollController();
-  final messages = CurrentChat.messages;
+  final messages = Current.messages;
   final chats = Config.chats;
 
   @override
@@ -170,12 +171,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    CurrentChat.title ?? S.of(context).new_chat,
+                    Current.title ?? S.of(context).new_chat,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
-                    CurrentChat.model ?? S.of(context).no_model,
+                    Current.model ?? S.of(context).no_model,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelSmall,
                   )
@@ -192,16 +193,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               icon: const Icon(Icons.swap_vert),
               onSelected: (value) {
                 InputWidget.unFocus();
-                CurrentChat.core = CoreConfig(
-                  bot: CurrentChat.bot,
-                  api: CurrentChat.api,
+                Current.core = CoreConfig(
+                  bot: Current.bot,
+                  api: Current.api,
                   model: value,
                 );
-                CurrentChat.save();
+                Current.save();
                 ref.read(chatProvider.notifier).notify();
               },
               itemBuilder: (context) {
-                final models = Config.apis[CurrentChat.api]?.models ?? [];
+                final models = Config.apis[Current.api]?.models ?? [];
                 final modelList = <PopupMenuItem<String>>[];
                 for (final model in models) {
                   modelList.add(PopupMenuItem(
@@ -244,11 +245,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
               onTap: () {
                 InputWidget.unFocus();
-                if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
+                if (!Current.hasChat || !Current.hasFile) return;
 
-                CurrentChat.chat = null;
-                CurrentChat.file = null;
-                CurrentChat.save();
+                Current.chat = null;
+                Current.file = null;
+                Current.save();
 
                 Util.showSnackBar(
                   context: context,
@@ -268,7 +269,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
               onTap: () async {
                 InputWidget.unFocus();
-                if (!CurrentChat.hasChat || !CurrentChat.hasFile) return;
+                if (!Current.hasChat || !Current.hasFile) return;
 
                 final result = await showDialog<bool>(
                   context: context,
@@ -289,8 +290,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 );
                 if (!(result ?? false)) return;
 
-                CurrentChat.messages.clear();
-                CurrentChat.save();
+                Current.messages.clear();
+                Current.save();
 
                 ref.read(messagesProvider.notifier).notify();
               },
@@ -323,7 +324,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               onTap: () {
                 InputWidget.unFocus();
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const CurrentChatSettings(),
+                  builder: (context) => const ChatSettings(),
                 ));
               },
             ),
@@ -358,8 +359,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               title: Text(S.of(context).new_chat),
               leading: const Icon(Icons.article_outlined),
               onTap: () {
-                if (CurrentChat.chatStatus.isResponding) return;
-                CurrentChat.clear();
+                if (Current.chatStatus.isResponding) return;
+                Current.clear();
                 ref.read(chatProvider.notifier).notify();
                 ref.read(chatsProvider.notifier).notify();
                 ref.read(messagesProvider.notifier).notify();
@@ -409,7 +410,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         minTileHeight: 48,
         shape: const StadiumBorder(),
         leading: const Icon(Icons.article),
-        selected: CurrentChat.chat == chat,
+        selected: Current.chat == chat,
         contentPadding: const EdgeInsets.only(left: 16, right: 8),
         title: Text(
           chat.title,
@@ -419,12 +420,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         ),
         subtitle: Text(chat.time),
         onTap: () async {
-          if (CurrentChat.chat == chat) return;
+          if (Current.chat == chat) return;
 
-          CurrentChat.chat = chat;
+          Current.chat = chat;
           ref.read(chatsProvider.notifier).notify();
 
-          await CurrentChat.load(chat);
+          await Current.load(chat);
           ref.read(chatProvider.notifier).notify();
           ref.read(messagesProvider.notifier).notify();
         },
@@ -437,8 +438,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             Config.save();
             File(Config.chatFilePath(chat.fileName)).delete();
 
-            if (CurrentChat.chat == chat) {
-              CurrentChat.clear();
+            if (Current.chat == chat) {
+              Current.clear();
               ref.read(chatProvider.notifier).notify();
               ref.read(messagesProvider.notifier).notify();
             }
@@ -450,7 +451,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   Future<void> _exportChatAsImage() async {
     InputWidget.unFocus();
-    if (CurrentChat.messages.isEmpty) return;
+    if (Current.messages.isEmpty) return;
 
     try {
       Dialogs.loading(
