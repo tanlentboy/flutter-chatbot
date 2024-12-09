@@ -25,6 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "all_chats": MessageLookupByLibrary.simpleMessage("All Chats"),
         "api": MessageLookupByLibrary.simpleMessage("API"),
         "api_key": MessageLookupByLibrary.simpleMessage("API Key"),
+        "api_type": MessageLookupByLibrary.simpleMessage("API Type"),
         "api_url": MessageLookupByLibrary.simpleMessage("API Url"),
         "apis": MessageLookupByLibrary.simpleMessage("APIs"),
         "base_config": MessageLookupByLibrary.simpleMessage("Base Config"),

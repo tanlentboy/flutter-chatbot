@@ -41,6 +41,7 @@
     "new_chat": "New Chat",
     "api_url": "API Url",
     "api_key": "API Key",
+    "api_type": "API Type",
     "model_list": "Model List",
     "select_models": "Select Models",
 

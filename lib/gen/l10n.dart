@@ -410,6 +410,16 @@ class S {
     );
   }
 
+  /// `API Type`
+  String get api_type {
+    return Intl.message(
+      'API Type',
+      name: 'api_type',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Model List`
   String get model_list {
     return Intl.message(

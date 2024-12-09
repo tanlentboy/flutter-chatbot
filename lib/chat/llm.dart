@@ -137,8 +137,8 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
           ),
         _ => ChatOpenAI(
             apiKey: apiKey,
-            client: _chatClient,
             baseUrl: apiUrl,
+            client: _chatClient,
             defaultOptions: ChatOpenAIOptions(
               model: model,
               maxTokens: Current.maxTokens,

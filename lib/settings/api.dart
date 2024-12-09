@@ -18,8 +18,8 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "dart:convert";
+import "package:http/http.dart";
 import "package:flutter/material.dart";
-import "package:http/http.dart" as http;
 import "package:animate_do/animate_do.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -90,13 +90,13 @@ class ApiSettings extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ApiSettings> createState() => ApiSettingsState();
+  ConsumerState<ApiSettings> createState() => _ApiSettingsState();
 }
 
-class ApiSettingsState extends ConsumerState<ApiSettings> {
+class _ApiSettingsState extends ConsumerState<ApiSettings> {
   String? _type;
-  bool isFetching = false;
-  http.Client? fetchClient;
+  Client? _client;
+  bool _isFetching = false;
   late final TextEditingController _nameCtrl;
   late final TextEditingController _modelsCtrl;
   late final TextEditingController _apiUrlCtrl;
@@ -143,7 +143,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _type ?? "openai",
+                    value: _type,
                     items: <DropdownMenuItem<String>>[
                       DropdownMenuItem(
                         value: "openai",
@@ -155,7 +155,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                       ),
                     ],
                     isExpanded: true,
-                    hint: Text(S.of(context).bot),
+                    hint: Text(S.of(context).api_type),
                     onChanged: (it) => setState(() => _type = it),
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(
@@ -220,7 +220,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                   children: [
                     Spin(
                       infinite: true,
-                      animate: isFetching,
+                      animate: _isFetching,
                       duration: Duration(seconds: 1),
                       child: IconButton.outlined(
                         icon: const Icon(Icons.sync),
@@ -285,10 +285,10 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
   }
 
   Future<void> _fetchModels() async {
-    if (isFetching) {
-      fetchClient?.close();
-      fetchClient = null;
-      isFetching = false;
+    if (_isFetching) {
+      _isFetching = false;
+      _client?.close();
+      _client = null;
       return;
     }
 
@@ -307,15 +307,15 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
       return;
     }
 
-    setState(() => isFetching = true);
+    setState(() => _isFetching = true);
 
     try {
-      fetchClient ??= http.Client();
-      final response = await fetchClient!.get(
+      _client ??= Client();
+      final response = await _client!.get(
         Uri.parse(endPoint),
         headers: switch (_type) {
-          "openai" => {"Authorization": "Bearer $key"},
-          _ => null,
+          "google" => null,
+          _ => {"Authorization": "Bearer $key"},
         },
       );
 
@@ -333,12 +333,12 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
 
       _modelsCtrl.text = models.join(", ");
     } catch (e) {
-      if (isFetching && mounted) {
+      if (_isFetching && mounted) {
         Dialogs.error(context: context, error: e);
       }
     }
 
-    setState(() => isFetching = false);
+    setState(() => _isFetching = false);
   }
 
   Future<void> _editModels() async {
@@ -442,7 +442,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
     }
 
     if (apiPair != null) Config.apis.remove(apiPair.key);
-    final modelList = models.split(",").map((e) => e.trim()).toList();
+    final modelList = models.split(',').map((e) => e.trim()).toList();
 
     Config.apis[name] = ApiConfig(
       url: apiUrl,

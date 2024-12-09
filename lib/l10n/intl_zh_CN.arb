@@ -41,6 +41,7 @@
     "new_chat": "新对话",
     "api_url": "接口地址",
     "api_key": "接口密钥",
+    "api_type": "接口类型",
     "model_list": "模型列表",
     "select_models": "选择模型",
 

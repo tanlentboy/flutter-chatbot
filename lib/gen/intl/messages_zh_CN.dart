@@ -25,6 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "all_chats": MessageLookupByLibrary.simpleMessage("所有对话"),
         "api": MessageLookupByLibrary.simpleMessage("接口"),
         "api_key": MessageLookupByLibrary.simpleMessage("接口密钥"),
+        "api_type": MessageLookupByLibrary.simpleMessage("接口类型"),
         "api_url": MessageLookupByLibrary.simpleMessage("接口地址"),
         "apis": MessageLookupByLibrary.simpleMessage("接口"),
         "base_config": MessageLookupByLibrary.simpleMessage("基本配置"),
