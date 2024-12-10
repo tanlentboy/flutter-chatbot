@@ -65,12 +65,18 @@ class Dialogs {
     required String title,
     required List<InputDialogField> fields,
   }) async {
-    return await showDialog<List<String>>(
+    return await showModalBottomSheet<List<String>>(
       context: context,
-      builder: (context) => Dialog(
-        child: InputDialog(
-          title: title,
-          fields: fields,
+      isScrollControlled: true,
+      builder: (context) => SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: InputDialog(
+            title: title,
+            fields: fields,
+          ),
         ),
       ),
     );
@@ -109,60 +115,67 @@ class Dialogs {
     required String title,
     String? selected,
   }) async {
-    return await showDialog<String>(
+    return await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              const Padding(
-                padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(),
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.6),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: list.length,
-                  itemBuilder: (context, index) => RadioListTile(
-                    value: list[index],
-                    groupValue: selected,
-                    title: Text(list[index]),
-                    contentPadding: const EdgeInsets.only(left: 16, right: 24),
-                    onChanged: (value) => setState(() => selected = value),
-                  ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+        builder: (context, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 16, left: 24, right: 12, bottom: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
                     onPressed: Navigator.of(context).pop,
-                    child: Text(S.of(context).cancel),
                   ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(selected),
-                    child: Text(S.of(context).ok),
-                  ),
-                  const SizedBox(width: 24),
                 ],
               ),
-              const SizedBox(height: 12),
-            ],
-          ),
+            ),
+            const Divider(height: 1),
+            Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: list.length,
+                itemBuilder: (context, index) => RadioListTile(
+                  value: list[index],
+                  groupValue: selected,
+                  title: Text(list[index]),
+                  contentPadding: const EdgeInsets.only(left: 16, right: 24),
+                  onChanged: (value) => setState(() => selected = value),
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).cancel),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(selected),
+                  child: Text(S.of(context).ok),
+                ),
+                const SizedBox(width: 24),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );
@@ -357,29 +370,42 @@ class _InputDialogState extends State<InputDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 24),
         Padding(
-          padding: const EdgeInsets.only(left: 24),
-          child: Text(
-            widget.title,
-            style: Theme.of(context).textTheme.headlineSmall,
+          padding:
+              const EdgeInsets.only(top: 16, left: 24, right: 12, bottom: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.title,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: Navigator.of(context).pop,
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        for (int i = 0; i < _ctrls.length; i++) ...[
-          SizedBox(height: i == 0 ? 0 : 8),
-          Padding(
-            padding: const EdgeInsets.only(left: 24, right: 24),
-            child: TextField(
-              controller: _ctrls[i],
-              decoration: InputDecoration(
-                labelText: widget.fields[i].hint,
-                border: const UnderlineInputBorder(),
-              ),
-            ),
+        Padding(
+          padding: const EdgeInsets.only(left: 24, right: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (int i = 0; i < _ctrls.length; i++) ...[
+                SizedBox(height: i == 0 ? 0 : 8),
+                TextField(
+                  controller: _ctrls[i],
+                  decoration: InputDecoration(
+                    labelText: widget.fields[i].hint,
+                    border: const UnderlineInputBorder(),
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
-        const SizedBox(height: 12),
+        ),
+        const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

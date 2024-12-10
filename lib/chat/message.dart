@@ -436,51 +436,48 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
     showModalBottomSheet(
       context: context,
-      enableDrag: true,
       useSafeArea: true,
-      isScrollControlled: false,
       scrollControlDisabledMaxHeightRatio: 1,
-      builder: (context) => ConstrainedBox(
+      builder: (context) => Container(
         constraints: BoxConstraints(
           minWidth: double.infinity,
-          minHeight: MediaQuery.of(context).size.height * 0.5,
+          minHeight: MediaQuery.of(context).size.height * 0.6,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: const BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.all(Radius.circular(2)),
-                  ),
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: const BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.all(Radius.circular(2)),
                 ),
               ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(
-                      top: 0, left: 16, right: 16, bottom: 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectableText(
-                        widget.message.item.text,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 48, width: double.infinity),
-                    ],
-                  ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                    top: 0, left: 16, right: 16, bottom: 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SelectableText(
+                      widget.message.item.text,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 48),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

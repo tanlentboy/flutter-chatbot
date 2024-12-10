@@ -138,9 +138,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
               controller: _nameCtrl,
               decoration: InputDecoration(
                 labelText: S.of(context).name,
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -152,9 +150,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: S.of(context).temperature,
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -165,9 +161,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: S.of(context).max_tokens,
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -180,9 +174,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
               decoration: InputDecoration(
                 alignLabelWithHint: true,
                 labelText: S.of(context).system_prompts,
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),

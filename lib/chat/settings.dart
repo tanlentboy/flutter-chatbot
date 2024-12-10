@@ -85,10 +85,8 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
             TextField(
               controller: _titleCtrl,
               decoration: InputDecoration(
+                border: const OutlineInputBorder(),
                 labelText: S.of(context).chat_title,
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -102,9 +100,7 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                     hint: Text(S.of(context).bot),
                     onChanged: (it) => setState(() => _bot = it),
                     decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -120,9 +116,7 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                       _api = it;
                     }),
                     decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -137,9 +131,7 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
               hint: Text(S.of(context).model),
               onChanged: (it) => setState(() => _model = it),
               decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
+                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),

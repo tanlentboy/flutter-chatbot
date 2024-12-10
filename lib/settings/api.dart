@@ -158,9 +158,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
                     hint: Text(S.of(context).api_type),
                     onChanged: (it) => setState(() => _type = it),
                     decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -170,9 +168,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
                     controller: _nameCtrl,
                     decoration: InputDecoration(
                       labelText: S.of(context).name,
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -183,9 +179,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
               controller: _apiUrlCtrl,
               decoration: InputDecoration(
                 labelText: S.of(context).api_url,
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -193,9 +187,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
               controller: _apiKeyCtrl,
               decoration: InputDecoration(
                 labelText: S.of(context).api_key,
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -208,14 +200,13 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
                     decoration: InputDecoration(
                       labelText: S.of(context).model_list,
                       alignLabelWithHint: true,
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Column(
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Spin(
@@ -227,7 +218,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
                         onPressed: _fetchModels,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     IconButton.outlined(
                       icon: const Icon(Icons.edit),
                       onPressed: _editModels,
@@ -349,63 +340,81 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
     final chosen = {for (final model in models) model: true};
     if (chosen.isEmpty) return;
 
-    final result = await showDialog<bool>(
+    final result = await showModalBottomSheet<bool>(
       context: context,
+      isScrollControlled: true,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 16),
-              Text(
-                S.of(context).select_models,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              const Padding(
-                padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(),
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.6),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: chosen.length,
-                  itemBuilder: (context, index) => CheckboxListTile(
-                    title: Text(models[index]),
-                    value: chosen[models[index]],
-                    contentPadding: const EdgeInsets.only(left: 24, right: 16),
-                    onChanged: (value) =>
-                        setState(() => chosen[models[index]] = value ?? false),
-                  ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 24, right: 24),
-                child: Divider(),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        builder: (context, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 16, left: 24, right: 12, bottom: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
+                  Text(
+                    S.of(context).select_models,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
                     onPressed: Navigator.of(context).pop,
-                    child: Text(S.of(context).cancel),
-                  ),
-                  TextButton(
-                    child: Text(S.of(context).clear),
-                    onPressed: () => setState(
-                        () => chosen.forEach((it, _) => chosen[it] = false)),
-                  ),
-                  TextButton(
-                    child: Text(S.of(context).ok),
-                    onPressed: () => Navigator.of(context).pop(true),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-            ],
-          ),
+            ),
+            const Divider(height: 1),
+            Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: chosen.length,
+                itemBuilder: (context, index) => CheckboxListTile(
+                  title: Text(models[index]),
+                  value: chosen[models[index]],
+                  contentPadding: const EdgeInsets.only(left: 24, right: 16),
+                  onChanged: (value) =>
+                      setState(() => chosen[models[index]] = value ?? false),
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(width: 24),
+                    TextButton(
+                      child: Text(S.of(context).clear),
+                      onPressed: () => setState(
+                          () => chosen.forEach((it, _) => chosen[it] = false)),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: Navigator.of(context).pop,
+                      child: Text(S.of(context).cancel),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      child: Text(S.of(context).ok),
+                      onPressed: () => Navigator.of(context).pop(true),
+                    ),
+                    const SizedBox(width: 24),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );

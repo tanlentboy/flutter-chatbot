@@ -82,7 +82,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               onPressed: _addImage,
             ),
             Expanded(
-              child: ConstrainedBox(
+              child: Container(
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height / 4,
                 ),
