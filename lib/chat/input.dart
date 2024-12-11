@@ -22,7 +22,7 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "dart:io";
-import "package:http/http.dart";
+import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:image_picker/image_picker.dart";
@@ -40,8 +40,10 @@ class InputWidget extends ConsumerStatefulWidget {
   static void unFocus() => focusNode.unfocus();
 }
 
+typedef _Image = ({String name, MessageImage image});
+
 class _InputWidgetState extends ConsumerState<InputWidget> {
-  Client? client;
+  final List<_Image> _images = [];
   final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _inputCtrl = TextEditingController();
 
@@ -55,67 +57,83 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   Widget build(BuildContext context) {
     ref.watch(llmProvider);
 
-    final hasImage = Current.image != null;
-    final isResponding = Current.chatStatus.isResponding;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8, left: 4, right: 4, bottom: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            IconButton(
-              icon: Badge(
-                smallSize: 8,
-                isLabelVisible: hasImage,
-                child: Icon(
-                  hasImage ? Icons.delete : Icons.add_photo_alternate,
-                ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_images.isNotEmpty)
+          SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              itemCount: _images.length,
+              itemBuilder: (context, index) => ActionChip.elevated(
+                avatar: const Icon(Icons.image),
+                label: Text(_images[index].name),
+                onPressed: () => setState(() => _images.removeAt(index)),
               ),
-              onPressed: _addImage,
             ),
-            Expanded(
-              child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height / 4,
+          ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: Badge(
+                  smallSize: 8,
+                  label: Text("${_images.length}"),
+                  isLabelVisible: _images.isNotEmpty,
+                  child: const Icon(Icons.add_photo_alternate),
                 ),
-                child: TextField(
-                  maxLines: null,
-                  autofocus: false,
-                  controller: _inputCtrl,
-                  focusNode: InputWidget.focusNode,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: S.of(context).enter_message,
+                onPressed: _addImage,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height / 4,
+                  ),
+                  child: TextField(
+                    maxLines: null,
+                    autofocus: false,
+                    controller: _inputCtrl,
+                    focusNode: InputWidget.focusNode,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      hintText: S.of(context).enter_message,
+                    ),
                   ),
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: _sendMessage,
-              icon: Icon(isResponding ? Icons.stop_circle : Icons.send),
-            ),
-          ],
+              const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(Current.chatStatus.isResponding
+                    ? Icons.stop_circle
+                    : Icons.send),
+                onPressed: _sendMessage,
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
   Future<void> _addImage() async {
-    if (Current.image != null) {
-      setState(() => Current.image = null);
-      return;
-    }
-
     InputWidget.unFocus();
+
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (context) => Padding(
@@ -183,7 +201,11 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     }
 
     final bytes = compressed ?? await File(result.path).readAsBytes();
-    setState(() => Current.image = bytes);
+    final image = (
+      name: result.name,
+      image: (bytes: bytes, base64: base64Encode(bytes)),
+    );
+    setState(() => _images.add(image));
   }
 
   Future<void> _sendMessage() async {
@@ -204,23 +226,28 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     }
 
     final messages = Current.messages;
-    messages.add(Message.fromItem(MessageItem(
+
+    final user = MessageItem(
       text: text,
       role: MessageRole.user,
-      image: Current.image,
-    )));
-    messages.add(Message.fromItem(MessageItem(
+    );
+    for (final image in _images) {
+      user.images.add(image.image);
+    }
+    messages.add(Message.fromItem(user));
+
+    final assistant = Message.fromItem(MessageItem(
       text: "",
       model: Current.model,
       role: MessageRole.assistant,
       time: Util.formatDateTime(DateTime.now()),
-    )));
+    ));
+    messages.add(assistant);
     ref.read(messagesProvider.notifier).notify();
 
+    _images.clear();
     _inputCtrl.clear();
-    Current.image = null;
-    final message = messages.last;
-    final error = await ref.read(llmProvider.notifier).chat(message);
+    final error = await ref.read(llmProvider.notifier).chat(assistant);
 
     if (error != null && mounted) {
       _inputCtrl.text = text;

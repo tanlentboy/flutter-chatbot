@@ -42,50 +42,62 @@ class MessageNotifier extends AutoDisposeFamilyNotifier<void, Message> {
 }
 
 enum MessageRole {
-  assistant,
-  user;
+  user,
+  assistant;
 
-  bool get isAssistant => this == MessageRole.assistant;
   bool get isUser => this == MessageRole.user;
+  bool get isAssistant => this == MessageRole.assistant;
 }
+
+typedef MessageImage = ({Uint8List bytes, String base64});
 
 class MessageItem {
   String text;
   String? time;
   String? model;
-  Uint8List? image;
   MessageRole role;
-  String? imageBase64;
+  List<MessageImage> images = [];
 
   MessageItem({
-    this.time,
-    this.image,
-    this.model,
-    this.imageBase64,
     required this.role,
     required this.text,
-  }) {
-    if (image != null) {
-      imageBase64 = base64Encode(image!);
-    } else if (imageBase64 != null) {
-      image = base64Decode(imageBase64!);
-    }
-  }
+    this.model,
+    this.time,
+  });
 
-  factory MessageItem.fromJson(Map json) => switch (json["role"]) {
-        "assistant" => MessageItem(
-            time: json["time"],
-            text: json["text"],
-            model: json["model"],
-            role: MessageRole.assistant,
-          ),
-        "user" => MessageItem(
-            text: json["text"],
-            role: MessageRole.user,
-            imageBase64: json["image"],
-          ),
-        _ => throw "bad role",
-      };
+  factory MessageItem.fromJson(Map json) {
+    final item = switch (json["role"]) {
+      "assistant" => MessageItem(
+          time: json["time"],
+          text: json["text"],
+          model: json["model"],
+          role: MessageRole.assistant,
+        ),
+      "user" => MessageItem(
+          text: json["text"],
+          role: MessageRole.user,
+        ),
+      _ => throw "bad role",
+    };
+
+    final image = json["image"];
+    final images = json["images"] ?? [];
+
+    if (image != null) {
+      item.images.add((
+        bytes: base64Decode(image),
+        base64: image,
+      ));
+    }
+    for (final base64 in images) {
+      item.images.add((
+        bytes: base64Decode(base64),
+        base64: base64,
+      ));
+    }
+
+    return item;
+  }
 
   Map toJson() => switch (role) {
         MessageRole.assistant => {
@@ -97,7 +109,9 @@ class MessageItem {
         MessageRole.user => {
             "text": text,
             "role": "user",
-            "image": imageBase64,
+            "images": [
+              for (final image in images) image.base64,
+            ],
           },
       };
 }
@@ -111,11 +125,14 @@ class Message {
     required this.list,
   });
 
-  factory Message.fromItem(MessageItem item) => Message(index: 0, list: [item]);
+  factory Message.fromItem(MessageItem item) => Message(
+        index: 0,
+        list: [item],
+      );
 
   factory Message.fromJson(Map json) =>
       json["index"] == null && json["list"] == null
-          ? Message(index: 0, list: [MessageItem.fromJson(json)])
+          ? Message.fromItem(MessageItem.fromJson(json))
           : Message(
               index: json["index"],
               list: [
@@ -135,8 +152,8 @@ class MessageWidget extends ConsumerStatefulWidget {
   final Message message;
 
   const MessageWidget({
-    super.key,
     required this.message,
+    super.key,
   });
 
   @override
@@ -184,15 +201,22 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             _buildHeader(message, item),
           ],
           SizedBox(height: role.isAssistant ? 8 : 16),
-          if (item.image != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-              child: Image.memory(
-                item.image!,
-                fit: BoxFit.cover,
-                height: 100,
-                width: 100,
-              ),
+          if (item.images.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final image in item.images)
+                  ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    child: Image.memory(
+                      image.bytes,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
           ],
@@ -631,15 +655,22 @@ class MessageView extends StatelessWidget {
             _buildHeader(context, message, item),
           ],
           SizedBox(height: role.isAssistant ? 8 : 16),
-          if (item.image != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-              child: Image.memory(
-                item.image!,
-                fit: BoxFit.cover,
-                height: 100,
-                width: 100,
-              ),
+          if (item.images.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final image in item.images)
+                  ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    child: Image.memory(
+                      image.bytes,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
           ],

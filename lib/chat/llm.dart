@@ -210,15 +210,16 @@ List<ChatMessage> _buildContext(List<Message> list) {
         break;
 
       case MessageRole.user:
-        if (item.image == null) {
+        if (item.images.isEmpty) {
           context.add(ChatMessage.humanText(item.text));
         } else {
           context.add(ChatMessage.human(ChatMessageContent.multiModal([
             ChatMessageContent.text(item.text),
-            ChatMessageContent.image(
-              mimeType: "image/jpeg",
-              data: item.imageBase64!,
-            ),
+            for (final image in item.images)
+              ChatMessageContent.image(
+                mimeType: "image/jpeg",
+                data: image.base64,
+              ),
           ])));
         }
         break;

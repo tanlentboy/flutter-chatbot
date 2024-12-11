@@ -20,11 +20,9 @@ import "../config.dart";
 import "dart:io";
 import "dart:isolate";
 import "dart:convert";
-import "dart:typed_data";
 
 class Current {
   static File? file;
-  static Uint8List? image;
   static ChatConfig? chat;
 
   static CoreConfig core = Config.core;
@@ -35,7 +33,6 @@ class Current {
   static void clear() {
     chat = null;
     file = null;
-    image = null;
     messages.clear();
     core = Config.core;
   }
