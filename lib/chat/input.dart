@@ -57,37 +57,39 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   Widget build(BuildContext context) {
     ref.watch(llmProvider);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_images.isNotEmpty)
-          SizedBox(
-            height: 56,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              separatorBuilder: (context, index) => const SizedBox(width: 8),
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-              itemCount: _images.length,
-              itemBuilder: (context, index) => ActionChip.elevated(
-                avatar: const Icon(Icons.image),
-                label: Text(_images[index].name),
-                onPressed: () => setState(() => _images.removeAt(index)),
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height / 4,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        border: Border.all(
+          width: 1,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 4),
+          Flexible(
+            child: TextField(
+              maxLines: null,
+              autofocus: false,
+              controller: _inputCtrl,
+              focusNode: InputWidget.focusNode,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: S.of(context).enter_message,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
           ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
             children: [
+              const SizedBox(width: 8),
               IconButton(
                 icon: Badge(
                   smallSize: 8,
@@ -97,37 +99,19 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 ),
                 onPressed: _addImage,
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height / 4,
-                  ),
-                  child: TextField(
-                    maxLines: null,
-                    autofocus: false,
-                    controller: _inputCtrl,
-                    focusNode: InputWidget.focusNode,
-                    keyboardType: TextInputType.multiline,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                      hintText: S.of(context).enter_message,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
+              Expanded(child: const SizedBox()),
               IconButton(
                 icon: Icon(Current.chatStatus.isResponding
                     ? Icons.stop_circle
                     : Icons.send),
                 onPressed: _sendMessage,
               ),
+              const SizedBox(width: 8),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 

@@ -197,10 +197,9 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             : CrossAxisAlignment.end,
         children: [
           if (role.isAssistant) ...[
-            const SizedBox(height: 12),
             _buildHeader(message, item),
+            SizedBox(height: 8),
           ],
-          SizedBox(height: role.isAssistant ? 8 : 16),
           if (item.images.isNotEmpty) ...[
             Wrap(
               spacing: 8,
@@ -651,10 +650,9 @@ class MessageView extends StatelessWidget {
             : CrossAxisAlignment.end,
         children: [
           if (role.isAssistant) ...[
-            const SizedBox(height: 12),
             _buildHeader(context, message, item),
+            const SizedBox(height: 8),
           ],
-          SizedBox(height: role.isAssistant ? 8 : 16),
           if (item.images.isNotEmpty) ...[
             Wrap(
               spacing: 8,
@@ -662,7 +660,9 @@ class MessageView extends StatelessWidget {
               children: [
                 for (final image in item.images)
                   ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(8),
+                    ),
                     child: Image.memory(
                       image.bytes,
                       width: 100,

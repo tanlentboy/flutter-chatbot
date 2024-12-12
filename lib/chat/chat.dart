@@ -90,60 +90,54 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         ),
         child: SafeArea(child: _buildDrawer()),
       ),
-      body: Column(
+      body: Stack(
+        alignment: Alignment.topCenter,
         children: [
-          Expanded(
-            child: Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                Consumer(
-                  builder: (context, ref, child) {
-                    ref.watch(messagesProvider);
+          Positioned.fill(
+            child: Consumer(
+              builder: (context, ref, child) {
+                ref.watch(messagesProvider);
 
-                    final length = messages.length;
-                    return ListView.builder(
-                      reverse: true,
-                      shrinkWrap: true,
-                      controller: _scrollCtrl,
-                      padding: const EdgeInsets.only(
-                          top: 0, left: 16, right: 16, bottom: 16),
-                      itemCount: length,
-                      itemBuilder: (context, index) {
-                        final message = messages[length - index - 1];
-                        return MessageWidget(
-                          message: message,
-                          key: ValueKey(message),
-                        );
-                      },
+                final length = messages.length;
+                return ListView.separated(
+                  reverse: true,
+                  shrinkWrap: true,
+                  controller: _scrollCtrl,
+                  padding: const EdgeInsets.all(16),
+                  separatorBuilder: (context, index) => SizedBox(height: 16),
+                  itemCount: length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) return InputWidget(key: ValueKey(null));
+                    final message = messages[length - index];
+                    return MessageWidget(
+                      key: ValueKey(message),
+                      message: message,
                     );
                   },
-                ),
-                Positioned(
-                  bottom: 8,
-                  child: Consumer(
-                    builder: (context, ref, child) {
-                      final show = ref.watch(_toBottomProvider);
-
-                      final child = ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          elevation: 2,
-                          shape: const CircleBorder(),
-                          padding: const EdgeInsets.all(8),
-                        ),
-                        onPressed: () => _scrollCtrl.jumpTo(0),
-                        child: Icon(Icons.arrow_downward_rounded, size: 20),
-                      );
-
-                      return show
-                          ? ZoomIn(child: child)
-                          : ZoomOut(child: child);
-                    },
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
-          InputWidget(),
+          Positioned(
+            bottom: 16,
+            child: Consumer(
+              builder: (context, ref, child) {
+                final show = ref.watch(_toBottomProvider);
+
+                final child = ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 2,
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(8),
+                  ),
+                  onPressed: () => _scrollCtrl.jumpTo(0),
+                  child: Icon(Icons.arrow_downward_rounded, size: 20),
+                );
+
+                return show ? ZoomIn(child: child) : ZoomOut(child: child);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -461,7 +455,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
       final width = MediaQuery.of(context).size.width * 1.2;
       final page = Container(
-        padding: const EdgeInsets.only(top: 0, left: 16, right: 16, bottom: 16),
+        padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 0),
         constraints: BoxConstraints(maxWidth: width),
         child: MediaQuery(
           data: MediaQueryData.fromView(View.of(context)).copyWith(
@@ -469,7 +463,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ),
           child: Column(
             children: [
-              for (final message in messages) MessageView(message: message),
+              for (final message in messages) ...[
+                MessageView(message: message),
+                const SizedBox(height: 16),
+              ]
             ],
           ),
         ),
