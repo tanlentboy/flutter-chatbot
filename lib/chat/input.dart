@@ -72,7 +72,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 4),
           Flexible(
             child: TextField(
               maxLines: null,
@@ -82,33 +81,41 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
                 border: InputBorder.none,
+                constraints: const BoxConstraints(),
                 hintText: S.of(context).enter_message,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: const EdgeInsets.only(
+                    top: 16, left: 16, right: 16, bottom: 8),
               ),
             ),
           ),
-          Row(
-            children: [
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Badge(
-                  smallSize: 8,
-                  label: Text("${_images.length}"),
-                  isLabelVisible: _images.isNotEmpty,
-                  child: const Icon(Icons.add_photo_alternate),
-                ),
-                onPressed: _addImage,
+          Row(children: [
+            const SizedBox(width: 8),
+            IconButton(
+              icon: Badge(
+                smallSize: 8,
+                label: Text("${_images.length}"),
+                isLabelVisible: _images.isNotEmpty,
+                child: const Icon(Icons.add_photo_alternate),
               ),
-              Expanded(child: const SizedBox()),
-              IconButton(
-                icon: Icon(Current.chatStatus.isResponding
-                    ? Icons.stop_circle
-                    : Icons.send),
-                onPressed: _sendMessage,
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
+              onPressed: _addImage,
+            ),
+            IconButton(
+              icon: Icon(Icons.travel_explore),
+              color: Current.googleSearch
+                  ? Theme.of(context).colorScheme.primary
+                  : null,
+              onPressed: () =>
+                  setState(() => Current.googleSearch = !Current.googleSearch),
+            ),
+            Expanded(child: const SizedBox()),
+            IconButton(
+              icon: Icon(Current.chatStatus.isResponding
+                  ? Icons.stop_circle
+                  : Icons.send),
+              onPressed: _sendMessage,
+            ),
+            const SizedBox(width: 8),
+          ]),
           const SizedBox(height: 8),
         ],
       ),

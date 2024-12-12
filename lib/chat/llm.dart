@@ -33,8 +33,8 @@ final llmProvider =
 
 class LlmNotifier extends AutoDisposeNotifier<void> {
   Client? _ttsClient;
-  Client? _chatClient;
   AudioPlayer? _player;
+  _Client? _chatClient;
 
   @override
   void build() {}
@@ -123,7 +123,7 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     notify();
 
     try {
-      _chatClient ??= Client();
+      _chatClient ??= _Client();
       BaseChatModel llm = switch (apiType) {
         "google" => ChatGoogleGenerativeAI(
             apiKey: apiKey,
@@ -227,4 +227,24 @@ List<ChatMessage> _buildContext(List<Message> list) {
   }
 
   return context;
+}
+
+class _Client extends BaseClient {
+  final Client _inner = Client();
+
+  void _handleBody(Request request) {
+    final json = jsonDecode(request.body);
+    if (Current.googleSearch) {
+      json["tools"] = [
+        {"google_search": {}},
+      ];
+    }
+    request.body = jsonEncode(json);
+  }
+
+  @override
+  Future<StreamedResponse> send(BaseRequest request) async {
+    if (request is Request) _handleBody(request);
+    return _inner.send(request);
+  }
 }

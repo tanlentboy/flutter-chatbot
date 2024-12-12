@@ -104,7 +104,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   shrinkWrap: true,
                   controller: _scrollCtrl,
                   padding: const EdgeInsets.all(16),
-                  separatorBuilder: (context, index) => SizedBox(height: 16),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 16),
                   itemCount: length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) return InputWidget(key: ValueKey(null));

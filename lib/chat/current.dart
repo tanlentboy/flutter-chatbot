@@ -24,6 +24,7 @@ import "dart:convert";
 class Current {
   static File? file;
   static ChatConfig? chat;
+  static bool googleSearch = false;
 
   static CoreConfig core = Config.core;
   static final List<Message> messages = [];

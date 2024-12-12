@@ -39,12 +39,11 @@ class BotsTab extends ConsumerWidget {
 
     return Stack(
       children: [
-        ListView.builder(
-          padding:
-              const EdgeInsets.only(top: 4, left: 16, right: 16, bottom: 16),
+        ListView.separated(
+          padding: const EdgeInsets.all(16),
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemCount: bots.length,
           itemBuilder: (context, index) => Card.filled(
-            margin: const EdgeInsets.only(top: 12),
             child: ListTile(
               title: Text(
                 bots[index].key,
