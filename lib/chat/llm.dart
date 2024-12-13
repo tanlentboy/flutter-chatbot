@@ -248,4 +248,10 @@ class _Client extends BaseClient {
     if (request is Request) _handleBody(request);
     return _inner.send(request);
   }
+
+  @override
+  void close() {
+    super.close();
+    _inner.close();
+  }
 }
