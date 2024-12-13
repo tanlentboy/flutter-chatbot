@@ -1,3 +1,11 @@
+0.2.9 (2024-12-13)
+
+    * Add: Google Search support (gemini-2.0-flash-exp only)
+    * Add: Support for sending multiple images.
+
+    * 增加：支持 GoogleSearch（仅 gemini-2.0-flash-exp）
+    * 增加：支持发送多张图片
+
 0.2.8 (2024-12-09)
 
     * Add: Support Google Gemini API.
