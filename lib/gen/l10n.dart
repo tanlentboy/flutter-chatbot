@@ -630,20 +630,20 @@ class S {
     );
   }
 
-  /// `Export Config`
+  /// `Export config`
   String get export_config {
     return Intl.message(
-      'Export Config',
+      'Export config',
       name: 'export_config',
       desc: '',
       args: [],
     );
   }
 
-  /// `Import Config`
+  /// `Import config`
   String get import_config {
     return Intl.message(
-      'Import Config',
+      'Import config',
       name: 'import_config',
       desc: '',
       args: [],
@@ -1015,6 +1015,46 @@ class S {
     return Intl.message(
       'Set up the API and Model first',
       name: 'setup_api_model_first',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Other`
+  String get other {
+    return Intl.message(
+      'Other',
+      name: 'other',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download`
+  String get download {
+    return Intl.message(
+      'Download',
+      name: 'download',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are up to date`
+  String get up_to_date {
+    return Intl.message(
+      'You are up to date',
+      name: 'up_to_date',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check for updates`
+  String get check_for_updates {
+    return Intl.message(
+      'Check for updates',
+      name: 'check_for_updates',
       desc: '',
       args: [],
     );

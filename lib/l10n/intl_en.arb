@@ -67,8 +67,8 @@
     "min_width": "Minimal Width",
     "min_height": "Minimal Height",
     "min_width_height": "Minimal Size",
-    "export_config": "Export Config",
-    "import_config": "Import Config",
+    "export_config": "Export config",
+    "import_config": "Import config",
     "exporting": "Exporting...",
     "importing": "Importing...",
 
@@ -112,5 +112,10 @@
     "enter_message": "Enter your message",
     "image_compress_failed": "Failed to comprese image",
     "setup_tts_first": "Set up the TTS first",
-    "setup_api_model_first": "Set up the API and Model first"
+    "setup_api_model_first": "Set up the API and Model first",
+
+    "other": "Other",
+    "download": "Download",
+    "up_to_date": "You are up to date",
+    "check_for_updates": "Check for updates"
 }

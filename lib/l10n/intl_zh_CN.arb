@@ -112,5 +112,10 @@
     "enter_message": "输入你的消息",
     "image_compress_failed": "图片压缩失败",
     "setup_tts_first": "请先配置文本转语音",
-    "setup_api_model_first": "请先配置接口和模型"
+    "setup_api_model_first": "请先配置接口和模型",
+
+    "other": "其他",
+    "download": "下载",
+    "up_to_date": "已是最新版本",
+    "check_for_updates": "检查更新"
 }

@@ -399,6 +399,22 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             ),
           ),
         ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: padding,
+          child: Text(
+            S.of(context).other,
+            style: TextStyle(color: primaryColor),
+          ),
+        ),
+        ListTile(
+          title: Text(S.of(context).check_for_updates),
+          onTap: () => Util.checkUpdate(
+            context: context,
+            notify: true,
+          ),
+          contentPadding: padding,
+        ),
       ],
     );
   }

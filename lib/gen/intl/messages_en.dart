@@ -38,6 +38,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Chat Image Compress"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
+        "check_for_updates":
+            MessageLookupByLibrary.simpleMessage("Check for updates"),
         "choose_api": MessageLookupByLibrary.simpleMessage("Choose API"),
         "choose_bot": MessageLookupByLibrary.simpleMessage("Choose Bot"),
         "choose_model": MessageLookupByLibrary.simpleMessage("Choose Model"),
@@ -59,6 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "default_config":
             MessageLookupByLibrary.simpleMessage("Default Config"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
+        "download": MessageLookupByLibrary.simpleMessage("Download"),
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
         "duplicate_bot_name":
@@ -80,7 +83,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("Error"),
         "export_chat_as_image":
             MessageLookupByLibrary.simpleMessage("Export Image"),
-        "export_config": MessageLookupByLibrary.simpleMessage("Export Config"),
+        "export_config": MessageLookupByLibrary.simpleMessage("Export config"),
         "exported_successfully":
             MessageLookupByLibrary.simpleMessage("Exported Successfully"),
         "exporting": MessageLookupByLibrary.simpleMessage("Exporting..."),
@@ -99,7 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "image_quality": MessageLookupByLibrary.simpleMessage("Image Quality"),
         "image_size": MessageLookupByLibrary.simpleMessage("Image Size"),
         "image_style": MessageLookupByLibrary.simpleMessage("Image Style"),
-        "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
+        "import_config": MessageLookupByLibrary.simpleMessage("Import config"),
         "imported_successfully":
             MessageLookupByLibrary.simpleMessage("Imported Successfully"),
         "importing": MessageLookupByLibrary.simpleMessage("Importing..."),
@@ -126,6 +129,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "open": MessageLookupByLibrary.simpleMessage("Open"),
         "optional_config":
             MessageLookupByLibrary.simpleMessage("Optional Config"),
+        "other": MessageLookupByLibrary.simpleMessage("Other"),
         "play": MessageLookupByLibrary.simpleMessage("Play"),
         "please_input": MessageLookupByLibrary.simpleMessage("Please Input"),
         "quality": MessageLookupByLibrary.simpleMessage("Quality"),
@@ -152,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "text_to_speech":
             MessageLookupByLibrary.simpleMessage("Text To Speech"),
         "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "up_to_date":
+            MessageLookupByLibrary.simpleMessage("You are up to date"),
         "voice": MessageLookupByLibrary.simpleMessage("Voice")
       };
 }

@@ -16,9 +16,11 @@
 import "dart:io";
 import "dart:convert";
 import "dart:isolate";
+import "package:http/http.dart";
 import "package:flutter/material.dart";
 import "package:archive/archive_io.dart";
 import "package:path_provider/path_provider.dart";
+import "package:package_info_plus/package_info_plus.dart";
 
 class Config {
   static late final TtsConfig tts;
@@ -176,6 +178,41 @@ class Backup {
     await Isolate.run(() async {
       await extractFileToDisk(from, root);
     });
+  }
+}
+
+class Updater {
+  static List<int>? versionCode;
+  static bool firstCheck = false;
+  static const String latestUrl =
+      "https://github.com/fanenr/flutter-chatbot/releases/latest";
+  static const String apiEndPoint =
+      "https://api.github.com/repos/fanenr/flutter-chatbot/releases/latest";
+
+  static Future<Map?> check() async {
+    if (versionCode == null) {
+      final version = (await PackageInfo.fromPlatform()).version;
+      versionCode = version.split('.').map(int.parse).toList();
+    }
+
+    final client = Client();
+    final response = await client.get(Uri.parse(apiEndPoint));
+
+    if (response.statusCode != 200) {
+      throw "${response.statusCode} ${response.body}";
+    }
+
+    final json = jsonDecode(response.body);
+    return _isNewer(json["tag_name"]) ? json : null;
+  }
+
+  static bool _isNewer(String latest) {
+    final latestCode = latest.substring(1).split('.').map(int.parse).toList();
+    for (int i = 0; i < 3; i++) {
+      if (latestCode[i] < versionCode![i]) return false;
+      if (latestCode[i] > versionCode![i]) return true;
+    }
+    return false;
   }
 }
 

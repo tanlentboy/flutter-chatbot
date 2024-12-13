@@ -64,13 +64,22 @@ class ChatPage extends ConsumerStatefulWidget {
 
 class _ChatPageState extends ConsumerState<ChatPage> {
   final ScrollController _scrollCtrl = ScrollController();
-  final messages = Current.messages;
-  final chats = Config.chats;
+  final List<Message> _messages = Current.messages;
+  final List<ChatConfig> _chats = Config.chats;
 
   @override
   void initState() {
     super.initState();
     _scrollCtrl.addListener(_onScroll);
+    if (!Updater.firstCheck) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Updater.firstCheck = true;
+        Util.checkUpdate(
+          context: context,
+          notify: false,
+        );
+      });
+    }
   }
 
   @override
@@ -98,7 +107,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               builder: (context, ref, child) {
                 ref.watch(messagesProvider);
 
-                final length = messages.length;
+                final length = _messages.length;
                 return ListView.separated(
                   reverse: true,
                   shrinkWrap: true,
@@ -109,7 +118,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   itemCount: length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) return InputWidget(key: ValueKey(null));
-                    final message = messages[length - index];
+                    final message = _messages[length - index];
                     return MessageWidget(
                       key: ValueKey(message),
                       message: message,
@@ -384,7 +393,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ref.watch(chatsProvider);
 
               return ListView.builder(
-                itemCount: chats.length,
+                itemCount: _chats.length,
                 itemBuilder: (context, index) => _buildChatItem(index),
                 padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
               );
@@ -396,7 +405,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   }
 
   Widget _buildChatItem(int index) {
-    final chat = chats[index];
+    final chat = _chats[index];
 
     return Container(
       margin: EdgeInsets.only(top: 4),
@@ -427,7 +436,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         trailing: IconButton(
           icon: const Icon(Icons.delete),
           onPressed: () {
-            chats.removeAt(index);
+            _chats.removeAt(index);
             ref.read(chatsProvider.notifier).notify();
 
             Config.save();
@@ -464,7 +473,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ),
           child: Column(
             children: [
-              for (final message in messages) ...[
+              for (final message in _messages) ...[
                 MessageView(message: message),
                 const SizedBox(height: 16),
               ]

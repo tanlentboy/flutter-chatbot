@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "config.dart";
 import "../gen/l10n.dart";
 
 import "dart:io";
@@ -33,6 +34,54 @@ class Util {
       context: context,
       content: Text(S.of(context).copied_successfully),
     );
+  }
+
+  static Future<void> checkUpdate({
+    required BuildContext context,
+    required bool notify,
+  }) async {
+    try {
+      final info = await Updater.check();
+      if (!context.mounted) return;
+
+      if (info == null) {
+        if (notify) {
+          showSnackBar(
+            context: context,
+            content: Text(S.of(context).up_to_date),
+          );
+        }
+        return;
+      }
+
+      String changeLog = info["body"];
+      String newVersion = info["tag_name"];
+      String apkUrl = info["assets"][0]["browser_download_url"];
+      final url = Platform.isAndroid ? apkUrl : Updater.latestUrl;
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(newVersion),
+          content: Text(changeLog),
+          actions: [
+            TextButton(
+              onPressed: Navigator.of(context).pop,
+              child: Text(S.of(context).cancel),
+            ),
+            TextButton(
+              child: Text(S.of(context).download),
+              onPressed: () {
+                launchUrl(Uri.parse(url));
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (notify) Dialogs.error(context: context, error: e);
+    }
   }
 
   static void showSnackBar({

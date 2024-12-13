@@ -37,6 +37,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chat_image_compress": MessageLookupByLibrary.simpleMessage("对话图片压缩"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("对话设置"),
         "chat_title": MessageLookupByLibrary.simpleMessage("对话标题"),
+        "check_for_updates": MessageLookupByLibrary.simpleMessage("检查更新"),
         "choose_api": MessageLookupByLibrary.simpleMessage("选择接口"),
         "choose_bot": MessageLookupByLibrary.simpleMessage("选择角色"),
         "choose_model": MessageLookupByLibrary.simpleMessage("选择模型"),
@@ -53,6 +54,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "copy": MessageLookupByLibrary.simpleMessage("拷贝"),
         "default_config": MessageLookupByLibrary.simpleMessage("默认配置"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
+        "download": MessageLookupByLibrary.simpleMessage("下载"),
         "duplicate_api_name": MessageLookupByLibrary.simpleMessage("接口名重复"),
         "duplicate_bot_name": MessageLookupByLibrary.simpleMessage("角色名重复"),
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),
@@ -102,6 +104,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("确定"),
         "open": MessageLookupByLibrary.simpleMessage("打开"),
         "optional_config": MessageLookupByLibrary.simpleMessage("可选配置"),
+        "other": MessageLookupByLibrary.simpleMessage("其他"),
         "play": MessageLookupByLibrary.simpleMessage("播放"),
         "please_input": MessageLookupByLibrary.simpleMessage("请输入"),
         "quality": MessageLookupByLibrary.simpleMessage("质量"),
@@ -122,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "temperature": MessageLookupByLibrary.simpleMessage("温度"),
         "text_to_speech": MessageLookupByLibrary.simpleMessage("文本转语音"),
         "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "up_to_date": MessageLookupByLibrary.simpleMessage("已是最新版本"),
         "voice": MessageLookupByLibrary.simpleMessage("音色")
       };
 }
