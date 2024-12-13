@@ -43,7 +43,7 @@ class InputWidget extends ConsumerStatefulWidget {
 typedef _Image = ({String name, MessageImage image});
 
 class _InputWidgetState extends ConsumerState<InputWidget> {
-  final List<_Image> _images = [];
+  static final List<_Image> _images = [];
   final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _inputCtrl = TextEditingController();
 
@@ -57,68 +57,88 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   Widget build(BuildContext context) {
     ref.watch(llmProvider);
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height / 4,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-        border: Border.all(
-          width: 1,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: TextField(
-              maxLines: null,
-              autofocus: false,
-              controller: _inputCtrl,
-              focusNode: InputWidget.focusNode,
-              keyboardType: TextInputType.multiline,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                constraints: const BoxConstraints(),
-                hintText: S.of(context).enter_message,
-                contentPadding: const EdgeInsets.only(
-                    top: 16, left: 16, right: 16, bottom: 8),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_images.isNotEmpty) ...[
+          SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(bottom: 8),
+              itemCount: _images.length,
+              itemBuilder: (context, index) => ActionChip.elevated(
+                avatar: const Icon(Icons.image),
+                label: Text(_images[index].name),
+                onPressed: () => setState(() => _images.removeAt(index)),
               ),
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
             ),
           ),
-          Row(children: [
-            const SizedBox(width: 8),
-            IconButton(
-              icon: Badge(
-                smallSize: 8,
-                label: Text("${_images.length}"),
-                isLabelVisible: _images.isNotEmpty,
-                child: const Icon(Icons.add_photo_alternate),
-              ),
-              onPressed: _addImage,
-            ),
-            IconButton(
-              icon: Icon(Icons.travel_explore),
-              color: Current.googleSearch
-                  ? Theme.of(context).colorScheme.primary
-                  : null,
-              onPressed: () =>
-                  setState(() => Current.googleSearch = !Current.googleSearch),
-            ),
-            Expanded(child: const SizedBox()),
-            IconButton(
-              icon: Icon(Current.chatStatus.isResponding
-                  ? Icons.stop_circle
-                  : Icons.send),
-              onPressed: _sendMessage,
-            ),
-            const SizedBox(width: 8),
-          ]),
-          const SizedBox(height: 8),
         ],
-      ),
+        Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height / 4,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            border: Border.all(
+              width: 1,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: TextField(
+                  maxLines: null,
+                  autofocus: false,
+                  controller: _inputCtrl,
+                  focusNode: InputWidget.focusNode,
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    constraints: const BoxConstraints(),
+                    hintText: S.of(context).enter_message,
+                    contentPadding: const EdgeInsets.only(
+                        top: 16, left: 16, right: 16, bottom: 8),
+                  ),
+                ),
+              ),
+              Row(children: [
+                const SizedBox(width: 5),
+                IconButton(
+                  icon: Badge(
+                    smallSize: 8,
+                    label: Text("${_images.length}"),
+                    isLabelVisible: _images.isNotEmpty,
+                    child: const Icon(Icons.add_photo_alternate),
+                  ),
+                  onPressed: _addImage,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.travel_explore),
+                  isSelected: LlmNotifier.googleSearch,
+                  selectedIcon: const Icon(Icons.travel_explore),
+                  onPressed: () => setState(() =>
+                      LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
+                ),
+                Expanded(child: const SizedBox()),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  isSelected: Current.chatStatus.isResponding,
+                  selectedIcon: const Icon(Icons.pause_circle),
+                  onPressed: _sendMessage,
+                ),
+                const SizedBox(width: 5),
+              ]),
+              const SizedBox(height: 5),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

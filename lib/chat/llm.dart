@@ -33,8 +33,9 @@ final llmProvider =
 
 class LlmNotifier extends AutoDisposeNotifier<void> {
   Client? _ttsClient;
-  AudioPlayer? _player;
   _Client? _chatClient;
+  AudioPlayer? _player;
+  static bool googleSearch = false;
 
   @override
   void build() {}
@@ -234,7 +235,7 @@ class _Client extends BaseClient {
 
   void _handleBody(Request request) {
     final json = jsonDecode(request.body);
-    if (Current.googleSearch) {
+    if (LlmNotifier.googleSearch) {
       json["tools"] = [
         {"google_search": {}},
       ];
