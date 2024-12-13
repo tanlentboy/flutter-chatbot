@@ -415,6 +415,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           ),
           contentPadding: padding,
         ),
+        const SizedBox(height: 8),
       ],
     );
   }

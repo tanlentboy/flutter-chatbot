@@ -59,22 +59,11 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_images.isNotEmpty) ...[
-          SizedBox(
-            height: 56,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(bottom: 8),
-              itemCount: _images.length,
-              itemBuilder: (context, index) => ActionChip.elevated(
-                avatar: const Icon(Icons.image),
-                label: Text(_images[index].name),
-                onPressed: () => setState(() => _images.removeAt(index)),
-              ),
-              separatorBuilder: (context, index) => const SizedBox(width: 8),
-            ),
-          ),
+          _buildImages(),
+          const SizedBox(height: 8),
         ],
         Container(
           constraints: BoxConstraints(
@@ -139,6 +128,47 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildImages() {
+    return LayoutBuilder(
+      builder: (context, constraints) => Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (int i = 0; i < _images.length; i++)
+            Container(
+              constraints:
+                  BoxConstraints(maxWidth: (constraints.maxWidth - 8) / 2),
+              child: InkWell(
+                onTap: () => setState(() => _images.removeAt(i)),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                child: Ink(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.image, size: 20),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _images[i].name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

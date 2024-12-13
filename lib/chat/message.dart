@@ -196,28 +196,13 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.end,
         children: [
+          if (item.images.isNotEmpty) ...[
+            _buildImages(item),
+            const SizedBox(height: 8),
+          ],
           if (role.isAssistant) ...[
             _buildHeader(message, item),
             SizedBox(height: 8),
-          ],
-          if (item.images.isNotEmpty) ...[
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final image in item.images)
-                  ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    child: Image.memory(
-                      image.bytes,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
           ],
           GestureDetector(
             onLongPress: _longPress,
@@ -270,6 +255,29 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         ],
       ),
     );
+  }
+
+  Widget _buildImages(MessageItem item) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final n = (constraints.maxWidth / 100).ceil();
+      final width = (constraints.maxWidth - 8 * (n - 1)) / n;
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final image in item.images)
+            ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: Image.memory(
+                image.bytes,
+                width: width,
+                height: width,
+                fit: BoxFit.cover,
+              ),
+            ),
+        ],
+      );
+    });
   }
 
   Widget _buildHeader(Message message, MessageItem item) {
@@ -649,29 +657,12 @@ class MessageView extends StatelessWidget {
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.end,
         children: [
-          if (role.isAssistant) ...[
-            _buildHeader(context, message, item),
+          if (item.images.isNotEmpty) ...[
+            _buildImages(item),
             const SizedBox(height: 8),
           ],
-          if (item.images.isNotEmpty) ...[
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final image in item.images)
-                  ClipRRect(
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(8),
-                    ),
-                    child: Image.memory(
-                      image.bytes,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-              ],
-            ),
+          if (role.isAssistant) ...[
+            _buildHeader(context, message, item),
             const SizedBox(height: 8),
           ],
           Container(
@@ -716,6 +707,29 @@ class MessageView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildImages(MessageItem item) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final n = (constraints.maxWidth / 100).ceil();
+      final width = (constraints.maxWidth - 8 * (n - 1)) / n;
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final image in item.images)
+            ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: Image.memory(
+                image.bytes,
+                width: width,
+                height: width,
+                fit: BoxFit.cover,
+              ),
+            ),
+        ],
+      );
+    });
   }
 
   Widget _buildHeader(BuildContext context, Message message, MessageItem item) {

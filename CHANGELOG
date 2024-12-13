@@ -1,3 +1,11 @@
+0.2.10 (2024-12-13)
+
+    * Add: Checking for updates.
+    * Improve: Images display.
+
+    * 增加：检查更新
+    * 改进：图片显示
+
 0.2.9 (2024-12-13)
 
     * Add: Google Search support (gemini-2.0-flash-exp only)
