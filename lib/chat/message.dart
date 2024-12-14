@@ -167,27 +167,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     ref.watch(messageProvider(message));
 
     final item = message.item;
-    var content = item.text;
     final role = item.role;
-
-    final colorScheme = Theme.of(context).colorScheme;
-    final markdownStyleSheet = MarkdownStyleSheet(
-      codeblockPadding: EdgeInsets.all(0),
-      codeblockDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.surfaceContainer,
-      ),
-      blockquoteDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.brightness == Brightness.light
-            ? Colors.blueGrey.withOpacity(0.3)
-            : Colors.black.withOpacity(0.3),
-      ),
-    );
-
-    final background = role.isUser
-        ? colorScheme.secondaryContainer
-        : colorScheme.surfaceContainerHighest;
 
     return Container(
       alignment: role.isUser ? Alignment.topRight : Alignment.topLeft,
@@ -197,82 +177,70 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             : CrossAxisAlignment.end,
         children: [
           if (item.images.isNotEmpty) ...[
-            _buildImages(item),
+            _buildImages(),
             const SizedBox(height: 8),
           ],
           if (role.isAssistant) ...[
-            _buildHeader(message, item),
+            _buildHeader(),
             SizedBox(height: 8),
           ],
-          GestureDetector(
-            onLongPress: _longPress,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              constraints: role.isUser
-                  ? BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.8,
-                    )
-                  : null,
-              decoration: BoxDecoration(
-                color: background,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  bottomLeft: const Radius.circular(16),
-                  bottomRight: const Radius.circular(16),
-                  topRight: Radius.circular(role.isUser ? 2 : 16),
-                ),
-              ),
-              child: switch (item.text.isNotEmpty) {
-                true => MarkdownBody(
-                    data: content,
-                    shrinkWrap: true,
-                    extensionSet: mdExtensionSet,
-                    onTapLink: (text, href, title) =>
-                        Dialogs.openLink(context: context, link: href),
-                    builders: {
-                      "pre": CodeBlockBuilder(context: context),
-                      "latex": LatexElementBuilder(textScaleFactor: 1.2),
-                    },
-                    styleSheet: markdownStyleSheet,
-                    styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                  ),
-                false => SizedBox(
-                    width: 36,
-                    height: 18,
-                    child: SpinKitWave(
-                      size: 18,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-              },
-            ),
-          ),
+          _buildBody(),
           if (Current.messages.lastOrNull == message &&
               Current.chatStatus.isNothing) ...[
             const SizedBox(height: 4),
-            FadeIn(child: _buildToolBar(role)),
+            FadeIn(child: _buildToolBar()),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildImages(MessageItem item) {
+  Widget _buildImages() {
+    final item = widget.message.item;
+
     return LayoutBuilder(builder: (context, constraints) {
-      final n = (constraints.maxWidth / 100).ceil();
+      final n = (constraints.maxWidth / 120).ceil();
       final width = (constraints.maxWidth - 8 * (n - 1)) / n;
       return Wrap(
         spacing: 8,
         runSpacing: 8,
         children: [
           for (final image in item.images)
-            ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              child: Image.memory(
-                image.bytes,
-                width: width,
-                height: width,
-                fit: BoxFit.cover,
+            Ink(
+              width: width,
+              height: width,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                image: DecorationImage(
+                  image: MemoryImage(image.bytes),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: InkWell(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                onTap: () async {
+                  final result = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(S.of(context).delete_image),
+                      content: Text(S.of(context).ensure_delete_image),
+                      actions: [
+                        TextButton(
+                          onPressed: Navigator.of(context).pop,
+                          child: Text(S.of(context).cancel),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(S.of(context).delete),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (!(result ?? false)) return;
+
+                  setState(() => item.images.remove(image));
+                  Current.save();
+                },
               ),
             ),
         ],
@@ -280,7 +248,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     });
   }
 
-  Widget _buildHeader(Message message, MessageItem item) {
+  Widget _buildHeader() {
+    final message = widget.message;
+    final item = message.item;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -343,7 +314,87 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     );
   }
 
-  Widget _buildToolBar(MessageRole role) {
+  Widget _buildBody() {
+    final item = widget.message.item;
+    final text = item.text;
+    final role = item.role;
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final markdownStyleSheet = MarkdownStyleSheet(
+      codeblockPadding: EdgeInsets.all(0),
+      codeblockDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.surfaceContainer,
+      ),
+      blockquoteDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.brightness == Brightness.light
+            ? Colors.blueGrey.withOpacity(0.3)
+            : Colors.black.withOpacity(0.3),
+      ),
+    );
+
+    final background = role.isUser
+        ? colorScheme.secondaryContainer
+        : colorScheme.surfaceContainerHighest;
+
+    return LayoutBuilder(
+      key: UniqueKey(),
+      builder: (context, constraints) => Ink(
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            bottomLeft: const Radius.circular(16),
+            bottomRight: const Radius.circular(16),
+            topRight: Radius.circular(role.isUser ? 2 : 16),
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            bottomLeft: const Radius.circular(16),
+            bottomRight: const Radius.circular(16),
+            topRight: Radius.circular(role.isUser ? 2 : 16),
+          ),
+          onLongPress: _longPress,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            constraints: BoxConstraints(
+              maxWidth: constraints.maxWidth * (role.isUser ? 0.9 : 1),
+            ),
+            child: switch (text.isNotEmpty) {
+              true => MarkdownBody(
+                  data: text,
+                  shrinkWrap: true,
+                  extensionSet: mdExtensionSet,
+                  onTapLink: (text, href, title) =>
+                      Dialogs.openLink(context: context, link: href),
+                  builders: {
+                    "pre": CodeBlockBuilder(context: context),
+                    "latex": LatexElementBuilder(textScaleFactor: 1.2),
+                  },
+                  styleSheet: markdownStyleSheet,
+                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+                ),
+              false => SizedBox(
+                  width: 36,
+                  height: 18,
+                  child: SpinKitWave(
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToolBar() {
+    final role = widget.message.item.role;
+
     return Row(
       mainAxisAlignment:
           role.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -619,36 +670,16 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
 class MessageView extends StatelessWidget {
   final Message message;
+  final MessageItem item;
 
-  const MessageView({
+  MessageView({
     required this.message,
     super.key,
-  });
+  }) : item = message.item;
 
   @override
   Widget build(BuildContext context) {
-    final item = message.item;
-    var content = item.text;
     final role = item.role;
-
-    final colorScheme = Theme.of(context).colorScheme;
-    final markdownStyleSheet = MarkdownStyleSheet(
-      codeblockPadding: EdgeInsets.all(0),
-      codeblockDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.surfaceContainer,
-      ),
-      blockquoteDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.brightness == Brightness.light
-            ? Colors.blueGrey.withOpacity(0.3)
-            : Colors.black.withOpacity(0.3),
-      ),
-    );
-
-    final background = role.isUser
-        ? colorScheme.secondaryContainer
-        : colorScheme.surfaceContainerHighest;
 
     return Container(
       alignment: role.isUser ? Alignment.topRight : Alignment.topLeft,
@@ -658,61 +689,24 @@ class MessageView extends StatelessWidget {
             : CrossAxisAlignment.end,
         children: [
           if (item.images.isNotEmpty) ...[
-            _buildImages(item),
+            _buildImages(context),
             const SizedBox(height: 8),
           ],
           if (role.isAssistant) ...[
-            _buildHeader(context, message, item),
+            _buildHeader(context),
             const SizedBox(height: 8),
           ],
-          Container(
-            padding: const EdgeInsets.all(12),
-            constraints: role.isUser
-                ? BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.8,
-                  )
-                : null,
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                bottomLeft: const Radius.circular(16),
-                bottomRight: const Radius.circular(16),
-                topRight: Radius.circular(role.isUser ? 2 : 16),
-              ),
-            ),
-            child: switch (item.text.isNotEmpty) {
-              true => MarkdownBody(
-                  data: content,
-                  extensionSet: mdExtensionSet,
-                  onTapLink: (text, href, title) =>
-                      Dialogs.openLink(context: context, link: href),
-                  builders: {
-                    "pre": CodeBlockBuilder2(context: context),
-                    "latex": LatexElementBuilder2(textScaleFactor: 1.2),
-                  },
-                  styleSheet: markdownStyleSheet,
-                  styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-                ),
-              false => SizedBox(
-                  width: 36,
-                  height: 18,
-                  child: SpinKitWave(
-                    size: 18,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-            },
-          ),
+          _buildBody(context),
         ],
       ),
     );
   }
 
-  Widget _buildImages(MessageItem item) {
+  Widget _buildImages(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final n = (constraints.maxWidth / 100).ceil();
+      final n = (constraints.maxWidth / 120).ceil();
       final width = (constraints.maxWidth - 8 * (n - 1)) / n;
+
       return Wrap(
         spacing: 8,
         runSpacing: 8,
@@ -732,7 +726,7 @@ class MessageView extends StatelessWidget {
     });
   }
 
-  Widget _buildHeader(BuildContext context, Message message, MessageItem item) {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -758,6 +752,60 @@ class MessageView extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    final text = item.text;
+    final role = item.role;
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final markdownStyleSheet = MarkdownStyleSheet(
+      codeblockPadding: EdgeInsets.all(0),
+      codeblockDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.surfaceContainer,
+      ),
+      blockquoteDecoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: colorScheme.brightness == Brightness.light
+            ? Colors.blueGrey.withOpacity(0.3)
+            : Colors.black.withOpacity(0.3),
+      ),
+    );
+
+    final background = role.isUser
+        ? colorScheme.secondaryContainer
+        : colorScheme.surfaceContainerHighest;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      constraints: role.isUser
+          ? BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            )
+          : null,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(16),
+          bottomLeft: const Radius.circular(16),
+          bottomRight: const Radius.circular(16),
+          topRight: Radius.circular(role.isUser ? 2 : 16),
+        ),
+      ),
+      child: MarkdownBody(
+        data: text,
+        extensionSet: mdExtensionSet,
+        onTapLink: (text, href, title) =>
+            Dialogs.openLink(context: context, link: href),
+        builders: {
+          "pre": CodeBlockBuilder2(context: context),
+          "latex": LatexElementBuilder2(textScaleFactor: 1.2),
+        },
+        styleSheet: markdownStyleSheet,
+        styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+      ),
     );
   }
 }

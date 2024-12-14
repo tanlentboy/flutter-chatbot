@@ -61,6 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "default_config":
             MessageLookupByLibrary.simpleMessage("Default Config"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
+        "delete_image": MessageLookupByLibrary.simpleMessage("Delete image"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
@@ -71,7 +72,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "empty_link": MessageLookupByLibrary.simpleMessage("Empty Link"),
         "enable": MessageLookupByLibrary.simpleMessage("Enable"),
         "ensure_clear_chat": MessageLookupByLibrary.simpleMessage(
-            "Are you sure you want to clear the chat?"),
+            "Are you sure to clear the chat?"),
+        "ensure_delete_image": MessageLookupByLibrary.simpleMessage(
+            "Are you sure to delete the image?"),
         "enter_a_name":
             MessageLookupByLibrary.simpleMessage("Please enter a name"),
         "enter_a_title":

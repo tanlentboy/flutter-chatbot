@@ -178,6 +178,7 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
 
     final isNewChat = !Current.hasFile;
     Current.save();
+
     if (isNewChat) {
       ref.read(chatsProvider.notifier).notify();
       ref.read(chatProvider.notifier).notify();

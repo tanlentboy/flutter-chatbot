@@ -117,5 +117,8 @@
     "other": "其他",
     "download": "下载",
     "up_to_date": "已是最新版本",
-    "check_for_updates": "检查更新"
+    "check_for_updates": "检查更新",
+
+    "delete_image": "删除图片",
+    "ensure_delete_image": "确定要删除图片？"
 }

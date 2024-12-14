@@ -900,10 +900,10 @@ class S {
     );
   }
 
-  /// `Are you sure you want to clear the chat?`
+  /// `Are you sure to clear the chat?`
   String get ensure_clear_chat {
     return Intl.message(
-      'Are you sure you want to clear the chat?',
+      'Are you sure to clear the chat?',
       name: 'ensure_clear_chat',
       desc: '',
       args: [],
@@ -1055,6 +1055,26 @@ class S {
     return Intl.message(
       'Check for updates',
       name: 'check_for_updates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete image`
+  String get delete_image {
+    return Intl.message(
+      'Delete image',
+      name: 'delete_image',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure to delete the image?`
+  String get ensure_delete_image {
+    return Intl.message(
+      'Are you sure to delete the image?',
+      name: 'ensure_delete_image',
       desc: '',
       args: [],
     );

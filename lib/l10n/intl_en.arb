@@ -98,7 +98,7 @@
     "chat_settings": "Chat Settings",
     "export_chat_as_image": "Export Image",
     "cloned_successfully": "Cloned Successfully",
-    "ensure_clear_chat": "Are you sure you want to clear the chat?",
+    "ensure_clear_chat": "Are you sure to clear the chat?",
 
     "saved_successfully": "Saved Successfully",
     "copied_successfully": "Copied Successfully",
@@ -117,5 +117,8 @@
     "other": "Other",
     "download": "Download",
     "up_to_date": "You are up to date",
-    "check_for_updates": "Check for updates"
+    "check_for_updates": "Check for updates",
+
+    "delete_image": "Delete image",
+    "ensure_delete_image": "Are you sure to delete the image?"
 }

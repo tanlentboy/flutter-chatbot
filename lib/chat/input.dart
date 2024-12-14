@@ -133,42 +133,45 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
   Widget _buildImages() {
     return LayoutBuilder(
-      builder: (context, constraints) => Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          for (int i = 0; i < _images.length; i++)
-            Container(
-              constraints:
-                  BoxConstraints(maxWidth: (constraints.maxWidth - 8) / 2),
-              child: InkWell(
-                onTap: () => setState(() => _images.removeAt(i)),
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                child: Ink(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.image, size: 20),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          _images[i].name,
-                          overflow: TextOverflow.ellipsis,
+      builder: (context, constraints) {
+        final n = (constraints.maxWidth / 160).floor();
+        final width = (constraints.maxWidth - 8 * (n - 1)) / n;
+
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final image in _images)
+              Ink(
+                width: width,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
+                child: InkWell(
+                  onTap: () => setState(() => _images.remove(image)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.image, size: 20),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            image.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 
