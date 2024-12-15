@@ -63,9 +63,9 @@ class ChatPage extends ConsumerStatefulWidget {
 }
 
 class _ChatPageState extends ConsumerState<ChatPage> {
-  final ScrollController _scrollCtrl = ScrollController();
-  final List<Message> _messages = Current.messages;
   final List<ChatConfig> _chats = Config.chats;
+  final List<Message> _messages = Current.messages;
+  final ScrollController _scrollCtrl = ScrollController();
 
   @override
   void initState() {

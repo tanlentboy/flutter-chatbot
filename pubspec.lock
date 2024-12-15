@@ -126,6 +126,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  beautiful_soup_dart:
+    dependency: transitive
+    description:
+      name: beautiful_soup_dart
+      sha256: "57e23946c85776dd9515a4e9a14263fff37dbedbd559bc4412bf565886e12b10"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -206,6 +214,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+  csslib:
+    dependency: transitive
+    description:
+      name: csslib
+      sha256: "09bad715f418841f976c77db72d5398dc1253c21fb9c0c7f0b0b985860b2d58e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
+  csv:
+    dependency: transitive
+    description:
+      name: csv
+      sha256: c6aa2679b2a18cb57652920f674488d89712efaf4d3fdf2e537215b35fc19d6c
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   custom_lint:
     dependency: "direct dev"
     description:
@@ -334,6 +358,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  flat_buffers:
+    dependency: transitive
+    description:
+      name: flat_buffers
+      sha256: "380bdcba5664a718bfd4ea20a45d39e13684f5318fcd8883066a55e21f37f4c3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "23.5.26"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -538,6 +570,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
+  html:
+    dependency: transitive
+    description:
+      name: html
+      sha256: "1fc58edeaec4307368c60d59b7e15b9d658b57d7f3125098b6294153c75337ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.15.5"
   http:
     dependency: "direct main"
     description:
@@ -642,6 +682,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.8.7"
+  iregexp:
+    dependency: transitive
+    description:
+      name: iregexp
+      sha256: "143859dcaeecf6f683102786762d70a47ef8441a0d2287a158172d32d38799cf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   js:
     dependency: transitive
     description:
@@ -658,6 +706,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
+  json_path:
+    dependency: transitive
+    description:
+      name: json_path
+      sha256: "7a06bbb1cfad390b20fb7a2ca5e67d9ba59633879c6d71142b80fbf61c3b66f6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.4"
   langchain:
     dependency: "direct main"
     description:
@@ -666,6 +722,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.7+1"
+  langchain_community:
+    dependency: "direct main"
+    description:
+      name: langchain_community
+      sha256: "33159de144958dd21bad754d3bffee6700d0f378c55002d33d75c5e9864992e3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2+2"
   langchain_core:
     dependency: transitive
     description:
@@ -770,6 +834,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
+  math_expressions:
+    dependency: transitive
+    description:
+      name: math_expressions
+      sha256: e32d803d758ace61cc6c4bdfed1226ff60a6a23646b35685670d28b5616139f8
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.0"
+  maybe_just_nothing:
+    dependency: transitive
+    description:
+      name: maybe_just_nothing
+      sha256: "0c06326e26d08f6ed43247404376366dc4d756cef23a4f1db765f546224c35e0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.3"
   meta:
     dependency: transitive
     description:
@@ -794,6 +874,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  objectbox:
+    dependency: transitive
+    description:
+      name: objectbox
+      sha256: ea823f4bf1d0a636e7aa50b43daabb64dd0fbd80b85a033016ccc1bc4f76f432
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.3"
   openai_dart:
     dependency: transitive
     description:
@@ -946,6 +1034,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  rfc_6901:
+    dependency: transitive
+    description:
+      name: rfc_6901
+      sha256: df1bbfa3d023009598f19636d6114c6ac1e0b7bb7bf6a260f0e6e6ce91416820
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   riverpod:
     dependency: transitive
     description:
@@ -1071,6 +1167,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.0+3"
+  tavily_dart:
+    dependency: transitive
+    description:
+      name: tavily_dart
+      sha256: "3e3b8f38a6c5c5dfd38c5f2f7bf6348f8500f53008352befd209c98047a7bf34"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   term_glyph:
     dependency: transitive
     description:

@@ -25,6 +25,7 @@ dependencies:
   langchain: ^0.7.7+1
   langchain_openai: ^0.7.2+5
   langchain_google: ^0.6.4+1
+  langchain_community: ^0.3.2+2
 
   animate_do: ^3.3.4
   share_plus: ^10.1.2
