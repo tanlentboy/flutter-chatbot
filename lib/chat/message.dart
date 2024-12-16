@@ -219,6 +219,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               child: InkWell(
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
                 onTap: () async {
+                  InputWidget.unFocus();
+
                   final result = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -268,13 +270,14 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                 style: Theme.of(context).textTheme.titleSmall,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 1),
               Text(
                 item.time ??
                     Current.chat?.time ??
                     Util.formatDateTime(DateTime.now()),
                 style: Theme.of(context).textTheme.labelSmall,
               ),
+              const SizedBox(height: 3),
             ],
           ),
         ),
@@ -742,13 +745,14 @@ class MessageView extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 1),
             Text(
               item.time ??
                   Current.chat?.time ??
                   Util.formatDateTime(DateTime.now()),
               style: Theme.of(context).textTheme.labelSmall,
             ),
+            const SizedBox(height: 3),
           ],
         ),
       ],

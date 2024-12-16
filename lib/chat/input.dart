@@ -61,10 +61,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_images.isNotEmpty) ...[
-          _buildImages(),
-          const SizedBox(height: 8),
-        ],
         Container(
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height / 4,
@@ -99,26 +95,37 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               Row(children: [
                 const SizedBox(width: 5),
                 IconButton(
-                  icon: Badge(
-                    smallSize: 8,
-                    label: Text("${_images.length}"),
-                    isLabelVisible: _images.isNotEmpty,
-                    child: const Icon(Icons.add_photo_alternate),
-                  ),
-                  onPressed: _addImage,
+                  icon: const Icon(Icons.upload_file),
+                  onPressed: _addFile,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.travel_explore),
+                  icon: const Icon(Icons.language),
                   isSelected: LlmNotifier.googleSearch,
-                  selectedIcon: const Icon(Icons.travel_explore),
+                  selectedIcon: const Icon(Icons.language),
                   onPressed: () => setState(() =>
                       LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
                 ),
-                Expanded(child: const SizedBox()),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Row(
+                    children: [
+                      if (_images.isNotEmpty)
+                        FilledButton.tonalIcon(
+                          icon: const Badge(
+                            smallSize: 8,
+                            child: Icon(Icons.image, size: 20),
+                          ),
+                          onPressed: _editImages,
+                          label: Text(S.of(context).images),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send),
+                  icon: const Icon(Icons.arrow_upward),
                   isSelected: Current.chatStatus.isResponding,
-                  selectedIcon: const Icon(Icons.pause_circle),
+                  selectedIcon: const Icon(Icons.pause),
                   onPressed: _sendMessage,
                 ),
                 const SizedBox(width: 5),
@@ -131,54 +138,10 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     );
   }
 
-  Widget _buildImages() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final n = (constraints.maxWidth / 160).floor();
-        final width = (constraints.maxWidth - 8 * (n - 1)) / n;
-
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final image in _images)
-              Ink(
-                width: width,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                ),
-                child: InkWell(
-                  onTap: () => setState(() => _images.remove(image)),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.image, size: 20),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            image.name,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _addImage() async {
+  Future<void> _addFile() async {
     InputWidget.unFocus();
 
-    final source = await showModalBottomSheet<ImageSource>(
+    final result = await showModalBottomSheet<int>(
       context: context,
       builder: (context) => Padding(
         padding: const EdgeInsets.all(8),
@@ -200,21 +163,32 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               shape: const StadiumBorder(),
               title: Text(S.of(context).camera),
               leading: const Icon(Icons.camera_outlined),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
+              onTap: () => Navigator.of(context).pop(1),
             ),
             ListTile(
               minTileHeight: 48,
               shape: const StadiumBorder(),
               title: Text(S.of(context).gallery),
               leading: const Icon(Icons.photo_library_outlined),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
+              onTap: () => Navigator.of(context).pop(2),
             ),
           ],
         ),
       ),
     );
-    if (source == null) return;
 
+    switch (result) {
+      case 1:
+        await _addImage(ImageSource.camera);
+        break;
+
+      case 2:
+        await _addImage(ImageSource.gallery);
+        break;
+    }
+  }
+
+  Future<void> _addImage(ImageSource source) async {
     final XFile? result;
     Uint8List? compressed;
 
@@ -250,6 +224,65 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       image: (bytes: bytes, base64: base64Encode(bytes)),
     );
     setState(() => _images.add(image));
+  }
+
+  void _editImages() async {
+    InputWidget.unFocus();
+
+    showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState2) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 16, left: 24, right: 12, bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    S.of(context).images,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: Navigator.of(context).pop,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _images.length,
+                itemBuilder: (context, index) => ListTile(
+                  title: Text(_images[index].name),
+                  contentPadding: const EdgeInsets.only(left: 24, right: 12),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      setState(() => _images.removeAt(index));
+                      if (_images.isEmpty) {
+                        Navigator.of(context).pop();
+                      } else {
+                        setState2(() {});
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _sendMessage() async {

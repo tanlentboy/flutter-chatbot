@@ -85,6 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "image_quality": MessageLookupByLibrary.simpleMessage("图像质量"),
         "image_size": MessageLookupByLibrary.simpleMessage("图像尺寸"),
         "image_style": MessageLookupByLibrary.simpleMessage("图像风格"),
+        "images": MessageLookupByLibrary.simpleMessage("图片"),
         "import_config": MessageLookupByLibrary.simpleMessage("导入配置"),
         "imported_successfully": MessageLookupByLibrary.simpleMessage("导入成功"),
         "importing": MessageLookupByLibrary.simpleMessage("正在导入..."),

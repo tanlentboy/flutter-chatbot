@@ -120,6 +120,16 @@ class S {
     );
   }
 
+  /// `Images`
+  String get images {
+    return Intl.message(
+      'Images',
+      name: 'images',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Camera`
   String get camera {
     return Intl.message(
