@@ -121,5 +121,14 @@
     "check_for_updates": "Check for updates",
 
     "delete_image": "Delete image",
-    "ensure_delete_image": "Are you sure to delete the image?"
+    "ensure_delete_image": "Are you sure to delete the image?",
+
+    "task": "Task",
+    "document": "Document",
+    "workspace": "Workspace",
+    "chat_model": "Chat Model",
+    "model_name": "Model Name",
+    "model_avatar": "Model Avatar",
+    "chat_model_hint": "Is it a Chat Model.",
+    "model_avatar_hint": "Click to choose a Model Avatar."
 }

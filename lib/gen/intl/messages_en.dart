@@ -36,6 +36,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannot_open": MessageLookupByLibrary.simpleMessage("Cannot Open"),
         "chat_image_compress":
             MessageLookupByLibrary.simpleMessage("Chat Image Compress"),
+        "chat_model": MessageLookupByLibrary.simpleMessage("Chat Model"),
+        "chat_model_hint":
+            MessageLookupByLibrary.simpleMessage("Is it a Chat Model."),
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
         "check_for_updates":
@@ -62,6 +65,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Default Config"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "delete_image": MessageLookupByLibrary.simpleMessage("Delete image"),
+        "document": MessageLookupByLibrary.simpleMessage("Document"),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
@@ -121,7 +125,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "min_width_height":
             MessageLookupByLibrary.simpleMessage("Minimal Size"),
         "model": MessageLookupByLibrary.simpleMessage("Model"),
+        "model_avatar": MessageLookupByLibrary.simpleMessage("Model Avatar"),
+        "model_avatar_hint": MessageLookupByLibrary.simpleMessage(
+            "Click to choose a Model Avatar."),
         "model_list": MessageLookupByLibrary.simpleMessage("Model List"),
+        "model_name": MessageLookupByLibrary.simpleMessage("Model Name"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "new_api": MessageLookupByLibrary.simpleMessage("New API"),
         "new_bot": MessageLookupByLibrary.simpleMessage("New Bot"),
@@ -156,12 +164,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Streaming Response"),
         "system_prompts":
             MessageLookupByLibrary.simpleMessage("System Prompts"),
+        "task": MessageLookupByLibrary.simpleMessage("Task"),
         "temperature": MessageLookupByLibrary.simpleMessage("Temperature"),
         "text_to_speech":
             MessageLookupByLibrary.simpleMessage("Text To Speech"),
         "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
         "up_to_date":
             MessageLookupByLibrary.simpleMessage("You are up to date"),
-        "voice": MessageLookupByLibrary.simpleMessage("Voice")
+        "voice": MessageLookupByLibrary.simpleMessage("Voice"),
+        "workspace": MessageLookupByLibrary.simpleMessage("Workspace")
       };
 }

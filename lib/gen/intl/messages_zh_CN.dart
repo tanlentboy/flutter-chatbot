@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
         "cannot_open": MessageLookupByLibrary.simpleMessage("无法打开"),
         "chat_image_compress": MessageLookupByLibrary.simpleMessage("对话图片压缩"),
+        "chat_model": MessageLookupByLibrary.simpleMessage("对话模型"),
+        "chat_model_hint": MessageLookupByLibrary.simpleMessage("是否是对话模型"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("对话设置"),
         "chat_title": MessageLookupByLibrary.simpleMessage("对话标题"),
         "check_for_updates": MessageLookupByLibrary.simpleMessage("检查更新"),
@@ -55,6 +57,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "default_config": MessageLookupByLibrary.simpleMessage("默认配置"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "delete_image": MessageLookupByLibrary.simpleMessage("删除图片"),
+        "document": MessageLookupByLibrary.simpleMessage("文档"),
         "download": MessageLookupByLibrary.simpleMessage("下载"),
         "duplicate_api_name": MessageLookupByLibrary.simpleMessage("接口名重复"),
         "duplicate_bot_name": MessageLookupByLibrary.simpleMessage("角色名重复"),
@@ -97,7 +100,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "min_width": MessageLookupByLibrary.simpleMessage("最小宽度"),
         "min_width_height": MessageLookupByLibrary.simpleMessage("最小宽高"),
         "model": MessageLookupByLibrary.simpleMessage("模型"),
+        "model_avatar": MessageLookupByLibrary.simpleMessage("模型头像"),
+        "model_avatar_hint": MessageLookupByLibrary.simpleMessage("点击选择一个模型头像"),
         "model_list": MessageLookupByLibrary.simpleMessage("模型列表"),
+        "model_name": MessageLookupByLibrary.simpleMessage("模型名称"),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
         "new_api": MessageLookupByLibrary.simpleMessage("新接口"),
         "new_bot": MessageLookupByLibrary.simpleMessage("新角色"),
@@ -125,10 +131,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "source": MessageLookupByLibrary.simpleMessage("源码"),
         "streaming_response": MessageLookupByLibrary.simpleMessage("流式响应"),
         "system_prompts": MessageLookupByLibrary.simpleMessage("系统提示词"),
+        "task": MessageLookupByLibrary.simpleMessage("任务"),
         "temperature": MessageLookupByLibrary.simpleMessage("温度"),
         "text_to_speech": MessageLookupByLibrary.simpleMessage("文本转语音"),
         "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
         "up_to_date": MessageLookupByLibrary.simpleMessage("已是最新版本"),
-        "voice": MessageLookupByLibrary.simpleMessage("音色")
+        "voice": MessageLookupByLibrary.simpleMessage("音色"),
+        "workspace": MessageLookupByLibrary.simpleMessage("工作空间")
       };
 }

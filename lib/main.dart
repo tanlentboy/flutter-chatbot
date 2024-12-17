@@ -18,6 +18,7 @@ import "gen/l10n.dart";
 import "chat/chat.dart";
 import "image/image.dart";
 import "settings/settings.dart";
+import "workspace/workspace.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -42,6 +43,7 @@ class App extends StatelessWidget {
         "/": (context) => ChatPage(),
         "/image": (context) => ImagePage(),
         "/settings": (context) => SettingsPage(),
+        "/workspace": (context) => WorkspacePage(),
       },
       localizationsDelegates: const [
         S.delegate,

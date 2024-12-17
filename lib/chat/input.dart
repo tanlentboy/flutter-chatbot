@@ -21,7 +21,6 @@ import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
 
-import "dart:io";
 import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -105,23 +104,16 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                   onPressed: () => setState(() =>
                       LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Row(
-                    children: [
-                      if (_images.isNotEmpty)
-                        FilledButton.tonalIcon(
-                          icon: const Badge(
-                            smallSize: 8,
-                            child: Icon(Icons.image, size: 20),
-                          ),
-                          onPressed: _editImages,
-                          label: Text(S.of(context).images),
-                        ),
-                    ],
+                if (_images.isNotEmpty)
+                  IconButton(
+                    icon: Badge(
+                      label: Text("${_images.length}"),
+                      child: Icon(Icons.image),
+                    ),
+                    isSelected: true,
+                    onPressed: _editImages,
                   ),
-                ),
-                const SizedBox(width: 8),
+                const Expanded(child: SizedBox()),
                 IconButton(
                   icon: const Icon(Icons.arrow_upward),
                   isSelected: Current.chatStatus.isResponding,
@@ -189,7 +181,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   }
 
   Future<void> _addImage(ImageSource source) async {
-    final XFile? result;
+    XFile? result;
     Uint8List? compressed;
 
     try {
@@ -218,7 +210,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       }
     }
 
-    final bytes = compressed ?? await File(result.path).readAsBytes();
+    final bytes = compressed ?? await result.readAsBytes();
     final image = (
       name: result.name,
       image: (bytes: bytes, base64: base64Encode(bytes)),

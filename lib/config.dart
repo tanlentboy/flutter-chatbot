@@ -30,6 +30,7 @@ class Config {
   static final List<ChatConfig> chats = [];
   static final Map<String, BotConfig> bots = {};
   static final Map<String, ApiConfig> apis = {};
+  static final Map<String, ModelConfig> models = {};
 
   static late final File _file;
   static late final String _dir;
@@ -39,6 +40,7 @@ class Config {
   static const String _chatDir = "chat";
   static const String _audioDir = "audio";
   static const String _imageDir = "image";
+  static const String _avatarDir = "avatar";
   static const String _settingsFile = "settings.json";
 
   static Future<void> init() async {
@@ -65,6 +67,8 @@ class Config {
       "$_dir$_sep$_audioDir$_sep$fileName";
   static String imageFilePath(String fileName) =>
       "$_dir$_sep$_imageDir$_sep$fileName";
+  static String avatarFilePath(String fileName) =>
+      "$_dir$_sep$_avatarDir$_sep$fileName";
   static String cacheFilePath(String fileName) => "$_cache$_sep$fileName";
 
   static Map toJson() => {
@@ -75,6 +79,7 @@ class Config {
         "apis": apis,
         "image": image,
         "chats": chats,
+        "models": models,
       };
 
   static void fromJson(Map json) {
@@ -85,6 +90,7 @@ class Config {
     final apisJson = json["apis"] ?? {};
     final imageJson = json["image"] ?? {};
     final chatsJson = json["chats"] ?? [];
+    final modelsJson = json["models"] ?? {};
 
     tts = TtsConfig.fromJson(ttsJson);
     cic = CicConfig.fromJson(imgJson);
@@ -100,12 +106,21 @@ class Config {
     for (final pair in apisJson.entries) {
       apis[pair.key] = ApiConfig.fromJson(pair.value);
     }
+    for (final pair in modelsJson.entries) {
+      models[pair.key] = ModelConfig.fromJson(pair.value);
+    }
   }
 
   static bool get isOkToTts =>
       tts.api != null && tts.model != null && tts.voice != null;
 
   static void _initDir() {
+    final avatarPath = "$_dir$_sep$_avatarDir";
+    final avatarDir = Directory(avatarPath);
+    if (!(avatarDir.existsSync())) {
+      avatarDir.createSync();
+    }
+
     final imagePath = "$_dir$_sep$_imageDir";
     final imageDir = Directory(imagePath);
     if (!(imageDir.existsSync())) {
@@ -428,6 +443,30 @@ class ImageConfig {
         size: json["size"],
         style: json["style"],
         quality: json["quality"],
+      );
+}
+
+class ModelConfig {
+  bool chat;
+  String name;
+  String? avatar;
+
+  ModelConfig({
+    required this.chat,
+    required this.name,
+    this.avatar,
+  });
+
+  Map toJson() => {
+        "chat": chat,
+        "name": name,
+        "avatar": avatar,
+      };
+
+  factory ModelConfig.fromJson(Map json) => ModelConfig(
+        chat: json["chat"],
+        name: json["name"],
+        avatar: json["avatar"],
       );
 }
 

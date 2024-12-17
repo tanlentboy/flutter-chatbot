@@ -1089,6 +1089,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Task`
+  String get task {
+    return Intl.message(
+      'Task',
+      name: 'task',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Document`
+  String get document {
+    return Intl.message(
+      'Document',
+      name: 'document',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Workspace`
+  String get workspace {
+    return Intl.message(
+      'Workspace',
+      name: 'workspace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat Model`
+  String get chat_model {
+    return Intl.message(
+      'Chat Model',
+      name: 'chat_model',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Model Name`
+  String get model_name {
+    return Intl.message(
+      'Model Name',
+      name: 'model_name',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Model Avatar`
+  String get model_avatar {
+    return Intl.message(
+      'Model Avatar',
+      name: 'model_avatar',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Is it a Chat Model.`
+  String get chat_model_hint {
+    return Intl.message(
+      'Is it a Chat Model.',
+      name: 'chat_model_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click to choose a Model Avatar.`
+  String get model_avatar_hint {
+    return Intl.message(
+      'Click to choose a Model Avatar.',
+      name: 'model_avatar_hint',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

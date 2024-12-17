@@ -253,21 +253,20 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
   Widget _buildHeader() {
     final message = widget.message;
     final item = message.item;
+    final id = item.model;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CircleAvatar(
-          child: const Icon(Icons.smart_toy),
-        ),
+        Widgets.modelAvatar(id),
         const SizedBox(width: 12),
         Flexible(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.model ?? Current.model ?? S.of(context).no_model,
-                style: Theme.of(context).textTheme.titleSmall,
+                Config.models[id]?.name ?? id ?? S.of(context).no_model,
+                style: Theme.of(context).textTheme.titleMedium,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 1),
@@ -275,7 +274,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                 item.time ??
                     Current.chat?.time ??
                     Util.formatDateTime(DateTime.now()),
-                style: Theme.of(context).textTheme.labelSmall,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 3),
             ],
@@ -332,8 +331,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       blockquoteDecoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.brightness == Brightness.light
-            ? Colors.blueGrey.withOpacity(0.3)
-            : Colors.black.withOpacity(0.3),
+            ? Colors.blueGrey.withValues(alpha: 0.3)
+            : Colors.black.withValues(alpha: 0.3),
       ),
     );
 
@@ -730,19 +729,19 @@ class MessageView extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final id = item.model;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        CircleAvatar(
-          child: const Icon(Icons.smart_toy),
-        ),
+        Widgets.modelAvatar(id),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              item.model ?? Current.model ?? S.current.no_model,
-              style: Theme.of(context).textTheme.titleSmall,
+              Config.models[id]?.name ?? id ?? S.current.no_model,
+              style: Theme.of(context).textTheme.titleMedium,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 1),
@@ -750,7 +749,7 @@ class MessageView extends StatelessWidget {
               item.time ??
                   Current.chat?.time ??
                   Util.formatDateTime(DateTime.now()),
-              style: Theme.of(context).textTheme.labelSmall,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 3),
           ],
@@ -773,8 +772,8 @@ class MessageView extends StatelessWidget {
       blockquoteDecoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.brightness == Brightness.light
-            ? Colors.blueGrey.withOpacity(0.3)
-            : Colors.black.withOpacity(0.3),
+            ? Colors.blueGrey.withValues(alpha: 0.3)
+            : Colors.black.withValues(alpha: 0.3),
       ),
     );
 

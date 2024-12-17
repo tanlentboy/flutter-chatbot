@@ -151,7 +151,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ),
         ),
         Container(
-          padding: const EdgeInsets.only(top: 0, left: 8, right: 8, bottom: 8),
+          padding:
+              const EdgeInsets.only(top: 0, left: 12, right: 12, bottom: 12),
           child: InputWidget(),
         ),
       ]),
@@ -214,6 +215,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 final models = Config.apis[Current.api]?.models ?? [];
                 final modelList = <PopupMenuItem<String>>[];
                 for (final model in models) {
+                  final config = Config.models[model];
+                  if (!(config?.chat ?? true)) continue;
                   modelList.add(PopupMenuItem(
                     value: model,
                     child: Text(model),
@@ -241,6 +244,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
+          onOpened: () => InputWidget.unFocus(),
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           itemBuilder: (context) => <PopupMenuItem>[
             PopupMenuItem(
@@ -374,6 +378,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ref.read(chatsProvider.notifier).notify();
                 ref.read(messagesProvider.notifier).notify();
               },
+            ),
+            ListTile(
+              minTileHeight: 48,
+              shape: const StadiumBorder(),
+              title: Text(S.of(context).workspace),
+              leading: const Icon(Icons.workspaces_outlined),
+              onTap: () => Navigator.of(context).pushNamed("/workspace"),
             ),
             ListTile(
               minTileHeight: 48,

@@ -108,6 +108,33 @@ class Util {
   static String _keepTwo(int n) => n.toString().padLeft(2, '0');
 }
 
+class Widgets {
+  static Widget modelAvatar(String? id) {
+    final config = Config.models[id];
+    final path = config?.avatar;
+
+    Icon? child;
+    Color? color;
+    FileImage? image;
+
+    if (path != null) {
+      color = Colors.transparent;
+      image = FileImage(
+        File(Config.avatarFilePath(path)),
+      );
+    } else {
+      child = const Icon(Icons.smart_toy);
+    }
+
+    return CircleAvatar(
+      key: ValueKey<String?>(path),
+      backgroundColor: color,
+      backgroundImage: image,
+      child: child,
+    );
+  }
+}
+
 class Dialogs {
   static Future<List<String>?> input({
     required BuildContext context,

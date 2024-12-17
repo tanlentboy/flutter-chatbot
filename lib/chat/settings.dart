@@ -67,6 +67,8 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
     }
 
     for (final model in models) {
+      final config = Config.models[model];
+      if (!(config?.chat ?? true)) continue;
       modelList.add(DropdownMenuItem(
         value: model,
         child: Text(model, overflow: TextOverflow.ellipsis),

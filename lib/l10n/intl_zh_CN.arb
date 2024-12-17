@@ -121,5 +121,14 @@
     "check_for_updates": "检查更新",
 
     "delete_image": "删除图片",
-    "ensure_delete_image": "确定要删除图片？"
+    "ensure_delete_image": "确定要删除图片？",
+
+    "task": "任务",
+    "document": "文档",
+    "workspace": "工作空间",
+    "chat_model": "对话模型",
+    "model_name": "模型名称",
+    "model_avatar": "模型头像",
+    "chat_model_hint": "是否是对话模型",
+    "model_avatar_hint": "点击选择一个模型头像"
 }
