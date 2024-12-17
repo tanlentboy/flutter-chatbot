@@ -1,3 +1,11 @@
+0.3.1 (2024-12-17)
+
+    * Add: Workspace.
+    * Improve: Input Widget.
+
+    * 增加：工作空间
+    * 改进：输入组件
+
 0.2.10 (2024-12-13)
 
     * Add: Checking for updates.
