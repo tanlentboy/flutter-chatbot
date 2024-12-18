@@ -258,7 +258,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Widgets.modelAvatar(id),
+        ModelAvatar(id: id, key: ValueKey(id)),
         const SizedBox(width: 12),
         Flexible(
           child: Column(
@@ -283,7 +283,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         if (message.list.length > 1 &&
             (Current.chatStatus.isNothing ||
                 message != Current.messages.lastOrNull)) ...[
-          const SizedBox(width: 4),
+          const SizedBox(width: 8),
           SizedBox(
             width: 32,
             height: 32,
@@ -734,7 +734,7 @@ class MessageView extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Widgets.modelAvatar(id),
+        ModelAvatar(id: id, key: ValueKey(id)),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

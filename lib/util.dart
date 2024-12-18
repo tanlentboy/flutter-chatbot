@@ -108,33 +108,6 @@ class Util {
   static String _keepTwo(int n) => n.toString().padLeft(2, '0');
 }
 
-class Widgets {
-  static Widget modelAvatar(String? id) {
-    final config = Config.models[id];
-    final path = config?.avatar;
-
-    Icon? child;
-    Color? color;
-    FileImage? image;
-
-    if (path != null) {
-      color = Colors.transparent;
-      image = FileImage(
-        File(Config.avatarFilePath(path)),
-      );
-    } else {
-      child = const Icon(Icons.smart_toy);
-    }
-
-    return CircleAvatar(
-      key: ValueKey<String?>(path),
-      backgroundColor: color,
-      backgroundImage: image,
-      child: child,
-    );
-  }
-}
-
 class Dialogs {
   static Future<List<String>?> input({
     required BuildContext context,
@@ -501,6 +474,44 @@ class _InputDialogState extends State<InputDialog> {
         ),
         const SizedBox(height: 16),
       ],
+    );
+  }
+}
+
+class ModelAvatar extends StatelessWidget {
+  final String? id;
+
+  const ModelAvatar({
+    required this.id,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final avatar = Config.models[id]?.avatar;
+
+    if (avatar == null) {
+      return const CircleAvatar(
+        child: Icon(Icons.smart_toy),
+      );
+    }
+
+    return ClipOval(
+      child: Image.file(
+        File(Config.avatarFilePath(avatar)),
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        frameBuilder: (context, child, frame, loaded) {
+          if (loaded) return child;
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: frame == null ? 0 : 1,
+            curve: Curves.easeOut,
+            child: child,
+          );
+        },
+      ),
     );
   }
 }

@@ -42,12 +42,23 @@ class ModelTab extends ConsumerWidget {
       itemBuilder: (context, index) {
         final id = modelList[index];
 
-        return Ink(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
-          ),
-          child: InkWell(
+        return Card.filled(
+          margin: EdgeInsets.zero,
+          child: ListTile(
+            leading: ModelAvatar(id: id, key: ValueKey(id)),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            title: Text(
+              Config.models[id]?.name ?? id,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            subtitle: Text(
+              id,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             onTap: () => showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -56,40 +67,6 @@ class ModelTab extends ConsumerWidget {
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
                 child: _ModelEditor(id: id),
-              ),
-            ),
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
-            child: Padding(
-              padding:
-                  const EdgeInsets.only(top: 8, left: 12, right: 8, bottom: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Widgets.modelAvatar(id),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          Config.models[id]?.name ?? id,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          id,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 3),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
               ),
             ),
           ),
@@ -135,24 +112,6 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
 
   @override
   Widget build(BuildContext context) {
-    String? path = _avatar?.path;
-    if (_avatar == null) {
-      path = _model?.avatar;
-      if (path != null) {
-        path = Config.avatarFilePath(path);
-      }
-    }
-
-    Icon? child;
-    Color? color;
-    FileImage? image;
-    if (path != null) {
-      color = Colors.transparent;
-      image = FileImage(File(path));
-    } else {
-      child = const Icon(Icons.smart_toy);
-    }
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,13 +157,9 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
         ListTile(
           title: Text(S.of(context).model_avatar),
           subtitle: Text(S.of(context).model_avatar_hint),
-          trailing: CircleAvatar(
-            backgroundColor: color,
-            backgroundImage: image,
-            child: child,
-          ),
+          trailing: _buildAvatar(),
           onTap: _pickAvatar,
-          contentPadding: const EdgeInsets.only(left: 24, right: 12),
+          contentPadding: const EdgeInsets.only(left: 24, right: 16),
         ),
         const Divider(height: 1),
         const SizedBox(height: 16),
@@ -225,6 +180,40 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
         ),
         const SizedBox(height: 16),
       ],
+    );
+  }
+
+  Widget _buildAvatar() {
+    String? path = _avatar?.path;
+    if (_avatar == null) {
+      path = _model?.avatar;
+      if (path != null) {
+        path = Config.avatarFilePath(path);
+      }
+    }
+
+    if (path == null) {
+      return const CircleAvatar(
+        child: Icon(Icons.smart_toy),
+      );
+    }
+
+    return ClipOval(
+      child: Image.file(
+        File(path),
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        frameBuilder: (context, child, frame, loaded) {
+          if (loaded) return child;
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: frame == null ? 0 : 1,
+            curve: Curves.easeOut,
+            child: child,
+          );
+        },
+      ),
     );
   }
 
