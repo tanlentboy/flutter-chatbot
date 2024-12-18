@@ -3,7 +3,7 @@ version: 0.3.1+6
 description: ChatBot
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.6.0
 
 dependencies:
   flutter:
