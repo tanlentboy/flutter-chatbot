@@ -56,8 +56,6 @@ class Util {
 
       String changeLog = info["body"];
       String newVersion = info["tag_name"];
-      String apkUrl = info["assets"][0]["browser_download_url"];
-      final url = Platform.isAndroid ? apkUrl : Updater.latestUrl;
 
       showDialog(
         context: context,
@@ -72,7 +70,7 @@ class Util {
             TextButton(
               child: Text(S.of(context).download),
               onPressed: () {
-                launchUrl(Uri.parse(url));
+                launchUrl(Uri.parse(Updater.latestUrl));
                 Navigator.of(context).pop();
               },
             ),
