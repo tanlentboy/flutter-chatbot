@@ -39,12 +39,12 @@ final mdExtensionSet = ExtensionSet(
 
 final codeDarkTheme = Map.of(atomOneDarkTheme)
   ..["root"] = TextStyle(
-      color: Colors.white.withOpacity(0.7),
+      color: Colors.white.withValues(alpha: 0.7),
       backgroundColor: Colors.transparent);
 
 final codeLightTheme = Map.of(atomOneLightTheme)
   ..["root"] = TextStyle(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withValues(alpha: 0.7),
       backgroundColor: Colors.transparent);
 
 String markdownToText(String markdown) {

@@ -54,8 +54,8 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
           Container(
             decoration: BoxDecoration(
               color: theme == codeDarkTheme
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.blueGrey.withOpacity(0.3),
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.blueGrey.withValues(alpha: 0.3),
             ),
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Row(
@@ -126,8 +126,8 @@ class CodeBlockBuilder2 extends MarkdownElementBuilder {
           Container(
             decoration: BoxDecoration(
               color: theme == codeDarkTheme
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.blueGrey.withOpacity(0.3),
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.blueGrey.withValues(alpha: 0.3),
             ),
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Row(
