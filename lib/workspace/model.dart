@@ -233,7 +233,7 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
     setState(() => _avatar = result);
   }
 
-  void _save() {
+  Future<void> _save() async {
     final name = _ctrl.text;
     if (name.isEmpty) return;
 
@@ -243,10 +243,10 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
       final pos = name.lastIndexOf('.');
       final suffix = pos > 0 ? name.substring(pos) : "";
       final time = DateTime.now().millisecondsSinceEpoch;
-      if (avatar != null) File(Config.avatarFilePath(avatar)).deleteSync();
+      if (avatar != null) await File(Config.avatarFilePath(avatar)).delete();
 
       avatar = "$time$suffix";
-      File(_avatar!.path).copySync(Config.avatarFilePath(avatar));
+      await _avatar!.saveTo(Config.avatarFilePath(avatar));
     }
 
     final chat = _chat ?? true;
