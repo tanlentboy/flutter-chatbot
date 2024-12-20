@@ -331,8 +331,8 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       blockquoteDecoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.brightness == Brightness.light
-            ? Colors.blueGrey.withValues(alpha: 0.3)
-            : Colors.black.withValues(alpha: 0.3),
+            ? Colors.blueGrey.withOpacity(0.3)
+            : Colors.black.withOpacity(0.3),
       ),
     );
 
@@ -772,8 +772,8 @@ class MessageView extends StatelessWidget {
       blockquoteDecoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.brightness == Brightness.light
-            ? Colors.blueGrey.withValues(alpha: 0.3)
-            : Colors.black.withValues(alpha: 0.3),
+            ? Colors.blueGrey.withOpacity(0.3)
+            : Colors.black.withOpacity(0.3),
       ),
     );
 
