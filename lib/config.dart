@@ -197,7 +197,7 @@ class Backup {
 }
 
 class Updater {
-  static String? version;
+  static List<int>? versionCode;
   static bool firstCheck = false;
   static const String latestUrl =
       "https://github.com/fanenr/flutter-chatbot/releases/latest";
@@ -205,7 +205,10 @@ class Updater {
       "https://api.github.com/repos/fanenr/flutter-chatbot/releases/latest";
 
   static Future<Map?> check() async {
-    version ??= (await PackageInfo.fromPlatform()).version;
+    if (versionCode == null) {
+      final version = (await PackageInfo.fromPlatform()).version;
+      versionCode = version.split('.').map(int.parse).toList();
+    }
 
     final client = Client();
     final response = await client.get(Uri.parse(apiEndPoint));
@@ -215,7 +218,16 @@ class Updater {
     }
 
     final json = jsonDecode(response.body);
-    return version != json["tag_name"] ? json : null;
+    return _isNewer(json["tag_name"]) ? json : null;
+  }
+
+  static bool _isNewer(String latest) {
+    final latestCode = latest.substring(1).split('.').map(int.parse).toList();
+    for (int i = 0; i < 3; i++) {
+      if (latestCode[i] < versionCode![i]) return false;
+      if (latestCode[i] > versionCode![i]) return true;
+    }
+    return false;
   }
 }
 
