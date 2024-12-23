@@ -65,11 +65,10 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
             maxHeight: MediaQuery.of(context).size.height / 4,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: const BorderRadius.all(Radius.circular(4)),
             border: Border.all(
-              width: 1,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
           child: Column(
@@ -87,42 +86,60 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                     constraints: const BoxConstraints(),
                     hintText: S.of(context).enter_message,
                     contentPadding: const EdgeInsets.only(
-                        top: 16, left: 16, right: 16, bottom: 8),
+                        top: 8, left: 16, right: 16, bottom: 8),
                   ),
                 ),
               ),
-              Row(children: [
-                const SizedBox(width: 5),
-                IconButton(
-                  icon: const Icon(Icons.upload_file),
-                  onPressed: _addFile,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.language),
-                  isSelected: LlmNotifier.googleSearch,
-                  selectedIcon: const Icon(Icons.language),
-                  onPressed: () => setState(() =>
-                      LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
-                ),
-                if (_images.isNotEmpty)
-                  IconButton(
-                    icon: Badge(
-                      label: Text("${_images.length}"),
-                      child: Icon(Icons.image),
+              Row(
+                children: [
+                  const SizedBox(width: 8),
+                  SizedBox.square(
+                    dimension: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.upload_file),
+                      padding: EdgeInsets.zero,
+                      onPressed: _addFile,
                     ),
-                    isSelected: true,
-                    onPressed: _editImages,
                   ),
-                const Expanded(child: SizedBox()),
-                IconButton(
-                  icon: const Icon(Icons.arrow_upward),
-                  isSelected: Current.chatStatus.isResponding,
-                  selectedIcon: const Icon(Icons.pause),
-                  onPressed: _sendMessage,
-                ),
-                const SizedBox(width: 5),
-              ]),
-              const SizedBox(height: 5),
+                  const SizedBox(width: 4),
+                  SizedBox.square(
+                    dimension: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.language),
+                      isSelected: LlmNotifier.googleSearch,
+                      selectedIcon: const Icon(Icons.language),
+                      padding: EdgeInsets.zero,
+                      onPressed: () => setState(() =>
+                          LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
+                    ),
+                  ),
+                  if (_images.isNotEmpty) ...[
+                    const SizedBox(width: 4),
+                    SizedBox.square(
+                      dimension: 36,
+                      child: IconButton(
+                        icon: const Icon(Icons.image_outlined),
+                        isSelected: true,
+                        padding: EdgeInsets.zero,
+                        onPressed: _editImages,
+                      ),
+                    ),
+                  ],
+                  const Expanded(child: SizedBox()),
+                  SizedBox.square(
+                    dimension: 36,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_upward),
+                      selectedIcon: const Icon(Icons.pause),
+                      isSelected: Current.chatStatus.isResponding,
+                      padding: EdgeInsets.zero,
+                      onPressed: _sendMessage,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -246,6 +263,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 ],
               ),
             ),
+            const Divider(height: 1),
             Container(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.6,

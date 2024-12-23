@@ -325,26 +325,24 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final markdownStyleSheet = MarkdownStyleSheet(
       codeblockPadding: EdgeInsets.all(0),
       codeblockDecoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.surfaceContainer,
       ),
       blockquoteDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.brightness == Brightness.light
             ? Colors.blueGrey.withOpacity(0.3)
             : Colors.black.withOpacity(0.3),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
     );
-
-    final background = role.isUser
-        ? colorScheme.secondaryContainer
-        : colorScheme.surfaceContainerHighest;
 
     return LayoutBuilder(
       key: UniqueKey(),
       builder: (context, constraints) => Ink(
         decoration: BoxDecoration(
-          color: background,
+          color: role.isAssistant
+              ? colorScheme.surfaceContainer
+              : colorScheme.secondaryContainer,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             bottomLeft: const Radius.circular(16),
@@ -368,7 +366,6 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             child: switch (text.isNotEmpty) {
               true => MarkdownBody(
                   data: text,
-                  shrinkWrap: true,
                   extensionSet: mdExtensionSet,
                   onTapLink: (text, href, title) =>
                       Dialogs.openLink(context: context, link: href),
@@ -777,19 +774,15 @@ class MessageView extends StatelessWidget {
       ),
     );
 
-    final background = role.isUser
-        ? colorScheme.secondaryContainer
-        : colorScheme.surfaceContainerHighest;
-
     return Container(
       padding: const EdgeInsets.all(12),
-      constraints: role.isUser
-          ? BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.8,
-            )
-          : null,
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * (role.isUser ? 0.9 : 1),
+      ),
       decoration: BoxDecoration(
-        color: background,
+        color: role.isAssistant
+            ? colorScheme.surfaceContainer
+            : colorScheme.secondaryContainer,
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(16),
           bottomLeft: const Radius.circular(16),
