@@ -65,7 +65,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
             maxHeight: MediaQuery.of(context).size.height / 4,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
             borderRadius: const BorderRadius.all(Radius.circular(4)),
             border: Border.all(
               color: Theme.of(context).colorScheme.outlineVariant,
@@ -125,6 +125,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                       ),
                     ),
                   ],
+                  const SizedBox(width: 4),
                   const Expanded(child: SizedBox()),
                   SizedBox.square(
                     dimension: 36,
@@ -313,7 +314,6 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     }
 
     final messages = Current.messages;
-
     final user = MessageItem(
       text: text,
       role: MessageRole.user,
@@ -339,6 +339,14 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
     if (error != null && mounted) {
       _inputCtrl.text = text;
       Dialogs.error(context: context, error: error);
+    }
+
+    final isNewChat = !Current.hasFile;
+    Current.save();
+
+    if (isNewChat) {
+      ref.read(chatsProvider.notifier).notify();
+      ref.read(chatProvider.notifier).notify();
     }
   }
 }

@@ -199,7 +199,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           contentPadding: const EdgeInsets.only(left: 24, right: 16),
           value: Config.cic.enable ?? true,
           subtitle: Text(s.image_enable_hint),
-          onChanged: (value) async {
+          onChanged: (value) {
             setState(() => Config.cic.enable = value);
             Config.save();
           },

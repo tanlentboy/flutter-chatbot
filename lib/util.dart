@@ -375,7 +375,10 @@ class Dialogs {
   }
 }
 
-typedef InputDialogField = ({String? hint, String? text});
+typedef InputDialogField = ({
+  String? hint,
+  String? text,
+});
 
 class InputDialog extends StatefulWidget {
   final String title;
@@ -442,6 +445,7 @@ class _InputDialogState extends State<InputDialog> {
               for (int i = 0; i < _ctrls.length; i++) ...[
                 SizedBox(height: i == 0 ? 0 : 8),
                 TextField(
+                  maxLines: null,
                   controller: _ctrls[i],
                   decoration: InputDecoration(
                     labelText: widget.fields[i].hint,

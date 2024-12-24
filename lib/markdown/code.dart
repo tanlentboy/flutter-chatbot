@@ -59,9 +59,10 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
             ),
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(language),
+                const SizedBox(width: 16),
+                const Expanded(child: SizedBox()),
                 InkWell(
                   onTap: () => Util.copyText(
                     context: context,
@@ -131,9 +132,10 @@ class CodeBlockBuilder2 extends MarkdownElementBuilder {
             ),
             padding: EdgeInsets.only(left: 16, right: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(language),
+                const SizedBox(width: 16),
+                const Expanded(child: SizedBox()),
                 InkWell(
                   onTap: () => Util.copyText(
                     context: context,

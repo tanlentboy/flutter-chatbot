@@ -591,6 +591,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     if (error != null && mounted) {
       Dialogs.error(context: context, error: error);
     }
+    Current.save();
   }
 
   Future<void> _longPress() async {
@@ -763,14 +764,14 @@ class MessageView extends StatelessWidget {
     final markdownStyleSheet = MarkdownStyleSheet(
       codeblockPadding: EdgeInsets.all(0),
       codeblockDecoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
-        color: colorScheme.surfaceContainer,
       ),
       blockquoteDecoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
         color: colorScheme.brightness == Brightness.light
             ? Colors.blueGrey.withOpacity(0.3)
             : Colors.black.withOpacity(0.3),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
     );
 
