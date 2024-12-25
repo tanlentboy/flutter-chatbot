@@ -20,6 +20,9 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static String m0(text) =>
+      "The ${text} placeholder in the prompt template will be replaced with the user\'s message. If unsure, leave empty to use the built-in template.";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "all_chats": MessageLookupByLibrary.simpleMessage("All Chats"),
@@ -169,6 +172,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "text_to_speech":
             MessageLookupByLibrary.simpleMessage("Text To Speech"),
         "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "title_enable_hint": MessageLookupByLibrary.simpleMessage(
+            "If disabled, the user\'s message will be used as the title"),
+        "title_generation":
+            MessageLookupByLibrary.simpleMessage("Title Generation"),
+        "title_generation_hint": m0,
+        "title_prompt": MessageLookupByLibrary.simpleMessage("Prompt"),
+        "title_prompt_hint": MessageLookupByLibrary.simpleMessage(
+            "Template for the title generation prompt"),
         "up_to_date":
             MessageLookupByLibrary.simpleMessage("You are up to date"),
         "voice": MessageLookupByLibrary.simpleMessage("Voice"),

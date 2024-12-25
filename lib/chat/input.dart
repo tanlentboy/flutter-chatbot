@@ -249,7 +249,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
           children: [
             Padding(
               padding: const EdgeInsets.only(
-                  top: 16, left: 24, right: 12, bottom: 8),
+                  top: 16, left: 24, right: 12, bottom: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -334,19 +334,30 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     _images.clear();
     _inputCtrl.clear();
-    final error = await ref.read(llmProvider.notifier).chat(assistant);
+
+    final results = await Future.wait([
+      _generateTitle(text).catchError((e) => text),
+      ref.read(llmProvider.notifier).chat(assistant),
+    ]);
+
+    final title = results[0];
+    final error = results[1];
 
     if (error != null && mounted) {
       _inputCtrl.text = text;
       Dialogs.error(context: context, error: error);
     }
 
-    final isNewChat = !Current.hasFile;
-    Current.save();
-
-    if (isNewChat) {
-      ref.read(chatsProvider.notifier).notify();
+    if (title != null) {
+      Current.newChat(title);
       ref.read(chatProvider.notifier).notify();
+      ref.read(chatsProvider.notifier).notify();
     }
+    Current.save();
+  }
+
+  Future<String?> _generateTitle(String text) async {
+    if (Current.hasChat) return null;
+    return await generateTitle(text);
   }
 }

@@ -22,24 +22,17 @@ import "dart:isolate";
 import "dart:convert";
 
 class Current {
-  static File? file;
-  static ChatConfig? chat;
+  static File? _file;
+  static ChatConfig? _chat;
 
   static CoreConfig core = Config.core;
   static final List<Message> messages = [];
   static TtsStatus ttsStatus = TtsStatus.nothing;
   static ChatStatus chatStatus = ChatStatus.nothing;
 
-  static void clear() {
-    chat = null;
-    file = null;
-    messages.clear();
-    core = Config.core;
-  }
-
   static Future<void> load(ChatConfig chat) async {
-    file = File(Config.chatFilePath(chat.fileName));
-    final from = file;
+    _file = File(Config.chatFilePath(chat.fileName));
+    final from = _file;
 
     final json = await Isolate.run(() async {
       return jsonDecode(await from!.readAsString());
@@ -57,59 +50,60 @@ class Current {
   }
 
   static Future<void> save() async {
-    if (chat == null) {
-      if (messages.isEmpty) return;
-      initChat(messages.first.item.text);
-    }
-
-    if (file == null) {
-      Config.chats.insert(0, chat!);
-      Config.save();
-      initFile();
-    }
-
-    await file!.writeAsString(jsonEncode({
+    await _file!.writeAsString(jsonEncode({
       "core": core,
       "messages": messages,
     }));
   }
 
-  static void initChat(String title) {
+  static void clear() {
+    _chat = null;
+    _file = null;
+    messages.clear();
+    core = Config.core;
+  }
+
+  static void newChat(String title) {
     final now = DateTime.now();
     final timestamp = now.millisecondsSinceEpoch.toString();
 
     final time = Util.formatDateTime(now);
     final fileName = "$timestamp.json";
 
-    chat = ChatConfig(
+    _chat = ChatConfig(
       time: time,
       title: title,
       fileName: fileName,
     );
-  }
+    _file = File(Config.chatFilePath(fileName));
 
-  static void initFile() {
-    file = File(Config.chatFilePath(chat!.fileName));
+    Config.chats.insert(0, _chat!);
+    Config.save();
   }
-
-  static bool get hasChat => chat != null;
-  static bool get hasFile => file != null;
 
   static String? get bot => core.bot;
   static String? get api => core.api;
   static String? get model => core.model;
 
-  static String? get apiUrl => Config.apis[api]?.url;
-  static String? get apiKey => Config.apis[api]?.key;
-  static String? get apiType => Config.apis[api]?.type;
-  static BotConfig? get _bot => Config.bots[core.bot];
+  static ApiConfig? get _api => Config.apis[api];
+  static BotConfig? get _bot => Config.bots[bot];
 
-  static String? get title => chat?.title;
+  static String? get apiUrl => _api?.url;
+  static String? get apiKey => _api?.key;
+  static String? get apiType => _api?.type;
+
   static bool? get stream => _bot?.stream;
   static int? get maxTokens => _bot?.maxTokens;
   static double? get temperature => _bot?.temperature;
   static String? get systemPrompts => _bot?.systemPrompts;
 
+  static ChatConfig? get chat => _chat;
+  static set chat(ChatConfig? chat) => _chat = chat!;
+
+  static String? get title => _chat?.title;
+  static set title(String? title) => _chat?.title = title!;
+
+  static bool get hasChat => _chat != null;
   static bool get isOkToChat => api != null && model != null;
 }
 

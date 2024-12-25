@@ -130,5 +130,11 @@
     "model_name": "Model Name",
     "model_avatar": "Model Avatar",
     "chat_model_hint": "Is it a Chat Model.",
-    "model_avatar_hint": "Click to choose a Model Avatar."
+    "model_avatar_hint": "Click to choose a Model Avatar.",
+
+    "title_generation": "Title Generation",
+    "title_enable_hint": "If disabled, the user's message will be used as the title",
+    "title_prompt": "Prompt",
+    "title_prompt_hint": "Template for the title generation prompt",
+    "title_generation_hint": "The {text} placeholder in the prompt template will be replaced with the user's message. If unsure, leave empty to use the built-in template."
 }

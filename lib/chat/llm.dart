@@ -33,7 +33,7 @@ final llmProvider =
 
 class LlmNotifier extends AutoDisposeNotifier<void> {
   Client? _ttsClient;
-  _Client? _chatClient;
+  Client? _chatClient;
   AudioPlayer? _player;
   static bool googleSearch = false;
 
@@ -124,7 +124,11 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     notify();
 
     try {
-      _chatClient ??= _Client();
+      _chatClient ??= switch (apiType) {
+        "google" => _GoogleClient(baseUrl: apiUrl),
+        _ => Client(),
+      };
+
       BaseChatModel llm = switch (apiType) {
         "google" => ChatGoogleGenerativeAI(
             apiKey: apiKey,
@@ -176,14 +180,6 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     updateMessage(message);
     notify();
 
-    final isNewChat = !Current.hasFile;
-    Current.save();
-
-    if (isNewChat) {
-      ref.read(chatsProvider.notifier).notify();
-      ref.read(chatProvider.notifier).notify();
-    }
-
     return error;
   }
 
@@ -192,6 +188,64 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     _chatClient?.close();
     _chatClient = null;
   }
+}
+
+Future<String> generateTitle(String text) async {
+  if (!(Config.title.enable ?? false)) return text;
+
+  final model = Config.title.model;
+  final api = Config.apis[Config.title.api];
+  if (api == null || model == null) return text;
+
+  final prompt = Config.title.prompt ??
+      """
+Based on the user input below, generate a concise and relevant title.
+Note: Only return the title text, without any additional content!
+
+Output examples:
+1. C Language Discussion
+2. 数学问题解答
+3. 電影推薦
+
+User input:
+{text}
+      """
+          .trim();
+
+  final apiUrl = api.url;
+  final apiKey = api.key;
+  final apiType = api.type;
+
+  final client = switch (apiType) {
+    "google" => _GoogleClient(
+        baseUrl: apiUrl,
+        enableSearch: false,
+      ),
+    _ => Client(),
+  };
+
+  BaseChatModel llm = switch (apiType) {
+    "google" => ChatGoogleGenerativeAI(
+        apiKey: apiKey,
+        client: client,
+        baseUrl: apiUrl,
+        defaultOptions: ChatGoogleGenerativeAIOptions(
+          model: model,
+        ),
+      ),
+    _ => ChatOpenAI(
+        apiKey: apiKey,
+        client: client,
+        baseUrl: apiUrl,
+        defaultOptions: ChatOpenAIOptions(
+          model: model,
+        ),
+      ),
+  };
+
+  final chain = ChatPromptTemplate.fromTemplate(prompt).pipe(llm);
+  final res = await chain.invoke({"text": text});
+  return res.output.content.trim();
 }
 
 List<ChatMessage> _buildContext(List<Message> list) {
@@ -231,28 +285,52 @@ List<ChatMessage> _buildContext(List<Message> list) {
   return context;
 }
 
-class _Client extends BaseClient {
-  final Client _inner = Client();
+class _GoogleClient extends BaseClient {
+  final String baseUrl;
+  final bool enableSearch;
 
-  void _handleBody(Request request) {
-    final json = jsonDecode(request.body);
-    if (LlmNotifier.googleSearch) {
-      json["tools"] = [
+  final Client _client = Client();
+
+  _GoogleClient({
+    required this.baseUrl,
+    this.enableSearch = true,
+  });
+
+  BaseRequest _hook(BaseRequest origin) {
+    if (origin is! Request) {
+      return origin;
+    }
+
+    final request = Request(
+      origin.method,
+      Uri.parse("${origin.url}".replaceFirst(
+        "https://generativelanguage.googleapis.com/v1beta",
+        baseUrl,
+      )),
+    );
+    request.headers.addAll(origin.headers);
+
+    final bodyJson = jsonDecode(origin.body);
+
+    if (enableSearch && LlmNotifier.googleSearch) {
+      bodyJson["tools"] = const [
         {"google_search": {}},
       ];
     }
-    request.body = jsonEncode(json);
+
+    request.body = jsonEncode(bodyJson);
+    return request;
   }
 
   @override
   Future<StreamedResponse> send(BaseRequest request) async {
-    if (request is Request) _handleBody(request);
-    return _inner.send(request);
+    request = _hook(request);
+    return _client.send(request);
   }
 
   @override
   void close() {
     super.close();
-    _inner.close();
+    _client.close();
   }
 }

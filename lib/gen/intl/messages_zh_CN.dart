@@ -20,6 +20,8 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh_CN';
 
+  static String m0(text) => "提示词模板中的 ${text} 占位变量会被用户消息替换。如不清楚，可留空以使用内置模板。";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "all_chats": MessageLookupByLibrary.simpleMessage("所有对话"),
@@ -81,7 +83,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gallery": MessageLookupByLibrary.simpleMessage("图库"),
         "generate": MessageLookupByLibrary.simpleMessage("生成"),
         "image_compress_failed": MessageLookupByLibrary.simpleMessage("图片压缩失败"),
-        "image_enable_hint": MessageLookupByLibrary.simpleMessage("压缩失败将使用原图"),
+        "image_enable_hint": MessageLookupByLibrary.simpleMessage("压缩失败则将使用原图"),
         "image_generation": MessageLookupByLibrary.simpleMessage("图像生成"),
         "image_hint": MessageLookupByLibrary.simpleMessage(
             "质量范围应在 1-100，质量越低压缩率越高。最小宽度与最小高度用于限制图片缩放，如不清楚，请留空。"),
@@ -135,6 +137,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "temperature": MessageLookupByLibrary.simpleMessage("温度"),
         "text_to_speech": MessageLookupByLibrary.simpleMessage("文本转语音"),
         "title": MessageLookupByLibrary.simpleMessage("ChatBot"),
+        "title_enable_hint":
+            MessageLookupByLibrary.simpleMessage("禁用则将以用户消息为标题"),
+        "title_generation": MessageLookupByLibrary.simpleMessage("标题生成"),
+        "title_generation_hint": m0,
+        "title_prompt": MessageLookupByLibrary.simpleMessage("提示词"),
+        "title_prompt_hint":
+            MessageLookupByLibrary.simpleMessage("用于生成标题的提示词模板"),
         "up_to_date": MessageLookupByLibrary.simpleMessage("已是最新版本"),
         "voice": MessageLookupByLibrary.simpleMessage("音色"),
         "workspace": MessageLookupByLibrary.simpleMessage("工作空间")

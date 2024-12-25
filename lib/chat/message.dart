@@ -271,9 +271,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               ),
               const SizedBox(height: 1),
               Text(
-                item.time ??
-                    Current.chat?.time ??
-                    Util.formatDateTime(DateTime.now()),
+                item.time ?? Util.formatDateTime(DateTime.now()),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 3),
@@ -744,9 +742,7 @@ class MessageView extends StatelessWidget {
             ),
             const SizedBox(height: 1),
             Text(
-              item.time ??
-                  Current.chat?.time ??
-                  Util.formatDateTime(DateTime.now()),
+              item.time ?? Util.formatDateTime(DateTime.now()),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 3),

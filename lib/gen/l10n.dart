@@ -1169,6 +1169,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Title Generation`
+  String get title_generation {
+    return Intl.message(
+      'Title Generation',
+      name: 'title_generation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If disabled, the user's message will be used as the title`
+  String get title_enable_hint {
+    return Intl.message(
+      'If disabled, the user\'s message will be used as the title',
+      name: 'title_enable_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prompt`
+  String get title_prompt {
+    return Intl.message(
+      'Prompt',
+      name: 'title_prompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Template for the title generation prompt`
+  String get title_prompt_hint {
+    return Intl.message(
+      'Template for the title generation prompt',
+      name: 'title_prompt_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The {text} placeholder in the prompt template will be replaced with the user's message. If unsure, leave empty to use the built-in template.`
+  String title_generation_hint(Object text) {
+    return Intl.message(
+      'The $text placeholder in the prompt template will be replaced with the user\'s message. If unsure, leave empty to use the built-in template.',
+      name: 'title_generation_hint',
+      desc: '',
+      args: [text],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -27,6 +27,7 @@ class Config {
   static late final CicConfig cic;
   static late final CoreConfig core;
   static late final ImageConfig image;
+  static late final TitleConfig title;
   static final List<ChatConfig> chats = [];
   static final Map<String, BotConfig> bots = {};
   static final Map<String, ApiConfig> apis = {};
@@ -78,6 +79,7 @@ class Config {
         "bots": bots,
         "apis": apis,
         "image": image,
+        "title": title,
         "chats": chats,
         "models": models,
       };
@@ -89,6 +91,7 @@ class Config {
     final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
     final imageJson = json["image"] ?? {};
+    final titleJson = json["title"] ?? {};
     final chatsJson = json["chats"] ?? [];
     final modelsJson = json["models"] ?? {};
 
@@ -96,6 +99,7 @@ class Config {
     cic = CicConfig.fromJson(imgJson);
     core = CoreConfig.fromJson(coreJson);
     image = ImageConfig.fromJson(imageJson);
+    title = TitleConfig.fromJson(titleJson);
 
     for (final chat in chatsJson) {
       chats.add(ChatConfig.fromJson(chat));
@@ -467,6 +471,42 @@ class ModelConfig {
         chat: json["chat"],
         name: json["name"],
         avatar: json["avatar"],
+      );
+}
+
+class TitleConfig {
+  bool? enable;
+  String? _api;
+  String? _model;
+  String? prompt;
+
+  TitleConfig({
+    String? api,
+    String? model,
+    this.enable,
+    this.prompt,
+  })  : _api = api,
+        _model = model;
+
+  String? get api => Config.apis.containsKey(_api) ? _api : null;
+  String? get model =>
+      (Config.apis[_api]?.models.contains(_model) ?? false) ? _model : null;
+
+  set api(String? value) => _api = value;
+  set model(String? value) => _model = value;
+
+  Map toJson() => {
+        "enable": enable,
+        "api": api,
+        "model": model,
+        "prompt": prompt,
+      };
+
+  factory TitleConfig.fromJson(Map json) => TitleConfig(
+        enable: json["enable"],
+        api: json["api"],
+        model: json["model"],
+        prompt: json["prompt"],
       );
 }
 

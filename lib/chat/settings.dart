@@ -167,9 +167,10 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
   void _save() {
     final title = _titleCtrl.text;
     final oldModel = Current.model;
-    final oldTitle = Current.title;
+    final oldTitle = Current.title ?? "";
+    final bool hasChat = Current.hasChat;
 
-    if (title.isEmpty && Current.hasChat) {
+    if (title.isEmpty && hasChat) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).enter_a_title),
@@ -177,25 +178,25 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
       return;
     }
 
-    if (Current.hasChat) {
-      Current.chat!.title = title;
-    } else if (title.isNotEmpty) {
-      Current.initChat(title);
-    }
-
     Current.core = CoreConfig(
       bot: _bot,
       api: _api,
       model: _model,
     );
-    Current.save();
 
-    if (title != oldTitle && Current.hasFile) {
+    if (title != oldTitle) {
+      if (hasChat) {
+        Current.title = title;
+      } else {
+        Current.newChat(title);
+      }
+      ref.read(chatProvider.notifier).notify();
       ref.read(chatsProvider.notifier).notify();
-    }
-    if (title != oldTitle || _model != oldModel) {
+    } else if (_model != oldModel) {
       ref.read(chatProvider.notifier).notify();
     }
+
+    if (Current.hasChat) Current.save();
     if (mounted) Navigator.of(context).pop();
   }
 }

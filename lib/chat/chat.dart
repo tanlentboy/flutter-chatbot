@@ -262,10 +262,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
               onTap: () {
                 InputWidget.unFocus();
-                if (!Current.hasChat || !Current.hasFile) return;
+                if (!Current.hasChat) return;
 
-                Current.chat = null;
-                Current.file = null;
+                Current.newChat(Current.title!);
                 Current.save();
 
                 Util.showSnackBar(
@@ -286,7 +285,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
               onTap: () async {
                 InputWidget.unFocus();
-                if (!Current.hasChat || !Current.hasFile) return;
+                if (_messages.isEmpty) return;
 
                 final result = await showDialog<bool>(
                   context: context,
@@ -307,7 +306,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 );
                 if (!(result ?? false)) return;
 
-                Current.messages.clear();
+                _messages.clear();
                 Current.save();
 
                 ref.read(messagesProvider.notifier).notify();
