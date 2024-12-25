@@ -1,3 +1,13 @@
+0.3.2 (2024-12-25)
+
+    * Add: Title Generation.
+    * Improve: Input Widget.
+    * Fix: Google Gemini API proxy not working.
+
+    * 增加：标题生成
+    * 改进：输入组件
+    * 修复：Google Gemini 接口代理无效。
+
 0.3.1 (2024-12-17)
 
     * Add: Workspace.
