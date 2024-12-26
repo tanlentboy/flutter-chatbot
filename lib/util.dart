@@ -114,16 +114,15 @@ class Dialogs {
   }) async {
     return await showModalBottomSheet<List<String>>(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: InputDialog(
-            title: title,
-            fields: fields,
-          ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: InputDialog(
+          title: title,
+          fields: fields,
         ),
       ),
     );
@@ -164,7 +163,8 @@ class Dialogs {
   }) async {
     return await showModalBottomSheet<String>(
       context: context,
-      isScrollControlled: true,
+      useSafeArea: true,
+      scrollControlDisabledMaxHeightRatio: 0.7,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -188,10 +188,7 @@ class Dialogs {
               ),
             ),
             const Divider(height: 1),
-            Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
-              ),
+            Flexible(
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: list.length,
@@ -416,6 +413,8 @@ class _InputDialogState extends State<InputDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final fields = widget.fields;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -437,23 +436,20 @@ class _InputDialogState extends State<InputDialog> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(left: 24, right: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (int i = 0; i < _ctrls.length; i++) ...[
-                SizedBox(height: i == 0 ? 0 : 8),
-                TextField(
-                  maxLines: null,
-                  controller: _ctrls[i],
-                  decoration: InputDecoration(
-                    labelText: widget.fields[i].hint,
-                    border: const UnderlineInputBorder(),
-                  ),
-                ),
-              ],
-            ],
+        Flexible(
+          child: ListView.separated(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(left: 24, right: 24),
+            itemCount: fields.length,
+            itemBuilder: (context, index) => TextField(
+              maxLines: null,
+              controller: _ctrls[index],
+              decoration: InputDecoration(
+                labelText: fields[index].hint,
+                border: const UnderlineInputBorder(),
+              ),
+            ),
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
           ),
         ),
         const SizedBox(height: 24),
@@ -476,6 +472,41 @@ class _InputDialogState extends State<InputDialog> {
         ),
         const SizedBox(height: 16),
       ],
+    );
+  }
+}
+
+class InfoCard extends StatelessWidget {
+  final String info;
+
+  const InfoCard({
+    required this.info,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card.outlined(
+      margin: const EdgeInsets.only(left: 16, right: 16),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                info,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

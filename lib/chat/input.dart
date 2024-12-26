@@ -155,12 +155,12 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     if (Current.chatStatus.isResponding) {
       icon = Icons.pause;
-      foreground = Colors.white;
       background = Theme.of(context).colorScheme.primaryContainer;
+      foreground = Theme.of(context).colorScheme.onPrimaryContainer;
     } else {
       icon = Icons.arrow_upward;
       if (_inputCtrl.text.isEmpty) {
-        background = Colors.grey.withOpacity(0.3);
+        background = Colors.grey.withOpacity(0.2);
       } else {
         background = Theme.of(context).colorScheme.primaryContainer;
         foreground = Theme.of(context).colorScheme.onPrimaryContainer;
@@ -320,7 +320,27 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const SizedBox(width: 24),
+                TextButton(
+                  onPressed: () {
+                    setState(() => _images.clear());
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(S.of(context).clear),
+                ),
+                const Expanded(child: SizedBox()),
+                TextButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).ok),
+                ),
+                const SizedBox(width: 24),
+              ],
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

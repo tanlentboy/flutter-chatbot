@@ -342,7 +342,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
 
     final result = await showModalBottomSheet<bool>(
       context: context,
-      isScrollControlled: true,
+      scrollControlDisabledMaxHeightRatio: 0.7,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -366,10 +366,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
               ),
             ),
             const Divider(height: 1),
-            Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
-              ),
+            Flexible(
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: chosen.length,

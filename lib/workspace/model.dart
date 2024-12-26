@@ -61,6 +61,7 @@ class ModelTab extends ConsumerWidget {
             ),
             onTap: () => showModalBottomSheet(
               context: context,
+              useSafeArea: true,
               isScrollControlled: true,
               builder: (context) => Padding(
                 padding: EdgeInsets.only(

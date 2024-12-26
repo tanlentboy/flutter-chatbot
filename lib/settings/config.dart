@@ -44,8 +44,8 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return ListView(
+      padding: const EdgeInsets.only(top: 16, bottom: 16),
       children: [
-        const SizedBox(height: 16),
         Padding(
           padding: padding,
           child: Text(
@@ -115,7 +115,6 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             Config.save();
           },
         ),
-        const SizedBox(height: 8),
         Padding(
           padding: padding,
           child: Text(
@@ -186,7 +185,6 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             Config.save();
           },
         ),
-        const SizedBox(height: 8),
         Padding(
           padding: padding,
           child: Text(
@@ -269,30 +267,9 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             Config.save();
           },
         ),
-        Card.outlined(
-          margin: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
-          child: Padding(
-            padding:
-                const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outlined,
-                  color: primaryColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    s.image_hint,
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
+        InfoCard(info: s.image_hint),
+        const SizedBox(height: 16),
         Padding(
           padding: padding,
           child: Text(
@@ -375,31 +352,9 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             }
           },
         ),
-        Card.outlined(
-          margin:
-              const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
-          child: Padding(
-            padding:
-                const EdgeInsets.only(top: 8, left: 12, right: 12, bottom: 8),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outlined,
-                  color: primaryColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    s.config_hint,
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
+        InfoCard(info: s.config_hint),
+        const SizedBox(height: 16),
         Padding(
           padding: padding,
           child: Text(
@@ -415,7 +370,6 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           ),
           contentPadding: padding,
         ),
-        const SizedBox(height: 8),
       ],
     );
   }
