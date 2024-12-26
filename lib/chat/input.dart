@@ -42,9 +42,21 @@ class InputWidget extends ConsumerStatefulWidget {
 typedef _Image = ({String name, MessageImage image});
 
 class _InputWidgetState extends ConsumerState<InputWidget> {
+  String _lastText = "";
   static final List<_Image> _images = [];
-  final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _inputCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _inputCtrl.addListener(() {
+      final text = _inputCtrl.text;
+      if (_lastText.isEmpty ^ text.isEmpty) {
+        setState(() {});
+      }
+      _lastText = text;
+    });
+  }
 
   @override
   void dispose() {
@@ -56,95 +68,113 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   Widget build(BuildContext context) {
     ref.watch(llmProvider);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height / 4,
-          ),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height / 4,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: TextField(
+              maxLines: null,
+              autofocus: false,
+              controller: _inputCtrl,
+              focusNode: InputWidget.focusNode,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                constraints: const BoxConstraints(),
+                hintText: S.of(context).enter_message,
+                contentPadding: const EdgeInsets.only(
+                    top: 8, left: 16, right: 16, bottom: 8),
+              ),
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          Row(
             children: [
-              Flexible(
-                child: TextField(
-                  maxLines: null,
-                  autofocus: false,
-                  controller: _inputCtrl,
-                  focusNode: InputWidget.focusNode,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    constraints: const BoxConstraints(),
-                    hintText: S.of(context).enter_message,
-                    contentPadding: const EdgeInsets.only(
-                        top: 8, left: 16, right: 16, bottom: 8),
-                  ),
+              const SizedBox(width: 8),
+              SizedBox.square(
+                dimension: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.upload_file),
+                  padding: EdgeInsets.zero,
+                  onPressed: _addFile,
                 ),
               ),
-              Row(
-                children: [
-                  const SizedBox(width: 8),
-                  SizedBox.square(
-                    dimension: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.upload_file),
-                      padding: EdgeInsets.zero,
-                      onPressed: _addFile,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  SizedBox.square(
-                    dimension: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.language),
-                      isSelected: LlmNotifier.googleSearch,
-                      selectedIcon: const Icon(Icons.language),
-                      padding: EdgeInsets.zero,
-                      onPressed: () => setState(() =>
-                          LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
-                    ),
-                  ),
-                  if (_images.isNotEmpty) ...[
-                    const SizedBox(width: 4),
-                    SizedBox.square(
-                      dimension: 36,
-                      child: IconButton(
-                        icon: const Icon(Icons.image_outlined),
-                        isSelected: true,
-                        padding: EdgeInsets.zero,
-                        onPressed: _editImages,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(width: 4),
-                  const Expanded(child: SizedBox()),
-                  SizedBox.square(
-                    dimension: 36,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_upward),
-                      selectedIcon: const Icon(Icons.pause),
-                      isSelected: Current.chatStatus.isResponding,
-                      padding: EdgeInsets.zero,
-                      onPressed: _sendMessage,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
+              const SizedBox(width: 8),
+              SizedBox.square(
+                dimension: 36,
+                child: IconButton(
+                  icon: const Icon(Icons.language),
+                  isSelected: LlmNotifier.googleSearch,
+                  selectedIcon: const Icon(Icons.language),
+                  padding: EdgeInsets.zero,
+                  onPressed: () => setState(() =>
+                      LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
+                ),
               ),
-              const SizedBox(height: 8),
+              if (_images.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                SizedBox.square(
+                  dimension: 36,
+                  child: IconButton(
+                    icon: const Icon(Icons.image_outlined),
+                    isSelected: true,
+                    padding: EdgeInsets.zero,
+                    onPressed: _editImages,
+                  ),
+                ),
+              ],
+              const Expanded(child: SizedBox()),
+              const SizedBox(width: 8),
+              SizedBox.square(
+                dimension: 36,
+                child: _buildSendButton(),
+              ),
+              const SizedBox(width: 8),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSendButton() {
+    IconData icon;
+    Color background;
+    Color? foreground;
+
+    if (Current.chatStatus.isResponding) {
+      icon = Icons.pause;
+      foreground = Colors.white;
+      background = Theme.of(context).colorScheme.primaryContainer;
+    } else {
+      icon = Icons.arrow_upward;
+      if (_inputCtrl.text.isEmpty) {
+        background = Colors.grey.withOpacity(0.3);
+      } else {
+        background = Theme.of(context).colorScheme.primaryContainer;
+        foreground = Theme.of(context).colorScheme.onPrimaryContainer;
+      }
+    }
+
+    return IconButton(
+      icon: Icon(icon),
+      onPressed: _sendMessage,
+      padding: EdgeInsets.zero,
+      style: IconButton.styleFrom(
+        foregroundColor: foreground,
+        backgroundColor: background,
+      ),
     );
   }
 
@@ -201,9 +231,10 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
   Future<void> _addImage(ImageSource source) async {
     XFile? result;
     Uint8List? compressed;
+    final picker = ImagePicker();
 
     try {
-      result = await _imagePicker.pickImage(source: source);
+      result = await picker.pickImage(source: source);
       if (result == null) return;
     } catch (e) {
       return;

@@ -202,7 +202,6 @@ class Backup {
 
 class Updater {
   static List<int>? versionCode;
-  static bool firstCheck = false;
   static const String latestUrl =
       "https://github.com/fanenr/flutter-chatbot/releases/latest";
   static const String apiEndPoint =

@@ -324,14 +324,21 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       codeblockPadding: EdgeInsets.all(0),
       codeblockDecoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
       blockquoteDecoration: BoxDecoration(
         color: colorScheme.brightness == Brightness.light
             ? Colors.blueGrey.withOpacity(0.3)
             : Colors.black.withOpacity(0.3),
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
+    );
+
+    final radius = BorderRadius.only(
+      topLeft: const Radius.circular(12),
+      bottomLeft: const Radius.circular(12),
+      bottomRight: const Radius.circular(12),
+      topRight: Radius.circular(role.isUser ? 2 : 12),
     );
 
     return LayoutBuilder(
@@ -341,20 +348,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
           color: role.isAssistant
               ? colorScheme.surfaceContainer
               : colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            bottomLeft: const Radius.circular(16),
-            bottomRight: const Radius.circular(16),
-            topRight: Radius.circular(role.isUser ? 2 : 16),
-          ),
+          borderRadius: radius,
         ),
         child: InkWell(
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            bottomLeft: const Radius.circular(16),
-            bottomRight: const Radius.circular(16),
-            topRight: Radius.circular(role.isUser ? 2 : 16),
-          ),
+          borderRadius: radius,
           onLongPress: _longPress,
           child: Container(
             padding: const EdgeInsets.all(12),
@@ -761,14 +758,21 @@ class MessageView extends StatelessWidget {
       codeblockPadding: EdgeInsets.all(0),
       codeblockDecoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
       blockquoteDecoration: BoxDecoration(
         color: colorScheme.brightness == Brightness.light
             ? Colors.blueGrey.withOpacity(0.3)
             : Colors.black.withOpacity(0.3),
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
+    );
+
+    final radius = BorderRadius.only(
+      topLeft: const Radius.circular(12),
+      bottomLeft: const Radius.circular(12),
+      bottomRight: const Radius.circular(12),
+      topRight: Radius.circular(role.isUser ? 2 : 12),
     );
 
     return Container(
@@ -777,15 +781,10 @@ class MessageView extends StatelessWidget {
         maxWidth: MediaQuery.of(context).size.width * (role.isUser ? 0.9 : 1),
       ),
       decoration: BoxDecoration(
+        borderRadius: radius,
         color: role.isAssistant
             ? colorScheme.surfaceContainer
             : colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(16),
-          bottomLeft: const Radius.circular(16),
-          bottomRight: const Radius.circular(16),
-          topRight: Radius.circular(role.isUser ? 2 : 16),
-        ),
       ),
       child: MarkdownBody(
         data: text,

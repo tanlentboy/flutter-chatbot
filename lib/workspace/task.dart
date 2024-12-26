@@ -99,7 +99,7 @@ class _TaskTabState extends ConsumerState<TaskTab> {
         ListTile(
           title: Text(s.title_prompt),
           contentPadding: padding,
-          subtitle: Text(s.title_enable_hint),
+          subtitle: Text(s.title_prompt_hint),
           onTap: () async {
             final texts = await Dialogs.input(
               context: context,

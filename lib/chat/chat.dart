@@ -70,21 +70,23 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   void initState() {
     super.initState();
-    _scrollCtrl.addListener(_onScroll);
-    if (!Updater.firstCheck) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Updater.firstCheck = true;
-        Util.checkUpdate(
-          context: context,
-          notify: false,
-        );
-      });
-    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Util.checkUpdate(context: context, notify: false);
+    });
+
+    _scrollCtrl.addListener(() {
+      final show = ref.read(_toBottomProvider);
+      if (_scrollCtrl.position.pixels < 200) {
+        if (show) ref.read(_toBottomProvider.notifier).hide();
+      } else {
+        if (!show) ref.read(_toBottomProvider.notifier).show();
+      }
+    });
   }
 
   @override
   void dispose() {
-    _scrollCtrl.removeListener(_onScroll);
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -161,16 +163,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         ],
       ),
     );
-  }
-
-  void _onScroll() {
-    final show = ref.read(_toBottomProvider);
-
-    if (_scrollCtrl.position.pixels < 200) {
-      if (show) ref.read(_toBottomProvider.notifier).hide();
-    } else {
-      if (!show) ref.read(_toBottomProvider.notifier).show();
-    }
   }
 
   AppBar _buildAppBar() {
