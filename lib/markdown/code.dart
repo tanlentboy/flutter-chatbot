@@ -51,15 +51,13 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: theme == codeDarkTheme
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.blueGrey.withOpacity(0.3),
-            ),
-            padding: EdgeInsets.only(left: 16, right: 16),
+          ColoredBox(
+            color: theme == codeDarkTheme
+                ? Colors.black.withOpacity(0.3)
+                : Colors.blueGrey.withOpacity(0.3),
             child: Row(
               children: [
+                const SizedBox(width: 16),
                 Text(language),
                 const SizedBox(width: 16),
                 const Expanded(child: SizedBox()),
@@ -76,6 +74,7 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
                     ),
                   ),
                 ),
+                const SizedBox(width: 16),
               ],
             ),
           ),
@@ -124,31 +123,24 @@ class CodeBlockBuilder2 extends MarkdownElementBuilder {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: theme == codeDarkTheme
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.blueGrey.withOpacity(0.3),
-            ),
-            padding: EdgeInsets.only(left: 16, right: 16),
+          ColoredBox(
+            color: theme == codeDarkTheme
+                ? Colors.black.withOpacity(0.3)
+                : Colors.blueGrey.withOpacity(0.3),
             child: Row(
               children: [
+                const SizedBox(width: 16),
                 Text(language),
                 const SizedBox(width: 16),
                 const Expanded(child: SizedBox()),
-                InkWell(
-                  onTap: () => Util.copyText(
-                    context: context,
-                    text: content,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
-                    child: Text(
-                      S.current.copy,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 8),
+                  child: Text(
+                    S.current.copy,
+                    style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
+                const SizedBox(width: 16),
               ],
             ),
           ),

@@ -167,64 +167,50 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   AppBar _buildAppBar() {
     return AppBar(
-      title: Row(children: [
-        Flexible(
-          child: Consumer(
-            builder: (context, ref, child) {
-              ref.watch(chatProvider);
+      title: Row(
+        children: [
+          Flexible(
+            child: Consumer(
+              builder: (context, ref, child) {
+                ref.watch(chatProvider);
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    Current.title ?? S.of(context).new_chat,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      Current.title ?? S.of(context).new_chat,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      Current.model ?? S.of(context).no_model,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    )
+                  ],
+                );
+              },
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit, size: 18),
+            onPressed: () {
+              InputWidget.unFocus();
+              showModalBottomSheet(
+                context: context,
+                useSafeArea: true,
+                isScrollControlled: true,
+                builder: (context) => Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
                   ),
-                  Text(
-                    Current.model ?? S.of(context).no_model,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelSmall,
-                  )
-                ],
+                  child: ChatSettings(),
+                ),
               );
             },
           ),
-        ),
-        Consumer(
-          builder: (context, ref, child) {
-            ref.watch(chatProvider);
-
-            return PopupMenuButton<String>(
-              icon: const Icon(Icons.swap_vert),
-              onSelected: (value) {
-                InputWidget.unFocus();
-                Current.core = CoreConfig(
-                  bot: Current.bot,
-                  api: Current.api,
-                  model: value,
-                );
-                Current.save();
-                ref.read(chatProvider.notifier).notify();
-              },
-              itemBuilder: (context) {
-                final models = Config.apis[Current.api]?.models ?? [];
-                final modelList = <PopupMenuItem<String>>[];
-                for (final model in models) {
-                  final config = Config.models[model];
-                  if (!(config?.chat ?? true)) continue;
-                  modelList.add(PopupMenuItem(
-                    value: model,
-                    child: Text(model),
-                  ));
-                }
-                return modelList;
-              },
-              iconSize: 18,
-            );
-          },
-        ),
-      ]),
+        ],
+      ),
       leading: Builder(
         builder: (context) => IconButton(
           icon: const Icon(Icons.menu),
@@ -319,22 +305,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 title: Text(S.of(context).export_chat_as_image),
                 minTileHeight: 0,
               ),
-            ),
-            PopupMenuItem(
-              padding: EdgeInsets.zero,
-              child: ListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                leading: const Icon(Icons.settings, size: 24),
-                title: Text(S.of(context).chat_settings),
-                minTileHeight: 0,
-              ),
-              onTap: () {
-                InputWidget.unFocus();
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const ChatSettings(),
-                ));
-              },
             ),
           ],
         ),

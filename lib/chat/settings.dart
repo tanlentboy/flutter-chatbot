@@ -15,7 +15,6 @@
 
 import "chat.dart";
 import "current.dart";
-import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
 
@@ -44,122 +43,265 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final botList = <DropdownMenuItem<String>>[];
-    final apiList = <DropdownMenuItem<String>>[];
-    final modelList = <DropdownMenuItem<String>>[];
-
-    final bots = Config.bots.keys;
-    final apis = Config.apis.keys;
-    final models = Config.apis[_api]?.models ?? [];
-
-    for (final bot in bots) {
-      botList.add(DropdownMenuItem(
-        value: bot,
-        child: Text(bot, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    for (final api in apis) {
-      apiList.add(DropdownMenuItem(
-        value: api,
-        child: Text(api, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    for (final model in models) {
-      final config = Config.models[model];
-      if (!(config?.chat ?? true)) continue;
-      modelList.add(DropdownMenuItem(
-        value: model,
-        child: Text(model, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).chat_settings),
-      ),
-      body: Container(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
-        child: ListView(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding:
+              const EdgeInsets.only(top: 16, left: 24, right: 12, bottom: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                S.of(context).chat_settings,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: Navigator.of(context).pop,
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.only(left: 24, right: 24),
+          child: TextField(
+            controller: _titleCtrl,
+            decoration: InputDecoration(
+              labelText: S.of(context).chat_title,
+              border: const UnderlineInputBorder(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Flexible(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(left: 12, right: 12),
+            children: [
+              _buildBots(),
+              const SizedBox(height: 8),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 320),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                      flex: 2,
+                      child: _buildApis(),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      flex: 3,
+                      child: _buildModels(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Divider(height: 1),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const SizedBox(height: 8),
-            TextField(
-              controller: _titleCtrl,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: S.of(context).chat_title,
-              ),
+            const SizedBox(width: 24),
+            TextButton(
+              onPressed: () => setState(() {
+                _model = null;
+                _api = null;
+                _bot = null;
+              }),
+              child: Text(S.of(context).reset),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _bot,
-                    items: botList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).bot),
-                    onChanged: (it) => setState(() => _bot = it),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _api,
-                    items: apiList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).api),
-                    onChanged: (it) => setState(() {
-                      _model = null;
-                      _api = it;
-                    }),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
+            const Expanded(child: SizedBox()),
+            TextButton(
+              onPressed: Navigator.of(context).pop,
+              child: Text(S.of(context).cancel),
             ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _model,
-              items: modelList,
-              isExpanded: true,
-              menuMaxHeight: 480,
-              hint: Text(S.of(context).model),
-              onChanged: (it) => setState(() => _model = it),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: _save,
+              child: Text(S.of(context).ok),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.tonal(
-                    child: Text(S.of(context).reset),
-                    onPressed: () => setState(() {
-                      _model = null;
-                      _api = null;
-                      _bot = null;
-                    }),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: _save,
-                    child: Text(S.of(context).save),
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(width: 24),
           ],
         ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildBots() {
+    final bots = Config.bots.keys.toList();
+
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const SizedBox(width: 12),
+              Icon(
+                Icons.smart_toy,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                S.of(context).bot,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 8),
+          Stack(
+            children: [
+              const IgnorePointer(
+                child: Opacity(
+                  opacity: 0,
+                  child: ChoiceChip(
+                    label: Text("bot"),
+                    padding: EdgeInsets.all(4),
+                    selected: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: double.infinity),
+              Positioned.fill(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: 12, right: 12),
+                  itemCount: bots.length,
+                  itemBuilder: (context, index) {
+                    final bot = bots[index];
+                    return ChoiceChip(
+                      label: Text(bot),
+                      padding: const EdgeInsets.all(4),
+                      selected: _bot == bot,
+                      onSelected: (value) =>
+                          setState(() => _bot = value ? bot : null),
+                    );
+                  },
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApis() {
+    final apis = Config.apis.keys.toList();
+
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const SizedBox(width: 12),
+              Icon(
+                Icons.api,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                S.of(context).api,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          Flexible(
+            child: ListView.builder(
+              itemCount: apis.length,
+              itemBuilder: (context, index) {
+                final api = apis[index];
+                return ListTile(
+                  title: Text(api),
+                  minTileHeight: 48,
+                  selected: _api == api,
+                  onTap: () => setState(() => _api = api),
+                  contentPadding: const EdgeInsets.only(left: 16, right: 16),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModels() {
+    final models = Config.apis[_api]?.models ?? [];
+
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const SizedBox(width: 12),
+              Icon(
+                Icons.face,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 16),
+              Text(
+                S.of(context).model,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          Flexible(
+            child: ListView.builder(
+              itemCount: models.length,
+              itemBuilder: (context, index) {
+                final model = models[index];
+                return ListTile(
+                  title: Text(model),
+                  minTileHeight: 48,
+                  selected: _model == model,
+                  onTap: () => setState(() => _model = model),
+                  contentPadding: const EdgeInsets.only(left: 16, right: 16),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
       ),
     );
   }
@@ -171,10 +313,6 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
     final bool hasChat = Current.hasChat;
 
     if (title.isEmpty && hasChat) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).enter_a_title),
-      );
       return;
     }
 
