@@ -114,11 +114,11 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 dimension: 36,
                 child: IconButton(
                   icon: const Icon(Icons.language),
-                  isSelected: LlmNotifier.googleSearch,
+                  isSelected: Preferences.search,
                   selectedIcon: const Icon(Icons.language),
                   padding: EdgeInsets.zero,
-                  onPressed: () => setState(() =>
-                      LlmNotifier.googleSearch = !LlmNotifier.googleSearch),
+                  onPressed: () =>
+                      setState(() => Preferences.search = !Preferences.search),
                 ),
               ),
               if (_images.isNotEmpty) ...[

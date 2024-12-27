@@ -35,7 +35,6 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
   Client? _ttsClient;
   Client? _chatClient;
   AudioPlayer? _player;
-  static bool googleSearch = false;
 
   @override
   void build() {}
@@ -312,7 +311,7 @@ class _GoogleClient extends BaseClient {
 
     final bodyJson = jsonDecode(origin.body);
 
-    if (enableSearch && LlmNotifier.googleSearch) {
+    if (enableSearch && Preferences.search) {
       bodyJson["tools"] = const [
         {"google_search": {}},
       ];

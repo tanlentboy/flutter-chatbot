@@ -77,30 +77,34 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
         ),
         const SizedBox(height: 12),
         Flexible(
-          child: ListView(
-            shrinkWrap: true,
+          child: SingleChildScrollView(
             padding: const EdgeInsets.only(left: 12, right: 12),
-            children: [
-              _buildBots(),
-              const SizedBox(height: 8),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 320),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      flex: 2,
-                      child: _buildApis(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildBots(),
+                const SizedBox(height: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 320),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          flex: 2,
+                          child: _buildApis(),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          flex: 3,
+                          child: _buildModels(),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      flex: 3,
-                      child: _buildModels(),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -163,44 +167,46 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
             ],
           ),
           const SizedBox(height: 12),
-          const Divider(height: 1),
-          const SizedBox(height: 8),
-          Stack(
-            children: [
-              const IgnorePointer(
-                child: Opacity(
-                  opacity: 0,
-                  child: ChoiceChip(
-                    label: Text("bot"),
-                    padding: EdgeInsets.all(4),
-                    selected: true,
+          if (bots.isNotEmpty) ...[
+            const Divider(height: 1),
+            const SizedBox(height: 8),
+            Stack(
+              children: [
+                const IgnorePointer(
+                  child: Opacity(
+                    opacity: 0,
+                    child: ChoiceChip(
+                      label: Text("bot"),
+                      padding: EdgeInsets.all(4),
+                      selected: true,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: double.infinity),
-              Positioned.fill(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(left: 12, right: 12),
-                  itemCount: bots.length,
-                  itemBuilder: (context, index) {
-                    final bot = bots[index];
-                    return ChoiceChip(
-                      label: Text(bot),
-                      padding: const EdgeInsets.all(4),
-                      selected: _bot == bot,
-                      onSelected: (value) =>
-                          setState(() => _bot = value ? bot : null),
-                    );
-                  },
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 8),
+                const SizedBox(width: double.infinity),
+                Positioned.fill(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(left: 12, right: 12),
+                    itemCount: bots.length,
+                    itemBuilder: (context, index) {
+                      final bot = bots[index];
+                      return ChoiceChip(
+                        label: Text(bot),
+                        padding: const EdgeInsets.all(4),
+                        selected: _bot == bot,
+                        onSelected: (value) =>
+                            setState(() => _bot = value ? bot : null),
+                      );
+                    },
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
         ],
       ),
     );
@@ -213,7 +219,6 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
       margin: EdgeInsets.zero,
       color: Theme.of(context).colorScheme.surfaceContainer,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
@@ -234,23 +239,27 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
             ],
           ),
           const SizedBox(height: 12),
-          const Divider(height: 1),
-          Flexible(
-            child: ListView.builder(
-              itemCount: apis.length,
-              itemBuilder: (context, index) {
-                final api = apis[index];
-                return ListTile(
-                  title: Text(api),
-                  minTileHeight: 48,
-                  selected: _api == api,
-                  onTap: () => setState(() => _api = api),
-                  contentPadding: const EdgeInsets.only(left: 16, right: 16),
-                );
-              },
+          if (apis.isNotEmpty) ...[
+            const Divider(height: 1),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    for (final api in apis)
+                      ListTile(
+                        title: Text(api),
+                        minTileHeight: 48,
+                        selected: _api == api,
+                        onTap: () => setState(() => _api = api),
+                        contentPadding:
+                            const EdgeInsets.only(left: 16, right: 16),
+                      ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ],
         ],
       ),
     );
@@ -263,7 +272,6 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
       margin: EdgeInsets.zero,
       color: Theme.of(context).colorScheme.surfaceContainer,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
@@ -284,23 +292,27 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
             ],
           ),
           const SizedBox(height: 12),
-          const Divider(height: 1),
-          Flexible(
-            child: ListView.builder(
-              itemCount: models.length,
-              itemBuilder: (context, index) {
-                final model = models[index];
-                return ListTile(
-                  title: Text(model),
-                  minTileHeight: 48,
-                  selected: _model == model,
-                  onTap: () => setState(() => _model = model),
-                  contentPadding: const EdgeInsets.only(left: 16, right: 16),
-                );
-              },
+          if (models.isNotEmpty) ...[
+            const Divider(height: 1),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    for (final model in models)
+                      ListTile(
+                        title: Text(model),
+                        minTileHeight: 48,
+                        selected: _api == model,
+                        onTap: () => setState(() => _api = model),
+                        contentPadding:
+                            const EdgeInsets.only(left: 16, right: 16),
+                      ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ],
         ],
       ),
     );

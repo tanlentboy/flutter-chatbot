@@ -21,6 +21,7 @@ import "package:flutter/material.dart";
 import "package:archive/archive_io.dart";
 import "package:path_provider/path_provider.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class Config {
   static late final TtsConfig tts;
@@ -56,6 +57,8 @@ class Config {
     _initDir();
     _initFile();
     _fixChatFile();
+
+    await Preferences.init();
   }
 
   static Future<void> save() async {
@@ -231,6 +234,27 @@ class Updater {
       if (latestCode[i] > versionCode![i]) return true;
     }
     return false;
+  }
+}
+
+class Preferences {
+  static late bool _search;
+  static late SharedPreferencesAsync _prefs;
+
+  static Future<void> init() async {
+    SharedPreferences.setPrefix("chatbot");
+    _prefs = SharedPreferencesAsync();
+    await _init();
+  }
+
+  static bool get search => _search;
+  static set search(bool value) {
+    _search = value;
+    _prefs.setBool("search", value);
+  }
+
+  static Future<void> _init() async {
+    _search = await _prefs.getBool("search") ?? false;
   }
 }
 
