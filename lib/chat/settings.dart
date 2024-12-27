@@ -302,8 +302,8 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                       ListTile(
                         title: Text(model),
                         minTileHeight: 48,
-                        selected: _api == model,
-                        onTap: () => setState(() => _api = model),
+                        selected: _model == model,
+                        onTap: () => setState(() => _model = model),
                         contentPadding:
                             const EdgeInsets.only(left: 16, right: 16),
                       ),
