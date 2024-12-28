@@ -198,7 +198,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               InputWidget.unFocus();
               showModalBottomSheet(
                 context: context,
-                enableDrag: false,
                 useSafeArea: true,
                 isScrollControlled: true,
                 builder: (context) => Padding(
