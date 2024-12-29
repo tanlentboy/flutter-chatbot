@@ -95,12 +95,24 @@ class _GenerateTabState extends ConsumerState<GenerateTab>
         const SizedBox(height: 12),
         if (!_status.isNothing) LinearProgressIndicator(),
         if (_images.isNotEmpty)
-          InkWell(
-            onTap: () => Dialogs.handleImage(
-              context: context,
-              path: _images[0],
+          AspectRatio(
+            aspectRatio: _getAspectRatio(),
+            child: Ink(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                image: DecorationImage(
+                  image: FileImage(File(_images.first)),
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+              child: InkWell(
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                onTap: () => Dialogs.handleImage(
+                  context: context,
+                  path: _images.first,
+                ),
+              ),
             ),
-            child: Image.file(File(_images[0])),
           ),
       ],
     );
@@ -192,5 +204,22 @@ class _GenerateTabState extends ConsumerState<GenerateTab>
 
     if (!mounted) return;
     setState(() => _status = _Status.nothing);
+  }
+
+  double _getAspectRatio() {
+    final size = Config.image.size;
+    if (size == null) return 1;
+
+    final pos = size.indexOf('x');
+    if (pos == -1) return 1;
+
+    final width = size.substring(0, pos);
+    final height = size.substring(pos + 1);
+
+    final w = int.tryParse(width);
+    final h = int.tryParse(height);
+    if (w == null || h == null) return 1;
+
+    return w / h;
   }
 }

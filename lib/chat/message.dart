@@ -210,14 +210,14 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               width: width,
               height: width,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
                 image: DecorationImage(
                   image: MemoryImage(image.bytes),
                   fit: BoxFit.cover,
                 ),
               ),
               child: InkWell(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
                 onTap: () async {
                   InputWidget.unFocus();
 
