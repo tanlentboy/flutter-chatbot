@@ -102,8 +102,11 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final texts = await Dialogs.input(
               context: context,
               title: s.image_size,
-              fields: <InputDialogField>[
-                (hint: s.please_input, text: Config.image.size),
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.image.size,
+                ),
               ],
             );
             if (texts == null) return;
@@ -123,8 +126,11 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final texts = await Dialogs.input(
               context: context,
               title: s.image_style,
-              fields: <InputDialogField>[
-                (hint: s.please_input, text: Config.image.style),
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.image.style,
+                ),
               ],
             );
             if (texts == null) return;
@@ -144,8 +150,11 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final texts = await Dialogs.input(
               context: context,
               title: s.image_quality,
-              fields: <InputDialogField>[
-                (hint: s.please_input, text: Config.image.quality),
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.image.quality,
+                ),
               ],
             );
             if (texts == null) return;

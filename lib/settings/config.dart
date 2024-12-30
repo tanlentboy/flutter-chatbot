@@ -171,8 +171,11 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final texts = await Dialogs.input(
               context: context,
               title: s.voice,
-              fields: <InputDialogField>[
-                (hint: s.please_input, text: Config.tts.voice)
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.tts.voice,
+                ),
               ],
             );
             if (texts == null) return;
@@ -211,8 +214,11 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final texts = await Dialogs.input(
               context: context,
               title: s.quality,
-              fields: <InputDialogField>[
-                (hint: s.please_input, text: Config.cic.quality?.toString()),
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.cic.quality?.toString(),
+                ),
               ],
             );
             if (texts == null) return;
@@ -240,9 +246,15 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             final texts = await Dialogs.input(
               context: context,
               title: s.min_width_height,
-              fields: <InputDialogField>[
-                (hint: s.min_width, text: Config.cic.minWidth?.toString()),
-                (hint: s.min_height, text: Config.cic.minHeight?.toString()),
+              fields: [
+                InputDialogField(
+                  hint: s.min_width,
+                  text: Config.cic.minWidth?.toString(),
+                ),
+                InputDialogField(
+                  hint: s.min_height,
+                  text: Config.cic.minHeight?.toString(),
+                ),
               ],
             );
             if (texts == null) return;

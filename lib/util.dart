@@ -170,23 +170,7 @@ class Dialogs {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 16, left: 24, right: 12, bottom: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: Navigator.of(context).pop,
-                  ),
-                ],
-              ),
-            ),
+            DialogHeader(title: title),
             const Divider(height: 1),
             Flexible(
               child: ListView.builder(
@@ -202,23 +186,18 @@ class Dialogs {
               ),
             ),
             const Divider(height: 1),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: Navigator.of(context).pop,
-                  child: Text(S.of(context).cancel),
-                ),
-                const SizedBox(width: 8),
+            DialogActions(
+              actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(selected),
                   child: Text(S.of(context).ok),
                 ),
-                const SizedBox(width: 24),
+                TextButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).cancel),
+                ),
               ],
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -318,14 +297,7 @@ class Dialogs {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: const BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.all(Radius.circular(2)),
-              ),
-            ),
+            const DialogBar(),
             const SizedBox(height: 8),
             ListTile(
               minTileHeight: 48,
@@ -372,10 +344,17 @@ class Dialogs {
   }
 }
 
-typedef InputDialogField = ({
-  String? hint,
-  String? text,
-});
+class InputDialogField {
+  final String? hint;
+  final String? text;
+  final int? maxLines;
+
+  const InputDialogField({
+    this.hint,
+    this.text,
+    this.maxLines = 1,
+  });
+}
 
 class InputDialog extends StatefulWidget {
   final String title;
@@ -420,19 +399,21 @@ class _InputDialogState extends State<InputDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding:
-              const EdgeInsets.only(top: 16, left: 24, right: 12, bottom: 8),
+          padding: const EdgeInsets.only(top: 16),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                widget.title,
-                style: Theme.of(context).textTheme.headlineSmall,
+              const SizedBox(width: 24),
+              Expanded(
+                child: Text(
+                  widget.title,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: Navigator.of(context).pop,
               ),
+              const SizedBox(width: 12),
             ],
           ),
         ),
@@ -442,8 +423,8 @@ class _InputDialogState extends State<InputDialog> {
             padding: const EdgeInsets.only(left: 24, right: 24),
             itemCount: fields.length,
             itemBuilder: (context, index) => TextField(
-              maxLines: null,
               controller: _ctrls[index],
+              maxLines: fields[index].maxLines,
               decoration: InputDecoration(
                 labelText: fields[index].hint,
                 border: const UnderlineInputBorder(),
@@ -452,25 +433,26 @@ class _InputDialogState extends State<InputDialog> {
             separatorBuilder: (context, index) => const SizedBox(height: 8),
           ),
         ),
-        const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: Navigator.of(context).pop,
-              child: Text(S.of(context).cancel),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(<String>[
-                for (final ctrl in _ctrls) ctrl.text,
-              ]),
-              child: Text(S.of(context).ok),
-            ),
-            const SizedBox(width: 24),
-          ],
-        ),
-        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 16),
+          child: Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              const SizedBox(width: 24),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(<String>[
+                  for (final ctrl in _ctrls) ctrl.text,
+                ]),
+                child: Text(S.of(context).ok),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: Navigator.of(context).pop,
+                child: Text(S.of(context).cancel),
+              ),
+            ],
+          ),
+        )
       ],
     );
   }
@@ -544,6 +526,88 @@ class ModelAvatar extends StatelessWidget {
             child: child,
           );
         },
+      ),
+    );
+  }
+}
+
+class DialogBar extends StatelessWidget {
+  const DialogBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 36,
+      height: 4,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.all(Radius.circular(2)),
+        ),
+      ),
+    );
+  }
+}
+
+class DialogHeader extends StatelessWidget {
+  final String title;
+
+  const DialogHeader({
+    required this.title,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      child: Row(
+        children: [
+          const SizedBox(width: 24),
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: Navigator.of(context).pop,
+          ),
+          const SizedBox(width: 12),
+        ],
+      ),
+    );
+  }
+}
+
+class DialogActions extends StatelessWidget {
+  final List<Widget> actions;
+
+  const DialogActions({
+    required this.actions,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final action1 = actions.elementAt(0);
+    final action2 = actions.elementAtOrNull(1);
+    final action3 = actions.elementAtOrNull(2);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
+      child: Row(
+        textDirection: TextDirection.rtl,
+        children: [
+          const SizedBox(width: 24),
+          action1,
+          const SizedBox(width: 8),
+          if (action2 != null) action2,
+          const Expanded(child: SizedBox()),
+          if (action3 != null) action3,
+          const SizedBox(width: 24),
+        ],
       ),
     );
   }

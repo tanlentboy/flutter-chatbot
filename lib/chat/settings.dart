@@ -15,6 +15,7 @@
 
 import "chat.dart";
 import "current.dart";
+import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
 
@@ -29,15 +30,16 @@ class ChatSettings extends ConsumerStatefulWidget {
 }
 
 class _ChatSettingsState extends ConsumerState<ChatSettings> {
+  String? _error;
   String? _bot = Current.bot;
   String? _api = Current.api;
   String? _model = Current.model;
-  final TextEditingController _titleCtrl =
+  final TextEditingController _ctrl =
       TextEditingController(text: Current.title);
 
   @override
   void dispose() {
-    _titleCtrl.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
 
@@ -46,34 +48,32 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding:
-              const EdgeInsets.only(top: 16, left: 24, right: 12, bottom: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                S.of(context).chat_settings,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: Navigator.of(context).pop,
-              ),
-            ],
-          ),
-        ),
+        DialogHeader(title: S.of(context).chat_settings),
         const Divider(height: 1),
         const SizedBox(height: 4),
-        Padding(
-          padding: const EdgeInsets.only(left: 24, right: 24),
-          child: TextField(
-            controller: _titleCtrl,
-            decoration: InputDecoration(
-              labelText: S.of(context).chat_title,
-              border: const UnderlineInputBorder(),
+        Row(
+          children: [
+            const SizedBox(width: 24),
+            Expanded(
+              child: TextField(
+                controller: _ctrl,
+                decoration: InputDecoration(
+                  errorText: _error,
+                  labelText: S.of(context).chat_title,
+                  border: const UnderlineInputBorder(),
+                ),
+              ),
             ),
-          ),
+            SizedBox.square(
+              dimension: 48,
+              child: IconButton(
+                icon: const Icon(Icons.check),
+                padding: EdgeInsets.zero,
+                onPressed: _saveTitle,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
         ),
         const SizedBox(height: 12),
         Flexible(
@@ -103,39 +103,11 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        const Divider(height: 1),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            const SizedBox(width: 24),
-            TextButton(
-              onPressed: () => setState(() {
-                _model = null;
-                _api = null;
-                _bot = null;
-              }),
-              child: Text(S.of(context).reset),
-            ),
-            const Expanded(child: SizedBox()),
-            TextButton(
-              onPressed: Navigator.of(context).pop,
-              child: Text(S.of(context).cancel),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: _save,
-              child: Text(S.of(context).ok),
-            ),
-            const SizedBox(width: 24),
-          ],
-        ),
-        const SizedBox(height: 16),
       ],
     );
   }
@@ -195,8 +167,10 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                         label: Text(bot),
                         padding: const EdgeInsets.all(4),
                         selected: _bot == bot,
-                        onSelected: (value) =>
-                            setState(() => _bot = value ? bot : null),
+                        onSelected: (value) {
+                          setState(() => _bot = value ? bot : null);
+                          _saveCore();
+                        },
                       );
                     },
                     separatorBuilder: (context, index) =>
@@ -250,9 +224,12 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                         title: Text(api),
                         minTileHeight: 48,
                         selected: _api == api,
-                        onTap: () => setState(() => _api = api),
                         contentPadding:
                             const EdgeInsets.only(left: 16, right: 16),
+                        onTap: () {
+                          setState(() => _api = api);
+                          _saveCore();
+                        },
                       ),
                   ],
                 ),
@@ -303,9 +280,12 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                         title: Text(model),
                         minTileHeight: 48,
                         selected: _model == model,
-                        onTap: () => setState(() => _model = model),
                         contentPadding:
                             const EdgeInsets.only(left: 16, right: 16),
+                        onTap: () {
+                          setState(() => _model = model);
+                          _saveCore();
+                        },
                       ),
                   ],
                 ),
@@ -318,21 +298,32 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
     );
   }
 
-  void _save() {
-    final title = _titleCtrl.text;
+  void _saveCore() {
     final oldModel = Current.model;
-    final oldTitle = Current.title ?? "";
-    final bool hasChat = Current.hasChat;
-
-    if (title.isEmpty && hasChat) {
-      return;
-    }
 
     Current.core = CoreConfig(
       bot: _bot,
       api: _api,
       model: _model,
     );
+
+    if (_model != oldModel) {
+      ref.read(chatProvider.notifier).notify();
+    }
+
+    if (Current.hasChat) Current.save();
+  }
+
+  void _saveTitle() {
+    final title = _ctrl.text;
+    final hasChat = Current.hasChat;
+    final oldTitle = Current.title ?? "";
+
+    if (title.isEmpty && hasChat) {
+      final error = S.of(context).enter_a_title;
+      setState(() => _error = error);
+      return;
+    }
 
     if (title != oldTitle) {
       if (hasChat) {
@@ -342,11 +333,9 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
       }
       ref.read(chatProvider.notifier).notify();
       ref.read(chatsProvider.notifier).notify();
-    } else if (_model != oldModel) {
-      ref.read(chatProvider.notifier).notify();
     }
 
+    setState(() => _error = null);
     if (Current.hasChat) Current.save();
-    if (mounted) Navigator.of(context).pop();
   }
 }

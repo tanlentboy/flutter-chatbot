@@ -104,8 +104,12 @@ class _TaskTabState extends ConsumerState<TaskTab> {
             final texts = await Dialogs.input(
               context: context,
               title: s.title_prompt,
-              fields: <InputDialogField>[
-                (hint: s.please_input, text: Config.title.prompt)
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.title.prompt,
+                  maxLines: null,
+                ),
               ],
             );
             if (texts == null) return;

@@ -525,16 +525,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 8),
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.all(Radius.circular(2)),
-                ),
-              ),
-            ),
+            const Center(child: DialogBar()),
             const SizedBox(height: 16),
             Flexible(
               child: SingleChildScrollView(
@@ -600,14 +591,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: const BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.all(Radius.circular(2)),
-              ),
-            ),
+            const DialogBar(),
             const SizedBox(height: 8),
             ListTile(
               minTileHeight: 48,

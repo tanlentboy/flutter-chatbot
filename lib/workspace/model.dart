@@ -117,23 +117,7 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding:
-              const EdgeInsets.only(top: 16, left: 24, right: 12, bottom: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                S.of(context).model,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: Navigator.of(context).pop,
-              ),
-            ],
-          ),
-        ),
+        DialogHeader(title: S.of(context).model),
         const Divider(height: 1),
         const SizedBox(height: 8),
         Padding(
@@ -163,23 +147,18 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
           contentPadding: const EdgeInsets.only(left: 24, right: 16),
         ),
         const Divider(height: 1),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: Navigator.of(context).pop,
-              child: Text(S.of(context).cancel),
-            ),
-            const SizedBox(width: 8),
+        DialogActions(
+          actions: [
             TextButton(
               onPressed: _save,
               child: Text(S.of(context).ok),
             ),
-            const SizedBox(width: 24),
+            TextButton(
+              onPressed: Navigator.of(context).pop,
+              child: Text(S.of(context).cancel),
+            ),
           ],
         ),
-        const SizedBox(height: 16),
       ],
     );
   }

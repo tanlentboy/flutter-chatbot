@@ -348,23 +348,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 16, left: 24, right: 12, bottom: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    S.of(context).select_models,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: Navigator.of(context).pop,
-                  ),
-                ],
-              ),
-            ),
+            DialogHeader(title: S.of(context).select_models),
             const Divider(height: 1),
             Flexible(
               child: ListView.builder(
@@ -380,37 +364,23 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
               ),
             ),
             const Divider(height: 1),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const SizedBox(width: 24),
-                    TextButton(
-                      child: Text(S.of(context).clear),
-                      onPressed: () => setState(
-                          () => chosen.forEach((it, _) => chosen[it] = false)),
-                    ),
-                  ],
+            DialogActions(
+              actions: [
+                TextButton(
+                  child: Text(S.of(context).ok),
+                  onPressed: () => Navigator.of(context).pop(true),
                 ),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: Navigator.of(context).pop,
-                      child: Text(S.of(context).cancel),
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton(
-                      child: Text(S.of(context).ok),
-                      onPressed: () => Navigator.of(context).pop(true),
-                    ),
-                    const SizedBox(width: 24),
-                  ],
+                TextButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).cancel),
+                ),
+                TextButton(
+                  child: Text(S.of(context).clear),
+                  onPressed: () => setState(
+                      () => chosen.forEach((it, _) => chosen[it] = false)),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),

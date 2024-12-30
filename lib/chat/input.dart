@@ -189,14 +189,7 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: const BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.all(Radius.circular(2)),
-              ),
-            ),
+            const DialogBar(),
             const SizedBox(height: 8),
             ListTile(
               minTileHeight: 48,
@@ -272,59 +265,40 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     showModalBottomSheet<String>(
       context: context,
-      isScrollControlled: true,
+      scrollControlDisabledMaxHeightRatio: 0.7,
       builder: (context) => StatefulBuilder(
         builder: (context, setState2) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 16, left: 24, right: 12, bottom: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    S.of(context).images,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: Navigator.of(context).pop,
-                  ),
-                ],
-              ),
-            ),
+            DialogHeader(title: S.of(context).images),
             const Divider(height: 1),
-            Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
-              ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _images.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(_images[index].name),
-                  contentPadding: const EdgeInsets.only(left: 24, right: 12),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      setState(() => _images.removeAt(index));
-                      if (_images.isEmpty) {
-                        Navigator.of(context).pop();
-                      } else {
-                        setState2(() {});
-                      }
-                    },
-                  ),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: _images.length,
+              itemBuilder: (context, index) => ListTile(
+                title: Text(_images[index].name),
+                contentPadding: const EdgeInsets.only(left: 24, right: 12),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() => _images.removeAt(index));
+                    if (_images.isEmpty) {
+                      Navigator.of(context).pop();
+                    } else {
+                      setState2(() {});
+                    }
+                  },
                 ),
               ),
             ),
             const Divider(height: 1),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const SizedBox(width: 24),
+            DialogActions(
+              actions: [
+                TextButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).cancel),
+                ),
                 TextButton(
                   onPressed: () {
                     setState(() => _images.clear());
@@ -332,15 +306,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                   },
                   child: Text(S.of(context).clear),
                 ),
-                const Expanded(child: SizedBox()),
-                TextButton(
-                  onPressed: Navigator.of(context).pop,
-                  child: Text(S.of(context).ok),
-                ),
-                const SizedBox(width: 24),
               ],
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
