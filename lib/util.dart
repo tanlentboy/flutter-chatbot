@@ -20,6 +20,7 @@ import "dart:io";
 import "package:flutter/services.dart";
 import "package:flutter/material.dart";
 import "package:share_plus/share_plus.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:image_gallery_saver_plus/image_gallery_saver_plus.dart";
 
@@ -398,24 +399,9 @@ class _InputDialogState extends State<InputDialog> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
+        DialogHeader(
+          title: widget.title,
           padding: const EdgeInsets.only(top: 16),
-          child: Row(
-            children: [
-              const SizedBox(width: 24),
-              Expanded(
-                child: Text(
-                  widget.title,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: Navigator.of(context).pop,
-              ),
-              const SizedBox(width: 12),
-            ],
-          ),
         ),
         Flexible(
           child: ListView.separated(
@@ -433,26 +419,21 @@ class _InputDialogState extends State<InputDialog> {
             separatorBuilder: (context, index) => const SizedBox(height: 8),
           ),
         ),
-        Padding(
+        DialogActions(
           padding: const EdgeInsets.only(top: 16, bottom: 16),
-          child: Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              const SizedBox(width: 24),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(<String>[
-                  for (final ctrl in _ctrls) ctrl.text,
-                ]),
-                child: Text(S.of(context).ok),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: Navigator.of(context).pop,
-                child: Text(S.of(context).cancel),
-              ),
-            ],
-          ),
-        )
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(<String>[
+                for (final ctrl in _ctrls) ctrl.text,
+              ]),
+              child: Text(S.of(context).ok),
+            ),
+            TextButton(
+              onPressed: Navigator.of(context).pop,
+              child: Text(S.of(context).cancel),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -495,6 +476,18 @@ class InfoCard extends StatelessWidget {
 
 class ModelAvatar extends StatelessWidget {
   final String? id;
+  static const String _prefix = "assets/images";
+  static const Map<String, String> _mappings = {
+    "o1": "$_prefix/openai.svg",
+    "gpt": "$_prefix/openai.svg",
+    "qwen": "$_prefix/qwen.svg",
+    "grok": "$_prefix/grok.svg",
+    "llama": "$_prefix/ollama.svg",
+    "claude": "$_prefix/claude.svg",
+    "gemini": "$_prefix/gemini.svg",
+    "deepseek": "$_prefix/deepseek.svg",
+  };
+  static final Map<String, SvgPicture?> _caches = {};
 
   const ModelAvatar({
     required this.id,
@@ -503,31 +496,46 @@ class ModelAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final avatar = Config.models[id]?.avatar;
+    final image = _getImage(context);
 
-    if (avatar == null) {
+    if (image == null) {
       return const CircleAvatar(
         child: Icon(Icons.smart_toy),
       );
     }
 
-    return ClipOval(
-      child: Image.file(
-        File(Config.avatarFilePath(avatar)),
-        width: 40,
-        height: 40,
-        fit: BoxFit.cover,
-        frameBuilder: (context, child, frame, loaded) {
-          if (loaded) return child;
-          return AnimatedOpacity(
-            duration: const Duration(milliseconds: 300),
-            opacity: frame == null ? 0 : 1,
-            curve: Curves.easeOut,
-            child: child,
-          );
-        },
-      ),
+    return CircleAvatar(
+      child: image,
     );
+  }
+
+  SvgPicture? _getImage(BuildContext context) {
+    if (id == null) return null;
+
+    final brightness = Theme.of(context).brightness;
+    final key = "$id.${brightness.index}";
+
+    return _caches.putIfAbsent(key, () {
+      String? path;
+      final modelId = id!.toLowerCase();
+
+      for (final pair in _mappings.entries) {
+        if (modelId.contains(pair.key)) {
+          path = pair.value;
+          break;
+        }
+      }
+
+      if (path == null) return null;
+
+      return SvgPicture.asset(
+        path,
+        colorFilter: ColorFilter.mode(
+          Theme.of(context).iconTheme.color!,
+          BlendMode.srcIn,
+        ),
+      );
+    });
   }
 }
 
@@ -551,16 +559,21 @@ class DialogBar extends StatelessWidget {
 
 class DialogHeader extends StatelessWidget {
   final String title;
+  final EdgeInsets padding;
 
   const DialogHeader({
     required this.title,
+    this.padding = const EdgeInsets.only(
+      top: 16,
+      bottom: 16,
+    ),
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      padding: padding,
       child: Row(
         children: [
           const SizedBox(width: 24),
@@ -583,9 +596,14 @@ class DialogHeader extends StatelessWidget {
 
 class DialogActions extends StatelessWidget {
   final List<Widget> actions;
+  final EdgeInsets padding;
 
   const DialogActions({
     required this.actions,
+    this.padding = const EdgeInsets.only(
+      top: 12,
+      bottom: 12,
+    ),
     super.key,
   });
 
@@ -596,7 +614,7 @@ class DialogActions extends StatelessWidget {
     final action3 = actions.elementAtOrNull(2);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 16),
+      padding: padding,
       child: Row(
         textDirection: TextDirection.rtl,
         children: [

@@ -40,6 +40,7 @@ dependencies:
   flutter_math_fork: ^0.7.2
   flutter_markdown: ^0.7.4+2
   flutter_highlighter: ^0.1.1
+  flutter_svg: ^2.0.16
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +51,8 @@ dev_dependencies:
   riverpod_lint: ^2.6.3
 
 flutter:
+  assets:
+    - assets/images/
   uses-material-design: true
 
 flutter_intl:

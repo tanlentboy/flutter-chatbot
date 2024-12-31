@@ -476,24 +476,20 @@ class ImageConfig {
 class ModelConfig {
   bool chat;
   String name;
-  String? avatar;
 
   ModelConfig({
     required this.chat,
     required this.name,
-    this.avatar,
   });
 
   Map toJson() => {
         "chat": chat,
         "name": name,
-        "avatar": avatar,
       };
 
   factory ModelConfig.fromJson(Map json) => ModelConfig(
         chat: json["chat"],
         name: json["name"],
-        avatar: json["avatar"],
       );
 }
 

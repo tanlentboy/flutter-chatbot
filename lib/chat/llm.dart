@@ -123,7 +123,7 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     notify();
 
     try {
-      _chatClient ??= switch (apiType) {
+      _chatClient = switch (apiType) {
         "google" => _GoogleClient(baseUrl: apiUrl),
         _ => Client(),
       };

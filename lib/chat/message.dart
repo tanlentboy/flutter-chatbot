@@ -258,7 +258,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ModelAvatar(id: id, key: ValueKey(id)),
+        ModelAvatar(id: id),
         const SizedBox(width: 12),
         Flexible(
           child: Column(
@@ -711,7 +711,7 @@ class MessageView extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ModelAvatar(id: id, key: ValueKey(id)),
+        ModelAvatar(id: id),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
