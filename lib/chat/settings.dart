@@ -61,18 +61,14 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                   errorText: _error,
                   labelText: S.of(context).chat_title,
                   border: const UnderlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.check),
+                    onPressed: _saveTitle,
+                  ),
                 ),
               ),
             ),
-            SizedBox.square(
-              dimension: 48,
-              child: IconButton(
-                icon: const Icon(Icons.check),
-                padding: EdgeInsets.zero,
-                onPressed: _saveTitle,
-              ),
-            ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 24),
           ],
         ),
         const SizedBox(height: 12),
@@ -226,10 +222,10 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                         selected: _api == api,
                         contentPadding:
                             const EdgeInsets.only(left: 16, right: 16),
-                        onTap: () {
-                          setState(() => _api = api);
-                          _saveCore();
-                        },
+                        onTap: () => setState(() {
+                          _api = api;
+                          _model = null;
+                        }),
                       ),
                   ],
                 ),
