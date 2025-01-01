@@ -51,30 +51,34 @@ class CodeBlockBuilder extends MarkdownElementBuilder {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ColoredBox(
+          Card.filled(
+            margin: EdgeInsets.zero,
             color: theme == codeDarkTheme
                 ? Colors.black.withOpacity(0.3)
                 : Colors.blueGrey.withOpacity(0.3),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
             child: Row(
               children: [
                 const SizedBox(width: 16),
                 Text(language),
-                const SizedBox(width: 16),
                 const Expanded(child: SizedBox()),
+                const SizedBox(width: 8),
                 InkWell(
                   onTap: () => Util.copyText(
                     context: context,
                     text: content,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 8),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     child: Text(
                       S.of(context).copy,
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
               ],
             ),
           ),
@@ -131,16 +135,16 @@ class CodeBlockBuilder2 extends MarkdownElementBuilder {
               children: [
                 const SizedBox(width: 16),
                 Text(language),
-                const SizedBox(width: 16),
                 const Expanded(child: SizedBox()),
+                const SizedBox(width: 8),
                 Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: Text(
                     S.current.copy,
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),
-                const SizedBox(width: 16),
               ],
             ),
           ),

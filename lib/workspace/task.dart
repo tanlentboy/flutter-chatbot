@@ -35,7 +35,7 @@ class _TaskTabState extends ConsumerState<TaskTab> {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
       children: [
         Padding(
           padding: padding,
@@ -124,6 +124,7 @@ class _TaskTabState extends ConsumerState<TaskTab> {
         ),
         const SizedBox(height: 4),
         InfoCard(info: s.title_generation_hint("{text}")),
+        const SizedBox(height: 8),
       ],
     );
   }

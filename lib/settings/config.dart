@@ -13,14 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:chatbot/chat/current.dart";
-
 import "bot.dart";
 import "api.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
 import "../chat/chat.dart";
+import "../chat/current.dart";
 
 import "dart:io";
 import "package:flutter/services.dart";
@@ -46,7 +45,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
       children: [
         Padding(
           padding: padding,
@@ -372,18 +371,18 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         Padding(
           padding: padding,
           child: Text(
-            S.of(context).other,
+            s.other,
             style: TextStyle(color: primaryColor),
           ),
         ),
         ListTile(
-          title: Text("清理数据"),
+          title: Text(s.clear_data),
           onTap: _clearData,
           contentPadding: padding,
         ),
         const Divider(height: 1),
         ListTile(
-          title: Text(S.of(context).check_for_updates),
+          title: Text(s.check_for_updates),
           onTap: () => Util.checkUpdate(
             context: context,
             notify: true,
@@ -433,12 +432,12 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
             DialogActions(
               actions: [
                 TextButton(
-                  child: Text(S.of(context).ok),
+                  child: Text(s.ok),
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
                 TextButton(
                   onPressed: Navigator.of(context).pop,
-                  child: Text(S.of(context).cancel),
+                  child: Text(s.cancel),
                 ),
               ],
             ),

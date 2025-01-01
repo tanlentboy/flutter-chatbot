@@ -38,7 +38,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
       children: [
         Padding(
           padding: padding,
