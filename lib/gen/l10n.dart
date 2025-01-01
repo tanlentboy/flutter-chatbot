@@ -1219,6 +1219,56 @@ class S {
       args: [text],
     );
   }
+
+  /// `Clearing...`
+  String get clearing {
+    return Intl.message(
+      'Clearing...',
+      name: 'clearing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear Data`
+  String get clear_data {
+    return Intl.message(
+      'Clear Data',
+      name: 'clear_data',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All chat history`
+  String get clear_data_chat {
+    return Intl.message(
+      'All chat history',
+      name: 'clear_data_chat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All TTS cache files`
+  String get clear_data_audio {
+    return Intl.message(
+      'All TTS cache files',
+      name: 'clear_data_audio',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All generated images`
+  String get clear_data_image {
+    return Intl.message(
+      'All generated images',
+      name: 'clear_data_image',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

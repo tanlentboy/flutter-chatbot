@@ -42,7 +42,6 @@ class Config {
   static const String _chatDir = "chat";
   static const String _audioDir = "audio";
   static const String _imageDir = "image";
-  static const String _avatarDir = "avatar";
   static const String _settingsFile = "settings.json";
 
   static Future<void> init() async {
@@ -71,8 +70,6 @@ class Config {
       "$_dir$_sep$_audioDir$_sep$fileName";
   static String imageFilePath(String fileName) =>
       "$_dir$_sep$_imageDir$_sep$fileName";
-  static String avatarFilePath(String fileName) =>
-      "$_dir$_sep$_avatarDir$_sep$fileName";
   static String cacheFilePath(String fileName) => "$_cache$_sep$fileName";
 
   static Map toJson() => {
@@ -122,10 +119,10 @@ class Config {
       tts.api != null && tts.model != null && tts.voice != null;
 
   static void _initDir() {
-    final avatarPath = "$_dir$_sep$_avatarDir";
-    final avatarDir = Directory(avatarPath);
-    if (!(avatarDir.existsSync())) {
-      avatarDir.createSync();
+    final chatPath = "$_dir$_sep$_chatDir";
+    final chatDir = Directory(chatPath);
+    if (!(chatDir.existsSync())) {
+      chatDir.createSync();
     }
 
     final imagePath = "$_dir$_sep$_imageDir";
@@ -138,12 +135,6 @@ class Config {
     final audioDir = Directory(audioPath);
     if (!(audioDir.existsSync())) {
       audioDir.createSync();
-    }
-
-    final chatPath = "$_dir$_sep$_chatDir";
-    final chatDir = Directory(chatPath);
-    if (!(chatDir.existsSync())) {
-      chatDir.createSync();
     }
   }
 
@@ -200,6 +191,21 @@ class Backup {
     await Isolate.run(() async {
       await extractFileToDisk(from, root);
     });
+  }
+
+  static Future<void> clearData(List<String> dirs) async {
+    final root = Config._dir;
+    final sep = Config._sep;
+
+    await Isolate.run(() async {
+      for (final dir in dirs) {
+        final directory = Directory("$root$sep$dir");
+        if (!directory.existsSync()) continue;
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    Config._initDir();
   }
 }
 

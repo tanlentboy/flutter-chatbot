@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:chatbot/chat/current.dart";
+
 import "bot.dart";
 import "api.dart";
 import "../util.dart";
@@ -375,6 +377,12 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
           ),
         ),
         ListTile(
+          title: Text("清理数据"),
+          onTap: _clearData,
+          contentPadding: padding,
+        ),
+        const Divider(height: 1),
+        ListTile(
           title: Text(S.of(context).check_for_updates),
           onTap: () => Util.checkUpdate(
             context: context,
@@ -384,5 +392,82 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ),
       ],
     );
+  }
+
+  Future<void> _clearData() async {
+    bool chat = false;
+    bool audio = false;
+    bool image = false;
+
+    final s = S.of(context);
+    final result = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DialogHeader(title: s.clear_data),
+            const Divider(height: 1),
+            CheckboxListTile(
+              value: chat,
+              title: Text("Chat"),
+              subtitle: Text(s.clear_data_chat),
+              onChanged: (it) => setState(() => chat = it ?? false),
+              contentPadding: const EdgeInsets.only(left: 24, right: 16),
+            ),
+            CheckboxListTile(
+              value: audio,
+              title: Text("Audio"),
+              subtitle: Text(s.clear_data_audio),
+              onChanged: (it) => setState(() => audio = it ?? false),
+              contentPadding: const EdgeInsets.only(left: 24, right: 16),
+            ),
+            CheckboxListTile(
+              value: image,
+              title: Text("Image"),
+              subtitle: Text(s.clear_data_image),
+              onChanged: (it) => setState(() => image = it ?? false),
+              contentPadding: const EdgeInsets.only(left: 24, right: 16),
+            ),
+            const Divider(height: 1),
+            DialogActions(
+              actions: [
+                TextButton(
+                  child: Text(S.of(context).ok),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+                TextButton(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).cancel),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!(result ?? false)) return;
+
+    if (!mounted) return;
+    Dialogs.loading(context: context, hint: s.clearing);
+
+    await Backup.clearData([
+      "avatar",
+      if (chat) "chat",
+      if (audio) "audio",
+      if (image) "image",
+    ]);
+
+    if (chat) {
+      Config.chats.clear();
+      Current.clear();
+      Config.save();
+
+      ref.read(chatProvider.notifier).notify();
+      ref.read(chatsProvider.notifier).notify();
+      ref.read(messagesProvider.notifier).notify();
+    }
+
+    if (mounted) Navigator.of(context).pop();
   }
 }

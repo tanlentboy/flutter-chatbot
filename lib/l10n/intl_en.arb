@@ -136,5 +136,11 @@
     "title_enable_hint": "If disabled, the user's message will be used as the title",
     "title_prompt": "Prompt",
     "title_prompt_hint": "Template for the title generation prompt",
-    "title_generation_hint": "The {text} placeholder in the prompt template will be replaced with the user's message. If unsure, leave empty to use the built-in template."
+    "title_generation_hint": "The {text} placeholder in the prompt template will be replaced with the user's message. If unsure, leave empty to use the built-in template.",
+
+    "clearing": "Clearing...",
+    "clear_data": "Clear Data",
+    "clear_data_chat": "All chat history",
+    "clear_data_audio": "All TTS cache files",
+    "clear_data_image": "All generated images"
 }

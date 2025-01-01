@@ -193,7 +193,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.edit, size: 18),
+            icon: const Icon(Icons.edit, size: 16),
             onPressed: () {
               InputWidget.unFocus();
               showModalBottomSheet(

@@ -119,16 +119,24 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
         DialogHeader(title: S.of(context).model),
         const Divider(height: 1),
         const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.only(left: 24, right: 24),
-          child: TextField(
-            controller: _ctrl,
-            decoration: InputDecoration(
-              hintText: widget.id,
-              labelText: S.of(context).model_name,
-              border: const UnderlineInputBorder(),
+        Row(
+          children: [
+            const SizedBox(width: 24),
+            Expanded(
+              child: TextField(
+                controller: _ctrl,
+                decoration: InputDecoration(
+                  labelText: S.of(context).model_name,
+                  border: const UnderlineInputBorder(),
+                ),
+              ),
             ),
-          ),
+            IconButton(
+              icon: const Icon(Icons.transform),
+              onPressed: _idToName,
+            ),
+            const SizedBox(width: 12),
+          ],
         ),
         const SizedBox(height: 8),
         CheckboxListTile(
@@ -153,6 +161,19 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
         ),
       ],
     );
+  }
+
+  void _idToName() {
+    String name = _id;
+    final slash = name.indexOf('/');
+    if (slash != -1) name = name.substring(slash + 1);
+
+    var parts = name.split('-');
+    parts.removeWhere((it) => it.isEmpty);
+    parts =
+        parts.map((it) => "${it[0].toUpperCase()}${it.substring(1)}").toList();
+
+    _ctrl.text = parts.join(' ');
   }
 
   Future<void> _save() async {

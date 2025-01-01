@@ -51,6 +51,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "choose_model": MessageLookupByLibrary.simpleMessage("Choose Model"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clear_chat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "clear_data": MessageLookupByLibrary.simpleMessage("Clear Data"),
+        "clear_data_audio":
+            MessageLookupByLibrary.simpleMessage("All TTS cache files"),
+        "clear_data_chat":
+            MessageLookupByLibrary.simpleMessage("All chat history"),
+        "clear_data_image":
+            MessageLookupByLibrary.simpleMessage("All generated images"),
+        "clearing": MessageLookupByLibrary.simpleMessage("Clearing..."),
         "clone_chat": MessageLookupByLibrary.simpleMessage("Clone Chat"),
         "cloned_successfully":
             MessageLookupByLibrary.simpleMessage("Cloned Successfully"),
