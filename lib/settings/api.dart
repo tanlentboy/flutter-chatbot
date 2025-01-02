@@ -364,8 +364,8 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
               ),
             ),
             const Divider(height: 1),
-            DialogActions(
-              actions: [
+            DialogFooter(
+              children: [
                 TextButton(
                   child: Text(S.of(context).ok),
                   onPressed: () => Navigator.of(context).pop(true),

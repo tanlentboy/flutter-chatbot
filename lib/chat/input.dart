@@ -183,14 +183,12 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     final result = await showModalBottomSheet<int>(
       context: context,
+      showDragHandle: true,
       builder: (context) => Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
-            const DialogBar(),
-            const SizedBox(height: 8),
             ListTile(
               minTileHeight: 48,
               shape: const StadiumBorder(),
@@ -293,8 +291,8 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               ),
             ),
             const Divider(height: 1),
-            DialogActions(
-              actions: [
+            DialogFooter(
+              children: [
                 TextButton(
                   onPressed: Navigator.of(context).pop,
                   child: Text(S.of(context).cancel),

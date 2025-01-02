@@ -147,8 +147,8 @@ class _ModelEditorState extends ConsumerState<_ModelEditor> {
           contentPadding: const EdgeInsets.only(left: 24, right: 16),
         ),
         const Divider(height: 1),
-        DialogActions(
-          actions: [
+        DialogFooter(
+          children: [
             TextButton(
               onPressed: _save,
               child: Text(S.of(context).ok),

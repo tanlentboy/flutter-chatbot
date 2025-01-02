@@ -513,38 +513,26 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
+      showDragHandle: true,
       scrollControlDisabledMaxHeightRatio: 1,
-      builder: (context) => Container(
+      builder: (context) => ConstrainedBox(
         constraints: BoxConstraints(
           minWidth: double.infinity,
           minHeight: MediaQuery.of(context).size.height * 0.6,
         ),
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            const Center(child: DialogBar()),
-            const SizedBox(height: 16),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                    top: 0, left: 16, right: 16, bottom: 0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SelectableText(
-                      widget.message.item.text,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 48),
-                  ],
-                ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(left: 24, right: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SelectableText(
+                widget.message.item.text,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-            ),
-          ],
+              const SizedBox(height: 48),
+            ],
+          ),
         ),
       ),
     );
@@ -585,14 +573,12 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
 
     final event = await showModalBottomSheet<int>(
       context: context,
+      showDragHandle: true,
       builder: (context) => Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
-            const DialogBar(),
-            const SizedBox(height: 8),
             ListTile(
               minTileHeight: 48,
               shape: StadiumBorder(),

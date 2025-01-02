@@ -187,8 +187,8 @@ class Dialogs {
               ),
             ),
             const Divider(height: 1),
-            DialogActions(
-              actions: [
+            DialogFooter(
+              children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(selected),
                   child: Text(S.of(context).ok),
@@ -215,16 +215,14 @@ class Dialogs {
       barrierDismissible: canPop,
       builder: (context) => PopScope(
         canPop: canPop,
-        child: Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(width: 24),
-                Text(hint),
-              ],
-            ),
+        child: AlertDialog(
+          contentPadding: const EdgeInsets.all(24),
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 24),
+              Text(hint),
+            ],
           ),
         ),
       ),
@@ -292,14 +290,12 @@ class Dialogs {
   }) async {
     final action = await showModalBottomSheet<int>(
       context: context,
+      showDragHandle: true,
       builder: (context) => Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
-            const DialogBar(),
-            const SizedBox(height: 8),
             ListTile(
               minTileHeight: 48,
               shape: StadiumBorder(),
@@ -419,9 +415,9 @@ class _InputDialogState extends State<InputDialog> {
             separatorBuilder: (context, index) => const SizedBox(height: 8),
           ),
         ),
-        DialogActions(
+        DialogFooter(
           padding: const EdgeInsets.only(top: 16, bottom: 16),
-          actions: [
+          children: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(<String>[
                 for (final ctrl in _ctrls) ctrl.text,
@@ -478,14 +474,14 @@ class ModelAvatar extends StatelessWidget {
   final String? id;
   static const String _prefix = "assets/images";
   static const Map<String, String> _mappings = {
-    "o1": "$_prefix/openai.svg",
-    "gpt": "$_prefix/openai.svg",
-    "qwen": "$_prefix/qwen.svg",
-    "grok": "$_prefix/grok.svg",
-    "llama": "$_prefix/ollama.svg",
-    "claude": "$_prefix/claude.svg",
-    "gemini": "$_prefix/gemini.svg",
-    "deepseek": "$_prefix/deepseek.svg",
+    "o1": "openai.svg",
+    "gpt": "openai.svg",
+    "claude": "claude.svg",
+    "gemini": "gemini.svg",
+    "grok": "grok.svg",
+    "qwen": "qwen.svg",
+    "llama": "ollama.svg",
+    "deepseek": "deepseek.svg",
   };
   static final Map<String, SvgPicture?> _caches = {};
 
@@ -516,44 +512,26 @@ class ModelAvatar extends StatelessWidget {
     final key = "$id.${brightness.index}";
 
     return _caches.putIfAbsent(key, () {
-      String? path;
+      String? fileName;
       final modelId = id!.toLowerCase();
 
       for (final pair in _mappings.entries) {
         if (modelId.contains(pair.key)) {
-          path = pair.value;
+          fileName = pair.value;
           break;
         }
       }
 
-      if (path == null) return null;
+      if (fileName == null) return null;
 
       return SvgPicture.asset(
-        path,
+        "$_prefix/$fileName",
         colorFilter: ColorFilter.mode(
           Theme.of(context).iconTheme.color!,
           BlendMode.srcIn,
         ),
       );
     });
-  }
-}
-
-class DialogBar extends StatelessWidget {
-  const DialogBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 36,
-      height: 4,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.all(Radius.circular(2)),
-        ),
-      ),
-    );
   }
 }
 
@@ -594,12 +572,12 @@ class DialogHeader extends StatelessWidget {
   }
 }
 
-class DialogActions extends StatelessWidget {
-  final List<Widget> actions;
+class DialogFooter extends StatelessWidget {
   final EdgeInsets padding;
+  final List<Widget> children;
 
-  const DialogActions({
-    required this.actions,
+  const DialogFooter({
+    required this.children,
     this.padding = const EdgeInsets.only(
       top: 12,
       bottom: 12,
@@ -609,9 +587,9 @@ class DialogActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final action1 = actions.elementAt(0);
-    final action2 = actions.elementAtOrNull(1);
-    final action3 = actions.elementAtOrNull(2);
+    final child1 = children.elementAt(0);
+    final child2 = children.elementAtOrNull(1);
+    final child3 = children.elementAtOrNull(2);
 
     return Padding(
       padding: padding,
@@ -619,11 +597,11 @@ class DialogActions extends StatelessWidget {
         textDirection: TextDirection.rtl,
         children: [
           const SizedBox(width: 24),
-          action1,
+          child1,
           const SizedBox(width: 8),
-          if (action2 != null) action2,
+          if (child2 != null) child2,
           const Expanded(child: SizedBox()),
-          if (action3 != null) action3,
+          if (child3 != null) child3,
           const SizedBox(width: 24),
         ],
       ),

@@ -429,8 +429,8 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               contentPadding: const EdgeInsets.only(left: 24, right: 16),
             ),
             const Divider(height: 1),
-            DialogActions(
-              actions: [
+            DialogFooter(
+              children: [
                 TextButton(
                   child: Text(s.ok),
                   onPressed: () => Navigator.of(context).pop(true),
