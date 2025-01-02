@@ -13,6 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "package:chatbot/settings/api.dart";
+import "package:chatbot/settings/bot.dart";
+import "package:chatbot/workspace/model.dart";
+
 import "chat.dart";
 import "current.dart";
 import "../util.dart";
@@ -45,6 +49,10 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(chatProvider);
+    ref.watch(botsProvider);
+    ref.watch(apisProvider);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -159,14 +167,20 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                     itemCount: bots.length,
                     itemBuilder: (context, index) {
                       final bot = bots[index];
-                      return ChoiceChip(
-                        label: Text(bot),
-                        padding: const EdgeInsets.all(4),
-                        selected: _bot == bot,
-                        onSelected: (value) {
-                          setState(() => _bot = value ? bot : null);
-                          _saveCore();
-                        },
+                      return GestureDetector(
+                        onLongPress: () =>
+                            Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => BotSettings(bot: bot),
+                        )),
+                        child: ChoiceChip(
+                          label: Text(bot),
+                          padding: const EdgeInsets.all(4),
+                          selected: _bot == bot,
+                          onSelected: (value) {
+                            setState(() => _bot = value ? bot : null);
+                            _saveCore();
+                          },
+                        ),
                       );
                     },
                     separatorBuilder: (context, index) =>
@@ -222,10 +236,11 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                         selected: _api == api,
                         contentPadding:
                             const EdgeInsets.only(left: 16, right: 16),
-                        onTap: () => setState(() {
-                          _api = api;
-                          _model = null;
-                        }),
+                        onTap: () => setState(() => _api = api),
+                        onLongPress: () =>
+                            Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => ApiSettings(api: api),
+                        )),
                       ),
                   ],
                 ),
@@ -239,7 +254,17 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
   }
 
   Widget _buildModels() {
-    final models = Config.apis[_api]?.models ?? [];
+    final ids = Config.apis[_api]?.models ?? [];
+    final models = <({String id, String name})>[];
+
+    for (final it in ids) {
+      final config = Config.models[it];
+      if (config == null) {
+        models.add((id: it, name: it));
+      } else if (config.chat) {
+        models.add((id: it, name: config.name));
+      }
+    }
 
     return Card.filled(
       margin: EdgeInsets.zero,
@@ -265,7 +290,7 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
             ],
           ),
           const SizedBox(height: 12),
-          if (models.isNotEmpty) ...[
+          if (ids.isNotEmpty) ...[
             const Divider(height: 1),
             Flexible(
               child: SingleChildScrollView(
@@ -273,15 +298,26 @@ class _ChatSettingsState extends ConsumerState<ChatSettings> {
                   children: [
                     for (final model in models)
                       ListTile(
-                        title: Text(model),
+                        title: Text(model.name),
                         minTileHeight: 48,
-                        selected: _model == model,
+                        selected: _model == model.id,
                         contentPadding:
                             const EdgeInsets.only(left: 16, right: 16),
                         onTap: () {
-                          setState(() => _model = model);
+                          setState(() => _model = model.id);
                           _saveCore();
                         },
+                        onLongPress: () => showModalBottomSheet(
+                          context: context,
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          builder: (context) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom: MediaQuery.of(context).viewInsets.bottom,
+                            ),
+                            child: ModelSettings(id: model.id),
+                          ),
+                        ),
                       ),
                   ],
                 ),

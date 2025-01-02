@@ -67,7 +67,7 @@ class ModelTab extends ConsumerWidget {
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-                child: _ModelEditor(id: id),
+                child: ModelSettings(id: id),
               ),
             ),
           ),
@@ -78,16 +78,19 @@ class ModelTab extends ConsumerWidget {
   }
 }
 
-class _ModelEditor extends ConsumerStatefulWidget {
+class ModelSettings extends ConsumerStatefulWidget {
   final String id;
 
-  const _ModelEditor({required this.id});
+  const ModelSettings({
+    required this.id,
+    super.key,
+  });
 
   @override
-  ConsumerState<_ModelEditor> createState() => _ModelEditorState();
+  ConsumerState<ModelSettings> createState() => _ModelEditorState();
 }
 
-class _ModelEditorState extends ConsumerState<_ModelEditor> {
+class _ModelEditorState extends ConsumerState<ModelSettings> {
   late String _id;
   late bool? _chat;
   late final ModelConfig? _model;

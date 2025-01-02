@@ -113,6 +113,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             child: Consumer(
               builder: (context, ref, child) {
                 ref.watch(chatProvider);
+                final id = Current.model;
+                final config = Config.models[id];
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +125,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(
-                      Current.model ?? S.of(context).no_model,
+                      config?.name ?? id ?? S.of(context).no_model,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelSmall,
                     )
@@ -132,22 +134,27 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               },
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.edit, size: 16),
-            onPressed: () {
-              InputWidget.unFocus();
-              showModalBottomSheet(
-                context: context,
-                useSafeArea: true,
-                isScrollControlled: true,
-                builder: (context) => Padding(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
+          const SizedBox(width: 8),
+          SizedBox.square(
+            dimension: 32,
+            child: IconButton(
+              icon: const Icon(Icons.edit, size: 16),
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                InputWidget.unFocus();
+                showModalBottomSheet(
+                  context: context,
+                  useSafeArea: true,
+                  isScrollControlled: true,
+                  builder: (context) => Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: ChatSettings(),
                   ),
-                  child: ChatSettings(),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
       ),

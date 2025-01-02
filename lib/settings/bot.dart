@@ -35,7 +35,7 @@ class BotsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(botsProvider);
-    final bots = Config.bots.entries.toList();
+    final bots = Config.bots.keys.toList();
 
     return Stack(
       children: [
@@ -47,13 +47,13 @@ class BotsTab extends ConsumerWidget {
             margin: EdgeInsets.zero,
             child: ListTile(
               title: Text(
-                bots[index].key,
+                bots[index],
                 overflow: TextOverflow.ellipsis,
               ),
               leading: const Icon(Icons.smart_toy),
               contentPadding: const EdgeInsets.only(left: 16, right: 8),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => BotSettings(botPair: bots[index]),
+                builder: (context) => BotSettings(bot: bots[index]),
               )),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -79,11 +79,11 @@ class BotsTab extends ConsumerWidget {
 }
 
 class BotSettings extends ConsumerStatefulWidget {
-  final MapEntry<String, BotConfig>? botPair;
+  final String? bot;
 
   const BotSettings({
     super.key,
-    this.botPair,
+    this.bot,
   });
 
   @override
@@ -101,15 +101,15 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
   void initState() {
     super.initState();
 
-    final botPair = widget.botPair;
-    final bot = botPair?.value;
+    final bot = widget.bot;
+    final config = Config.bots[bot];
 
-    _stream = bot?.stream;
-    _nameCtrl = TextEditingController(text: botPair?.key);
-    _maxTokensCtrl = TextEditingController(text: bot?.maxTokens?.toString());
+    _stream = config?.stream;
+    _nameCtrl = TextEditingController(text: bot);
+    _maxTokensCtrl = TextEditingController(text: config?.maxTokens?.toString());
     _temperatureCtrl =
-        TextEditingController(text: bot?.temperature?.toString());
-    _systemPromptsCtrl = TextEditingController(text: bot?.systemPrompts);
+        TextEditingController(text: config?.temperature?.toString());
+    _systemPromptsCtrl = TextEditingController(text: config?.systemPrompts);
   }
 
   @override
@@ -123,7 +123,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final botPair = widget.botPair;
+    final bot = widget.bot;
 
     return Scaffold(
       appBar: AppBar(
@@ -205,7 +205,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                if (botPair != null) ...[
+                if (bot != null) ...[
                   const SizedBox(width: 6),
                   Expanded(
                     child: FilledButton(
@@ -215,7 +215,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
                       ),
                       child: Text(S.of(context).delete),
                       onPressed: () async {
-                        Config.bots.remove(botPair.key);
+                        Config.bots.remove(bot);
                         Config.save();
 
                         ref.read(botsProvider.notifier).notify();
@@ -251,9 +251,8 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
       return;
     }
 
-    final botPair = widget.botPair;
-    if (Config.bots.containsKey(name) &&
-        (botPair == null || name != botPair.key)) {
+    final bot = widget.bot;
+    if (Config.bots.containsKey(name) && (bot == null || name != bot)) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).duplicate_bot_name),
@@ -280,7 +279,7 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
       return;
     }
 
-    if (botPair != null) Config.bots.remove(botPair.key);
+    if (bot != null) Config.bots.remove(bot);
     final text = _systemPromptsCtrl.text;
     final systemPrompts = text.isEmpty ? null : text;
 

@@ -38,7 +38,7 @@ class ApisTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(apisProvider);
-    final apis = Config.apis.entries.toList();
+    final apis = Config.apis.keys.toList();
 
     return Stack(
       children: [
@@ -50,13 +50,13 @@ class ApisTab extends ConsumerWidget {
             margin: EdgeInsets.zero,
             child: ListTile(
               title: Text(
-                apis[index].key,
+                apis[index],
                 overflow: TextOverflow.ellipsis,
               ),
               leading: const Icon(Icons.api),
               contentPadding: const EdgeInsets.only(left: 16, right: 8),
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ApiSettings(apiPair: apis[index]),
+                builder: (context) => ApiSettings(api: apis[index]),
               )),
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -82,11 +82,11 @@ class ApisTab extends ConsumerWidget {
 }
 
 class ApiSettings extends ConsumerStatefulWidget {
-  final MapEntry<String, ApiConfig>? apiPair;
+  final String? api;
 
   const ApiSettings({
     super.key,
-    this.apiPair,
+    this.api,
   });
 
   @override
@@ -106,15 +106,14 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
   void initState() {
     super.initState();
 
-    final apiPair = widget.apiPair;
-    final api = apiPair?.value;
-    final name = apiPair?.key;
+    final api = widget.api;
+    final config = Config.apis[api];
 
-    _type = api?.type;
-    _nameCtrl = TextEditingController(text: name);
-    _apiUrlCtrl = TextEditingController(text: api?.url);
-    _apiKeyCtrl = TextEditingController(text: api?.key);
-    _modelsCtrl = TextEditingController(text: api?.models.join(", "));
+    _type = config?.type;
+    _nameCtrl = TextEditingController(text: api);
+    _apiUrlCtrl = TextEditingController(text: config?.url);
+    _apiKeyCtrl = TextEditingController(text: config?.key);
+    _modelsCtrl = TextEditingController(text: config?.models.join(", "));
   }
 
   @override
@@ -128,7 +127,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final apiPair = widget.apiPair;
+    final api = widget.api;
 
     return Scaffold(
       appBar: AppBar(
@@ -238,7 +237,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                if (apiPair != null) ...[
+                if (api != null) ...[
                   const SizedBox(width: 6),
                   Expanded(
                     flex: 1,
@@ -249,7 +248,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
                       ),
                       child: Text(S.of(context).delete),
                       onPressed: () {
-                        Config.apis.remove(apiPair.key);
+                        Config.apis.remove(api);
                         Config.save();
 
                         ref.read(apisProvider.notifier).notify();
@@ -407,9 +406,8 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
       return;
     }
 
-    final apiPair = widget.apiPair;
-    if (Config.apis.containsKey(name) &&
-        (apiPair == null || name != apiPair.key)) {
+    final api = widget.api;
+    if (Config.apis.containsKey(name) && (api == null || name != api)) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).duplicate_api_name),
@@ -417,7 +415,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
       return;
     }
 
-    if (apiPair != null) Config.apis.remove(apiPair.key);
+    if (api != null) Config.apis.remove(api);
     final modelList = models.split(',').map((e) => e.trim()).toList();
 
     Config.apis[name] = ApiConfig(
