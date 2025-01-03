@@ -183,12 +183,12 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
 
     final result = await showModalBottomSheet<int>(
       context: context,
-      showDragHandle: true,
       builder: (context) => Padding(
         padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const DragHandle(),
             ListTile(
               minTileHeight: 48,
               shape: const StadiumBorder(),

@@ -290,12 +290,12 @@ class Dialogs {
   }) async {
     final action = await showModalBottomSheet<int>(
       context: context,
-      showDragHandle: true,
       builder: (context) => Padding(
         padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const DragHandle(),
             ListTile(
               minTileHeight: 48,
               shape: StadiumBorder(),
@@ -532,6 +532,36 @@ class ModelAvatar extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class DragHandle extends StatelessWidget {
+  final Size size;
+  final EdgeInsets margin;
+
+  const DragHandle({
+    this.size = const Size(32, 4),
+    this.margin = const EdgeInsets.only(
+      top: 16,
+      bottom: 8,
+    ),
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: margin,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            borderRadius: BorderRadius.all(Radius.circular(2)),
+          ),
+          child: SizedBox.fromSize(size: size),
+        ),
+      ),
+    );
   }
 }
 
