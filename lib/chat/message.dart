@@ -262,8 +262,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
         const SizedBox(width: 12),
         Flexible(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 1),
               Text(
                 Config.models[id]?.name ?? id ?? S.of(context).no_model,
                 style: Theme.of(context).textTheme.titleMedium,
@@ -274,7 +276,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
                 item.time ?? Util.formatDateTime(DateTime.now()),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 2),
             ],
           ),
         ),
@@ -700,8 +702,10 @@ class MessageView extends StatelessWidget {
         ModelAvatar(id: id),
         const SizedBox(width: 12),
         Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 1),
             Text(
               Config.models[id]?.name ?? id ?? S.current.no_model,
               style: Theme.of(context).textTheme.titleMedium,
@@ -712,7 +716,7 @@ class MessageView extends StatelessWidget {
               item.time ?? Util.formatDateTime(DateTime.now()),
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
           ],
         ),
       ],
