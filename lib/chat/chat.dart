@@ -121,6 +121,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   children: [
                     Text(
                       Current.title ?? S.of(context).new_chat,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
