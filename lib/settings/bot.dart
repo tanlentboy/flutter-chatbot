@@ -129,113 +129,112 @@ class _BotSettingsState extends ConsumerState<BotSettings> {
       appBar: AppBar(
         title: Text(S.of(context).bot),
       ),
-      body: Container(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
-        child: ListView(
-          children: [
-            const SizedBox(height: 8),
-            TextField(
-              controller: _nameCtrl,
-              decoration: InputDecoration(
-                labelText: S.of(context).name,
-                border: const OutlineInputBorder(),
+      body: ListView(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        children: [
+          const SizedBox(height: 16),
+          TextField(
+            controller: _nameCtrl,
+            decoration: InputDecoration(
+              labelText: S.of(context).name,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _temperatureCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: S.of(context).temperature,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _temperatureCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: S.of(context).temperature,
-                      border: const OutlineInputBorder(),
-                    ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _maxTokensCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: S.of(context).max_tokens,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _maxTokensCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: S.of(context).max_tokens,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              maxLines: 4,
-              controller: _systemPromptsCtrl,
-              decoration: InputDecoration(
-                alignLabelWithHint: true,
-                labelText: S.of(context).system_prompts,
-                border: const OutlineInputBorder(),
               ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            maxLines: 4,
+            controller: _systemPromptsCtrl,
+            decoration: InputDecoration(
+              alignLabelWithHint: true,
+              labelText: S.of(context).system_prompts,
+              border: const OutlineInputBorder(),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Flexible(
-                  child: SwitchListTile(
-                    value: _stream ?? true,
-                    title: Text(S.of(context).streaming_response),
-                    onChanged: (value) => setState(() => _stream = value),
-                    contentPadding: const EdgeInsets.only(left: 8, right: 8),
-                  ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Flexible(
+                child: SwitchListTile(
+                  value: _stream ?? true,
+                  title: Text(S.of(context).streaming_response),
+                  onChanged: (value) => setState(() => _stream = value),
+                  contentPadding: const EdgeInsets.only(left: 8, right: 8),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.tonal(
+                  child: Text(S.of(context).reset),
+                  onPressed: () {
+                    _maxTokensCtrl.text = "";
+                    _temperatureCtrl.text = "";
+                    _systemPromptsCtrl.text = "";
+                    setState(() => _stream = null);
+                  },
+                ),
+              ),
+              const SizedBox(width: 6),
+              if (bot != null) ...[
+                const SizedBox(width: 6),
                 Expanded(
-                  child: FilledButton.tonal(
-                    child: Text(S.of(context).reset),
-                    onPressed: () {
-                      _maxTokensCtrl.text = "";
-                      _temperatureCtrl.text = "";
-                      _systemPromptsCtrl.text = "";
-                      setState(() => _stream = null);
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Theme.of(context).colorScheme.onError,
+                    ),
+                    child: Text(S.of(context).delete),
+                    onPressed: () async {
+                      Config.bots.remove(bot);
+                      Config.save();
+
+                      ref.read(botsProvider.notifier).notify();
+                      Navigator.of(context).pop();
                     },
                   ),
                 ),
                 const SizedBox(width: 6),
-                if (bot != null) ...[
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor: Theme.of(context).colorScheme.onError,
-                      ),
-                      child: Text(S.of(context).delete),
-                      onPressed: () async {
-                        Config.bots.remove(bot);
-                        Config.save();
-
-                        ref.read(botsProvider.notifier).notify();
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                ],
-                const SizedBox(width: 6),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: _save,
-                    child: Text(S.of(context).save),
-                  ),
-                ),
               ],
-            ),
-          ],
-        ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: FilledButton(
+                  onPressed: _save,
+                  child: Text(S.of(context).save),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }

@@ -133,143 +133,142 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
       appBar: AppBar(
         title: Text(S.of(context).api),
       ),
-      body: Container(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
-        child: ListView(
-          children: [
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _type,
-                    items: <DropdownMenuItem<String>>[
-                      DropdownMenuItem(
-                        value: "openai",
-                        child: const Text("OpenAI"),
-                      ),
-                      DropdownMenuItem(
-                        value: "google",
-                        child: const Text("Google"),
-                      ),
-                    ],
-                    isExpanded: true,
-                    hint: Text(S.of(context).api_type),
-                    onChanged: (it) => setState(() => _type = it),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+      body: ListView(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        children: [
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _type,
+                  items: <DropdownMenuItem<String>>[
+                    DropdownMenuItem(
+                      value: "openai",
+                      child: const Text("OpenAI"),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _nameCtrl,
-                    decoration: InputDecoration(
-                      labelText: S.of(context).name,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _apiUrlCtrl,
-              decoration: InputDecoration(
-                labelText: S.of(context).api_url,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _apiKeyCtrl,
-              decoration: InputDecoration(
-                labelText: S.of(context).api_key,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    maxLines: 4,
-                    controller: _modelsCtrl,
-                    decoration: InputDecoration(
-                      labelText: S.of(context).model_list,
-                      alignLabelWithHint: true,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Spin(
-                      infinite: true,
-                      animate: _isFetching,
-                      duration: Duration(seconds: 1),
-                      child: IconButton.outlined(
-                        icon: const Icon(Icons.sync),
-                        onPressed: _fetchModels,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    IconButton.outlined(
-                      icon: const Icon(Icons.edit),
-                      onPressed: _editModels,
+                    DropdownMenuItem(
+                      value: "google",
+                      child: const Text("Google"),
                     ),
                   ],
-                )
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: FilledButton.tonal(
-                    onPressed: Navigator.of(context).pop,
-                    child: Text(S.of(context).cancel),
+                  isExpanded: true,
+                  hint: Text(S.of(context).api_type),
+                  onChanged: (it) => setState(() => _type = it),
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(width: 6),
-                if (api != null) ...[
-                  const SizedBox(width: 6),
-                  Expanded(
-                    flex: 1,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor: Theme.of(context).colorScheme.onError,
-                      ),
-                      child: Text(S.of(context).delete),
-                      onPressed: () {
-                        Config.apis.remove(api);
-                        Config.save();
-
-                        ref.read(apisProvider.notifier).notify();
-                        Navigator.of(context).pop();
-                      },
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _nameCtrl,
+                  decoration: InputDecoration(
+                    labelText: S.of(context).name,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _apiUrlCtrl,
+            decoration: InputDecoration(
+              labelText: S.of(context).api_url,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _apiKeyCtrl,
+            decoration: InputDecoration(
+              labelText: S.of(context).api_key,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  maxLines: 4,
+                  controller: _modelsCtrl,
+                  decoration: InputDecoration(
+                    labelText: S.of(context).model_list,
+                    alignLabelWithHint: true,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Spin(
+                    infinite: true,
+                    animate: _isFetching,
+                    duration: Duration(seconds: 1),
+                    child: IconButton.outlined(
+                      icon: const Icon(Icons.sync),
+                      onPressed: _fetchModels,
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(height: 16),
+                  IconButton.outlined(
+                    icon: const Icon(Icons.edit),
+                    onPressed: _editModels,
+                  ),
                 ],
+              )
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: FilledButton.tonal(
+                  onPressed: Navigator.of(context).pop,
+                  child: Text(S.of(context).cancel),
+                ),
+              ),
+              const SizedBox(width: 6),
+              if (api != null) ...[
                 const SizedBox(width: 6),
                 Expanded(
                   flex: 1,
                   child: FilledButton(
-                    onPressed: _save,
-                    child: Text(S.of(context).save),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Theme.of(context).colorScheme.onError,
+                    ),
+                    child: Text(S.of(context).delete),
+                    onPressed: () {
+                      Config.apis.remove(api);
+                      Config.save();
+
+                      ref.read(apisProvider.notifier).notify();
+                      Navigator.of(context).pop();
+                    },
                   ),
                 ),
+                const SizedBox(width: 6),
               ],
-            ),
-          ],
-        ),
+              const SizedBox(width: 6),
+              Expanded(
+                flex: 1,
+                child: FilledButton(
+                  onPressed: _save,
+                  child: Text(S.of(context).save),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }
