@@ -282,7 +282,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ),
         const SizedBox(height: 4),
         InfoCard(info: s.image_hint),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Padding(
           padding: padding,
           child: Text(
@@ -367,7 +367,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
         ),
         const SizedBox(height: 4),
         InfoCard(info: s.config_hint),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Padding(
           padding: padding,
           child: Text(

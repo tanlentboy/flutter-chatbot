@@ -525,7 +525,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const DragHandle(margin: EdgeInsets.only(top: 16, bottom: 16)),
+            const DragHandle(margin: EdgeInsets.only(top: 16, bottom: 12)),
             SingleChildScrollView(
               padding: const EdgeInsets.only(left: 24, right: 24),
               child: Column(
