@@ -1150,10 +1150,10 @@ class S {
     );
   }
 
-  /// `Is it a Chat Model.`
+  /// `Is it a Chat Model?`
   String get chat_model_hint {
     return Intl.message(
-      'Is it a Chat Model.',
+      'Is it a Chat Model?',
       name: 'chat_model_hint',
       desc: '',
       args: [],
@@ -1210,10 +1210,10 @@ class S {
     );
   }
 
-  /// `The {text} placeholder in the prompt template will be replaced with the user's message. If unsure, leave empty to use the built-in template.`
+  /// `In the prompt template, The {text} placeholder will be replaced with the user's message. If unsure, leave empty to use the built-in template.`
   String title_generation_hint(Object text) {
     return Intl.message(
-      'The $text placeholder in the prompt template will be replaced with the user\'s message. If unsure, leave empty to use the built-in template.',
+      'In the prompt template, The $text placeholder will be replaced with the user\'s message. If unsure, leave empty to use the built-in template.',
       name: 'title_generation_hint',
       desc: '',
       args: [text],
@@ -1267,6 +1267,116 @@ class S {
       name: 'clear_data_image',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Set up the SearXNG first`
+  String get setup_searxng_first {
+    return Intl.message(
+      'Set up the SearXNG first',
+      name: 'setup_searxng_first',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google Search Mode`
+  String get search_gemini_mode {
+    return Intl.message(
+      'Google Search Mode',
+      name: 'search_gemini_mode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `General Mode`
+  String get search_general_mode {
+    return Intl.message(
+      'General Mode',
+      name: 'search_general_mode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Web Search`
+  String get web_search {
+    return Intl.message(
+      'Web Search',
+      name: 'web_search',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `SearXNG`
+  String get search_searxng {
+    return Intl.message(
+      'SearXNG',
+      name: 'search_searxng',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `SearXNG instance root URL (without trailing /)`
+  String get search_searxng_hint {
+    return Intl.message(
+      'SearXNG instance root URL (without trailing /)',
+      name: 'search_searxng_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Number of web pages`
+  String get search_n {
+    return Intl.message(
+      'Number of web pages',
+      name: 'search_n',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Number of web pages to integrate into the context (default is 3)`
+  String get search_n_hint {
+    return Intl.message(
+      'Number of web pages to integrate into the context (default is 3)',
+      name: 'search_n_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prompt`
+  String get search_prompt {
+    return Intl.message(
+      'Prompt',
+      name: 'search_prompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Template for synthesizing context and user messages`
+  String get search_prompt_hint {
+    return Intl.message(
+      'Template for synthesizing context and user messages',
+      name: 'search_prompt_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the prompt template, the {pages} placeholder will be replaced with web page content, and the {text} placeholder will be replaced with the user message. If unsure, leave it empty to use the built-in template.`
+  String search_prompt_info(Object pages, Object text) {
+    return Intl.message(
+      'In the prompt template, the $pages placeholder will be replaced with web page content, and the $text placeholder will be replaced with the user message. If unsure, leave it empty to use the built-in template.',
+      name: 'search_prompt_info',
+      desc: '',
+      args: [pages, text],
     );
   }
 }

@@ -129,18 +129,30 @@
     "chat_model": "Chat Model",
     "model_name": "Model Name",
     "model_avatar": "Model Avatar",
-    "chat_model_hint": "Is it a Chat Model.",
+    "chat_model_hint": "Is it a Chat Model?",
     "model_avatar_hint": "Click to choose a Model Avatar.",
 
     "title_generation": "Title Generation",
     "title_enable_hint": "If disabled, the user's message will be used as the title",
     "title_prompt": "Prompt",
     "title_prompt_hint": "Template for the title generation prompt",
-    "title_generation_hint": "The {text} placeholder in the prompt template will be replaced with the user's message. If unsure, leave empty to use the built-in template.",
+    "title_generation_hint": "In the prompt template, The {text} placeholder will be replaced with the user's message. If unsure, leave empty to use the built-in template.",
 
     "clearing": "Clearing...",
     "clear_data": "Clear Data",
     "clear_data_chat": "All chat history",
     "clear_data_audio": "All TTS cache files",
-    "clear_data_image": "All generated images"
+    "clear_data_image": "All generated images",
+
+    "setup_searxng_first": "Set up the SearXNG first",
+    "search_gemini_mode": "Google Search Mode",
+    "search_general_mode": "General Mode",
+    "web_search": "Web Search",
+    "search_searxng": "SearXNG",
+    "search_searxng_hint": "SearXNG instance root URL (without trailing /)",
+    "search_n": "Number of web pages",
+    "search_n_hint": "Number of web pages to integrate into the context (default is 3)",
+    "search_prompt": "Prompt",
+    "search_prompt_hint": "Template for synthesizing context and user messages",
+    "search_prompt_info": "In the prompt template, the {pages} placeholder will be replaced with web page content, and the {text} placeholder will be replaced with the user message. If unsure, leave it empty to use the built-in template."
 }

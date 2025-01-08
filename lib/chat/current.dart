@@ -104,7 +104,6 @@ class Current {
   static set title(String? title) => _chat?.title = title!;
 
   static bool get hasChat => _chat != null;
-  static bool get isOkToChat => api != null && model != null;
 }
 
 enum TtsStatus {

@@ -15,6 +15,7 @@
 
 import "config.dart";
 import "../gen/l10n.dart";
+import "chat/current.dart";
 
 import "dart:io";
 import "package:flutter/services.dart";
@@ -81,6 +82,28 @@ class Util {
     } catch (e) {
       if (notify) Dialogs.error(context: context, error: e);
     }
+  }
+
+  static bool checkChat(BuildContext context) {
+    if (Current.api == null || Current.model == null) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).setup_api_model_first),
+      );
+      return false;
+    }
+
+    if (Preferences.search &&
+        !Preferences.googleSearch &&
+        Config.search.searxng == null) {
+      Util.showSnackBar(
+        context: context,
+        content: Text(S.of(context).setup_searxng_first),
+      );
+      return false;
+    }
+
+    return true;
   }
 
   static void showSnackBar({

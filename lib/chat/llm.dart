@@ -21,12 +21,14 @@ import "../markdown/util.dart";
 
 import "dart:io";
 import "dart:convert";
+import "dart:isolate";
 import "package:http/http.dart";
 import "package:langchain/langchain.dart";
 import "package:audioplayers/audioplayers.dart";
 import "package:langchain_openai/langchain_openai.dart";
 import "package:langchain_google/langchain_google.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:langchain_community/langchain_community.dart";
 
 final llmProvider =
     AutoDisposeNotifierProvider<LlmNotifier, void>(LlmNotifier.new);
@@ -109,20 +111,20 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
   Future<dynamic> chat(Message message) async {
     dynamic error;
 
+    final item = message.item;
     final model = Current.model!;
     final apiUrl = Current.apiUrl!;
     final apiKey = Current.apiKey!;
     final apiType = Current.apiType;
     final messages = Current.messages;
 
-    final item = message.item;
-    final chatContext = _buildContext(messages);
-
     Current.chatStatus = ChatStatus.responding;
     updateMessage(message);
     notify();
 
     try {
+      final context = await _buildContext(messages);
+
       _chatClient = switch (apiType) {
         "google" => _GoogleClient(baseUrl: apiUrl),
         _ => Client(),
@@ -152,13 +154,13 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
       };
 
       if (Current.stream ?? true) {
-        final stream = llm.stream(PromptValue.chat(chatContext));
+        final stream = llm.stream(context);
         await for (final chunk in stream) {
           item.text += chunk.output.content;
           updateMessage(message);
         }
       } else {
-        final result = await llm.invoke(PromptValue.chat(chatContext));
+        final result = await llm.invoke(context);
         item.text += result.output.content;
         updateMessage(message);
       }
@@ -186,6 +188,107 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     Current.chatStatus = ChatStatus.nothing;
     _chatClient?.close();
     _chatClient = null;
+  }
+
+  Future<PromptValue> _buildContext(List<Message> messages) async {
+    final context = <ChatMessage>[];
+    final items = <MessageItem>[
+      for (final it in messages) it.item,
+    ];
+    final system = Current.systemPrompts;
+
+    if (items.last.role.isAssistant) {
+      items.removeLast();
+    }
+
+    if (Preferences.search && !Preferences.googleSearch) {
+      items.last = await _buildWebContext(items.last);
+    }
+
+    if (system != null) {
+      context.add(ChatMessage.system(system));
+    }
+
+    for (final item in items) {
+      switch (item.role) {
+        case MessageRole.assistant:
+          context.add(ChatMessage.ai(item.text));
+          break;
+
+        case MessageRole.user:
+          if (item.images.isEmpty) {
+            context.add(ChatMessage.humanText(item.text));
+            break;
+          }
+
+          context.add(ChatMessage.human(ChatMessageContent.multiModal([
+            ChatMessageContent.text(item.text),
+            for (final image in item.images)
+              ChatMessageContent.image(
+                mimeType: "image/jpeg",
+                data: image.base64,
+              ),
+          ])));
+          break;
+      }
+    }
+
+    return PromptValue.chat(context);
+  }
+
+  Future<MessageItem> _buildWebContext(MessageItem origin) async {
+    final text = origin.text;
+
+    final searxng = Config.search.searxng!;
+    final endPoint = "$searxng/search?q=$text&format=json";
+
+    _chatClient = Client();
+    final response = await _chatClient!.get(
+      Uri.parse(endPoint),
+    );
+
+    if (response.statusCode != 200) {
+      throw "${response.statusCode} ${response.body}";
+    }
+
+    final data = response.body;
+    final json = jsonDecode(data);
+    final results = json["results"];
+
+    final n = Config.search.n ?? 3;
+    final urls = <String>[
+      for (var i = 0; i < n; i++) results[i]["url"],
+    ];
+
+    final docs = await Isolate.run(() async {
+      final loader = WebBaseLoader(urls);
+      final docs = await loader.load();
+      return docs;
+    });
+    final pages = docs.map((it) => "<webPage>\n${it.pageContent}\n</webPage>");
+
+    final template = Config.search.prompt ??
+        """
+You are now an AI model with internet search capabilities.
+You can answer user questions based on content from the internet.
+I will provide you with some information from web pages on the internet.
+Each <webPage> tag below contains the content of a web page:
+{pages}
+
+You need to answer the user's question based on the above content:
+{text}
+        """
+            .trim();
+
+    final context = PromptTemplate.fromTemplate(template).format({
+      "pages": pages.join("\n\n"),
+      "text": text,
+    });
+
+    return MessageItem(
+      role: MessageRole.user,
+      text: context,
+    );
   }
 }
 
@@ -247,43 +350,6 @@ User input:
   return res.output.content.trim();
 }
 
-List<ChatMessage> _buildContext(List<Message> list) {
-  final context = <ChatMessage>[];
-  final items = [
-    for (final message in list) message.item,
-  ];
-  if (items.last.role.isAssistant) items.removeLast();
-
-  if (Current.systemPrompts != null) {
-    context.add(ChatMessage.system(Current.systemPrompts!));
-  }
-
-  for (final item in items) {
-    switch (item.role) {
-      case MessageRole.assistant:
-        context.add(ChatMessage.ai(item.text));
-        break;
-
-      case MessageRole.user:
-        if (item.images.isEmpty) {
-          context.add(ChatMessage.humanText(item.text));
-        } else {
-          context.add(ChatMessage.human(ChatMessageContent.multiModal([
-            ChatMessageContent.text(item.text),
-            for (final image in item.images)
-              ChatMessageContent.image(
-                mimeType: "image/jpeg",
-                data: image.base64,
-              ),
-          ])));
-        }
-        break;
-    }
-  }
-
-  return context;
-}
-
 class _GoogleClient extends BaseClient {
   final String baseUrl;
   final bool enableSearch;
@@ -310,8 +376,7 @@ class _GoogleClient extends BaseClient {
     request.headers.addAll(origin.headers);
 
     final bodyJson = jsonDecode(origin.body);
-
-    if (enableSearch && Preferences.search) {
+    if (enableSearch && Preferences.search && Preferences.googleSearch) {
       bodyJson["tools"] = const [
         {"google_search": {}},
       ];

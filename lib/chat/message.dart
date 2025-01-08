@@ -552,15 +552,9 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       return;
     }
 
-    if (!Current.isOkToChat) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).setup_api_model_first),
-      );
-      return;
-    }
-
+    if (!Util.checkChat(context)) return;
     final message = widget.message;
+
     message.list.add(MessageItem(
       text: "",
       model: Current.model,
@@ -568,11 +562,12 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
       time: Util.formatDateTime(DateTime.now()),
     ));
     message.index = message.list.length - 1;
-    final error = await ref.read(llmProvider.notifier).chat(message);
 
+    final error = await ref.read(llmProvider.notifier).chat(message);
     if (error != null && mounted) {
       Dialogs.error(context: context, error: error);
     }
+
     Current.save();
   }
 

@@ -20,7 +20,10 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh_CN';
 
-  static String m0(text) => "提示词模板中的 ${text} 占位变量会被用户消息替换。如不清楚，可留空以使用内置模板。";
+  static String m0(pages, text) =>
+      "提示词模板中的 ${pages} 占位变量会被网页内容替换，${text} 占位变量会被用户消息替换。如不清楚，可留空以使用内置模板。";
+
+  static String m1(text) => "提示词模板中的 ${text} 占位变量会被用户消息替换。如不清楚，可留空以使用内置模板。";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -129,10 +132,25 @@ class MessageLookup extends MessageLookupByLibrary {
         "restart_app": MessageLookupByLibrary.simpleMessage("请重启应用以加载新配置。"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "saved_successfully": MessageLookupByLibrary.simpleMessage("保存成功"),
+        "search_gemini_mode":
+            MessageLookupByLibrary.simpleMessage("Google Search 模式"),
+        "search_general_mode": MessageLookupByLibrary.simpleMessage("通用模式"),
+        "search_n": MessageLookupByLibrary.simpleMessage("网页数量"),
+        "search_n_hint":
+            MessageLookupByLibrary.simpleMessage("集成到上下文中的网页数量（默认为 3）"),
+        "search_prompt": MessageLookupByLibrary.simpleMessage("提示词"),
+        "search_prompt_hint":
+            MessageLookupByLibrary.simpleMessage("用于合成上下文和用户消息的提示词模板"),
+        "search_prompt_info": m0,
+        "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
+        "search_searxng_hint":
+            MessageLookupByLibrary.simpleMessage("SearXNG 实例根地址（不包含末尾 /）"),
         "select_models": MessageLookupByLibrary.simpleMessage("选择模型"),
         "settings": MessageLookupByLibrary.simpleMessage("设置"),
         "setup_api_model_first":
             MessageLookupByLibrary.simpleMessage("请先配置接口和模型"),
+        "setup_searxng_first":
+            MessageLookupByLibrary.simpleMessage("请先配置 SearXNG 实例地址"),
         "setup_tts_first": MessageLookupByLibrary.simpleMessage("请先配置文本转语音"),
         "share": MessageLookupByLibrary.simpleMessage("分享"),
         "source": MessageLookupByLibrary.simpleMessage("源码"),
@@ -145,12 +163,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "title_enable_hint":
             MessageLookupByLibrary.simpleMessage("禁用则将以用户消息为标题"),
         "title_generation": MessageLookupByLibrary.simpleMessage("标题生成"),
-        "title_generation_hint": m0,
+        "title_generation_hint": m1,
         "title_prompt": MessageLookupByLibrary.simpleMessage("提示词"),
         "title_prompt_hint":
             MessageLookupByLibrary.simpleMessage("用于生成标题的提示词模板"),
         "up_to_date": MessageLookupByLibrary.simpleMessage("已是最新版本"),
         "voice": MessageLookupByLibrary.simpleMessage("音色"),
+        "web_search": MessageLookupByLibrary.simpleMessage("联网搜索"),
         "workspace": MessageLookupByLibrary.simpleMessage("工作空间")
       };
 }

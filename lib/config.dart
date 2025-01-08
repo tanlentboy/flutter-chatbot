@@ -29,6 +29,7 @@ class Config {
   static late final CoreConfig core;
   static late final ImageConfig image;
   static late final TitleConfig title;
+  static late final SearchConfig search;
   static final List<ChatConfig> chats = [];
   static final Map<String, BotConfig> bots = {};
   static final Map<String, ApiConfig> apis = {};
@@ -78,9 +79,10 @@ class Config {
         "core": core,
         "bots": bots,
         "apis": apis,
+        "chats": chats,
         "image": image,
         "title": title,
-        "chats": chats,
+        "search": search,
         "models": models,
       };
 
@@ -90,9 +92,10 @@ class Config {
     final coreJson = json["core"] ?? {};
     final botsJson = json["bots"] ?? {};
     final apisJson = json["apis"] ?? {};
+    final chatsJson = json["chats"] ?? [];
     final imageJson = json["image"] ?? {};
     final titleJson = json["title"] ?? {};
-    final chatsJson = json["chats"] ?? [];
+    final searchJson = json["search"] ?? {};
     final modelsJson = json["models"] ?? {};
 
     tts = TtsConfig.fromJson(ttsJson);
@@ -100,6 +103,7 @@ class Config {
     core = CoreConfig.fromJson(coreJson);
     image = ImageConfig.fromJson(imageJson);
     title = TitleConfig.fromJson(titleJson);
+    search = SearchConfig.fromJson(searchJson);
 
     for (final chat in chatsJson) {
       chats.add(ChatConfig.fromJson(chat));
@@ -245,6 +249,7 @@ class Updater {
 
 class Preferences {
   static late bool _search;
+  static late bool _googleSearch;
   static late SharedPreferencesAsync _prefs;
 
   static Future<void> init() async {
@@ -254,13 +259,21 @@ class Preferences {
   }
 
   static bool get search => _search;
+  static bool get googleSearch => _googleSearch;
+
   static set search(bool value) {
     _search = value;
     _prefs.setBool("search", value);
   }
 
+  static set googleSearch(bool value) {
+    _googleSearch = value;
+    _prefs.setBool("googleSearch", value);
+  }
+
   static Future<void> _init() async {
     _search = await _prefs.getBool("search") ?? false;
+    _googleSearch = await _prefs.getBool("googleSearch") ?? false;
   }
 }
 
@@ -532,6 +545,30 @@ class TitleConfig {
         api: json["api"],
         model: json["model"],
         prompt: json["prompt"],
+      );
+}
+
+class SearchConfig {
+  int? n;
+  String? prompt;
+  String? searxng;
+
+  SearchConfig({
+    this.n,
+    this.prompt,
+    this.searxng,
+  });
+
+  Map toJson() => {
+        "n": n,
+        "prompt": prompt,
+        "searxng": searxng,
+      };
+
+  factory SearchConfig.fromJson(Map json) => SearchConfig(
+        n: json["n"],
+        prompt: json["prompt"],
+        searxng: json["searxng"],
       );
 }
 

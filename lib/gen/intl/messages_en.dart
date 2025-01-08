@@ -20,8 +20,11 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(text) =>
-      "The ${text} placeholder in the prompt template will be replaced with the user\'s message. If unsure, leave empty to use the built-in template.";
+  static String m0(pages, text) =>
+      "In the prompt template, the ${pages} placeholder will be replaced with web page content, and the ${text} placeholder will be replaced with the user message. If unsure, leave it empty to use the built-in template.";
+
+  static String m1(text) =>
+      "In the prompt template, The ${text} placeholder will be replaced with the user\'s message. If unsure, leave empty to use the built-in template.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -41,7 +44,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Chat Image Compress"),
         "chat_model": MessageLookupByLibrary.simpleMessage("Chat Model"),
         "chat_model_hint":
-            MessageLookupByLibrary.simpleMessage("Is it a Chat Model."),
+            MessageLookupByLibrary.simpleMessage("Is it a Chat Model?"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
         "check_for_updates":
@@ -163,10 +166,26 @@ class MessageLookup extends MessageLookupByLibrary {
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saved_successfully":
             MessageLookupByLibrary.simpleMessage("Saved Successfully"),
+        "search_gemini_mode":
+            MessageLookupByLibrary.simpleMessage("Google Search Mode"),
+        "search_general_mode":
+            MessageLookupByLibrary.simpleMessage("General Mode"),
+        "search_n": MessageLookupByLibrary.simpleMessage("Number of web pages"),
+        "search_n_hint": MessageLookupByLibrary.simpleMessage(
+            "Number of web pages to integrate into the context (default is 3)"),
+        "search_prompt": MessageLookupByLibrary.simpleMessage("Prompt"),
+        "search_prompt_hint": MessageLookupByLibrary.simpleMessage(
+            "Template for synthesizing context and user messages"),
+        "search_prompt_info": m0,
+        "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
+        "search_searxng_hint": MessageLookupByLibrary.simpleMessage(
+            "SearXNG instance root URL (without trailing /)"),
         "select_models": MessageLookupByLibrary.simpleMessage("Select Models"),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "setup_api_model_first": MessageLookupByLibrary.simpleMessage(
             "Set up the API and Model first"),
+        "setup_searxng_first":
+            MessageLookupByLibrary.simpleMessage("Set up the SearXNG first"),
         "setup_tts_first":
             MessageLookupByLibrary.simpleMessage("Set up the TTS first"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
@@ -184,13 +203,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "If disabled, the user\'s message will be used as the title"),
         "title_generation":
             MessageLookupByLibrary.simpleMessage("Title Generation"),
-        "title_generation_hint": m0,
+        "title_generation_hint": m1,
         "title_prompt": MessageLookupByLibrary.simpleMessage("Prompt"),
         "title_prompt_hint": MessageLookupByLibrary.simpleMessage(
             "Template for the title generation prompt"),
         "up_to_date":
             MessageLookupByLibrary.simpleMessage("You are up to date"),
         "voice": MessageLookupByLibrary.simpleMessage("Voice"),
+        "web_search": MessageLookupByLibrary.simpleMessage("Web Search"),
         "workspace": MessageLookupByLibrary.simpleMessage("Workspace")
       };
 }

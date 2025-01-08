@@ -142,5 +142,17 @@
     "clear_data": "清理数据",
     "clear_data_chat": "所有的对话数据",
     "clear_data_audio": "所有的 TTS 缓存",
-    "clear_data_image": "所有的图片生成结果"
+    "clear_data_image": "所有的图片生成结果",
+
+    "setup_searxng_first": "请先配置 SearXNG 实例地址",
+    "search_gemini_mode": "Google Search 模式",
+    "search_general_mode": "通用模式",
+    "web_search": "联网搜索",
+    "search_searxng": "SearXNG",
+    "search_searxng_hint": "SearXNG 实例根地址（不包含末尾 /）",
+    "search_n": "网页数量",
+    "search_n_hint": "集成到上下文中的网页数量（默认为 3）",
+    "search_prompt": "提示词",
+    "search_prompt_hint": "用于合成上下文和用户消息的提示词模板",
+    "search_prompt_info": "提示词模板中的 {pages} 占位变量会被网页内容替换，{text} 占位变量会被用户消息替换。如不清楚，可留空以使用内置模板。"
 }

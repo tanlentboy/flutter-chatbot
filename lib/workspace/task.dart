@@ -124,6 +124,96 @@ class _TaskTabState extends ConsumerState<TaskTab> {
         ),
         const SizedBox(height: 4),
         InfoCard(info: s.title_generation_hint("{text}")),
+        const SizedBox(height: 16),
+        Padding(
+          padding: padding,
+          child: Text(
+            s.web_search,
+            style: TextStyle(color: primaryColor),
+          ),
+        ),
+        ListTile(
+          title: Text(s.search_searxng),
+          contentPadding: padding,
+          subtitle: Text(s.search_searxng_hint),
+          onTap: () async {
+            final texts = await Dialogs.input(
+              context: context,
+              title: s.search_searxng,
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.search.searxng,
+                ),
+              ],
+            );
+            if (texts == null) return;
+
+            String? searxng;
+            final text = texts[0].trim();
+            if (text.isNotEmpty) searxng = text;
+
+            Config.search.searxng = searxng;
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.search_n),
+          contentPadding: padding,
+          subtitle: Text(s.search_n_hint),
+          onTap: () async {
+            final texts = await Dialogs.input(
+              context: context,
+              title: s.search_n,
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.search.n?.toString(),
+                ),
+              ],
+            );
+            if (texts == null) return;
+
+            int? n;
+            final text = texts[0].trim();
+            if (text.isNotEmpty) {
+              n = int.tryParse(text);
+              if (n == null) return;
+            }
+
+            Config.search.n = n;
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.search_prompt),
+          contentPadding: padding,
+          subtitle: Text(s.search_prompt_hint),
+          onTap: () async {
+            final texts = await Dialogs.input(
+              context: context,
+              title: s.search_prompt,
+              fields: [
+                InputDialogField(
+                  hint: s.please_input,
+                  text: Config.search.prompt,
+                ),
+              ],
+            );
+            if (texts == null) return;
+
+            String? prompt;
+            final text = texts[0].trim();
+            if (text.isNotEmpty) prompt = text;
+
+            Config.search.prompt = prompt;
+            Config.save();
+          },
+        ),
+        const SizedBox(height: 4),
+        InfoCard(info: s.search_prompt_info("{pages}", "{text}")),
         const SizedBox(height: 8),
       ],
     );

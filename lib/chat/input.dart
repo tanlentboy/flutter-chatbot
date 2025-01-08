@@ -112,13 +112,25 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
               const SizedBox(width: 8),
               SizedBox.square(
                 dimension: 36,
-                child: IconButton(
-                  icon: const Icon(Icons.language),
-                  isSelected: Preferences.search,
-                  selectedIcon: const Icon(Icons.language),
-                  padding: EdgeInsets.zero,
-                  onPressed: () =>
-                      setState(() => Preferences.search = !Preferences.search),
+                child: GestureDetector(
+                  onLongPress: () {
+                    final old = Preferences.googleSearch;
+                    Preferences.googleSearch = !old;
+                    Util.showSnackBar(
+                      context: context,
+                      content: Text(old
+                          ? S.of(context).search_general_mode
+                          : S.of(context).search_gemini_mode),
+                    );
+                  },
+                  child: IconButton(
+                    icon: const Icon(Icons.language),
+                    isSelected: Preferences.search,
+                    selectedIcon: const Icon(Icons.language),
+                    padding: EdgeInsets.zero,
+                    onPressed: () => setState(
+                        () => Preferences.search = !Preferences.search),
+                  ),
                 ),
               ),
               if (_images.isNotEmpty) ...[
@@ -318,16 +330,9 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
       return;
     }
 
+    if (!Util.checkChat(context)) return;
     final text = _inputCtrl.text;
     if (text.isEmpty) return;
-
-    if (!Current.isOkToChat) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).setup_api_model_first),
-      );
-      return;
-    }
 
     final messages = Current.messages;
     final user = MessageItem(
