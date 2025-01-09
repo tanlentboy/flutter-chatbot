@@ -85,22 +85,38 @@ class Util {
   }
 
   static bool checkChat(BuildContext context) {
-    if (Current.api == null || Current.model == null) {
-      Util.showSnackBar(
+    final core = Current.core;
+    final coreOk = core.api != null && core.model != null;
+
+    if (!coreOk) {
+      showSnackBar(
         context: context,
         content: Text(S.of(context).setup_api_model_first),
       );
       return false;
     }
 
-    if (Preferences.search &&
-        !Preferences.googleSearch &&
-        Config.search.searxng == null) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).setup_searxng_first),
-      );
-      return false;
+    if (Preferences.search) {
+      final search = Config.search;
+      final vector = Config.vector;
+      final vectorOk = vector.api != null && vector.model != null;
+      final searchOk = Preferences.googleSearch || search.searxng != null;
+
+      if (!searchOk) {
+        showSnackBar(
+          context: context,
+          content: Text(S.of(context).setup_searxng_first),
+        );
+        return false;
+      }
+
+      if ((search.vector ?? false) && !vectorOk) {
+        showSnackBar(
+          context: context,
+          content: Text("请先配置向量接口和模型"),
+        );
+        return false;
+      }
     }
 
     return true;

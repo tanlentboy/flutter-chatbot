@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "llm.dart";
 import "chat.dart";
 import "input.dart";
 import "current.dart";
 import "../util.dart";
 import "../config.dart";
+import "../llm/llm.dart";
 import "../gen/l10n.dart";
 import "../markdown/all.dart";
 
@@ -515,32 +515,26 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
+      showDragHandle: true,
       scrollControlDisabledMaxHeightRatio: 1,
       builder: (context) => ConstrainedBox(
         constraints: BoxConstraints(
           minWidth: double.infinity,
           minHeight: MediaQuery.of(context).size.height * 0.6,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const DragHandle(margin: EdgeInsets.only(top: 16, bottom: 12)),
-            SingleChildScrollView(
-              padding: const EdgeInsets.only(left: 24, right: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SelectableText(
-                    widget.message.item.text,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 48),
-                ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(left: 24, right: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SelectableText(
+                widget.message.item.text,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-            ),
-          ],
+              const SizedBox(height: 48),
+            ],
+          ),
         ),
       ),
     );

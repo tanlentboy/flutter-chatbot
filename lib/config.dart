@@ -30,6 +30,9 @@ class Config {
   static late final ImageConfig image;
   static late final TitleConfig title;
   static late final SearchConfig search;
+  static late final VectorConfig vector;
+  static late final DocumentConfig document;
+
   static final List<ChatConfig> chats = [];
   static final Map<String, BotConfig> bots = {};
   static final Map<String, ApiConfig> apis = {};
@@ -83,7 +86,9 @@ class Config {
         "image": image,
         "title": title,
         "search": search,
+        "vector": vector,
         "models": models,
+        "document": document,
       };
 
   static void fromJson(Map json) {
@@ -96,7 +101,9 @@ class Config {
     final imageJson = json["image"] ?? {};
     final titleJson = json["title"] ?? {};
     final searchJson = json["search"] ?? {};
+    final vectorJson = json["vector"] ?? {};
     final modelsJson = json["models"] ?? {};
+    final documentJson = json["document"] ?? {};
 
     tts = TtsConfig.fromJson(ttsJson);
     cic = CicConfig.fromJson(imgJson);
@@ -104,6 +111,8 @@ class Config {
     image = ImageConfig.fromJson(imageJson);
     title = TitleConfig.fromJson(titleJson);
     search = SearchConfig.fromJson(searchJson);
+    vector = VectorConfig.fromJson(vectorJson);
+    document = DocumentConfig.fromJson(documentJson);
 
     for (final chat in chatsJson) {
       chats.add(ChatConfig.fromJson(chat));
@@ -550,25 +559,89 @@ class TitleConfig {
 
 class SearchConfig {
   int? n;
+  bool? vector;
   String? prompt;
   String? searxng;
 
   SearchConfig({
     this.n,
+    this.vector,
     this.prompt,
     this.searxng,
   });
 
   Map toJson() => {
         "n": n,
+        "vector": vector,
         "prompt": prompt,
         "searxng": searxng,
       };
 
   factory SearchConfig.fromJson(Map json) => SearchConfig(
         n: json["n"],
+        vector: json["vector"],
         prompt: json["prompt"],
         searxng: json["searxng"],
+      );
+}
+
+class VectorConfig {
+  String? _api;
+  String? _model;
+  int? batchSize;
+  int? dimensions;
+
+  VectorConfig({
+    String? api,
+    String? model,
+    this.batchSize,
+    this.dimensions,
+  })  : _api = api,
+        _model = model;
+
+  String? get api => Config.apis.containsKey(_api) ? _api : null;
+  String? get model =>
+      (Config.apis[_api]?.models.contains(_model) ?? false) ? _model : null;
+
+  set api(String? value) => _api = value;
+  set model(String? value) => _model = value;
+
+  factory VectorConfig.fromJson(Map json) => VectorConfig(
+        api: json["api"],
+        model: json["model"],
+        batchSize: json["batchSize"],
+        dimensions: json["dimensions"],
+      );
+
+  Map toJson() => {
+        "api": api,
+        "model": model,
+        "batchSize": batchSize,
+        "dimensions": dimensions,
+      };
+}
+
+class DocumentConfig {
+  int? n;
+  int? size;
+  int? overlap;
+
+  DocumentConfig({
+    this.n,
+    this.size,
+    this.overlap,
+  });
+
+  Map toJson() => {
+        "n": n,
+        "size": size,
+        "overlap": overlap,
+      };
+
+  factory DocumentConfig.fromJson(Map json) => DocumentConfig(
+        n: json["n"],
+        size: json["size"],
+        overlap: json["overlap"],
       );
 }
 
