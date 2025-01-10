@@ -559,6 +559,7 @@ class TitleConfig {
 
 class SearchConfig {
   int? n;
+  int? timeout;
   bool? vector;
   String? prompt;
   String? searxng;
@@ -567,6 +568,7 @@ class SearchConfig {
     this.n,
     this.vector,
     this.prompt,
+    this.timeout,
     this.searxng,
   });
 
@@ -574,6 +576,7 @@ class SearchConfig {
         "n": n,
         "vector": vector,
         "prompt": prompt,
+        "timeout": timeout,
         "searxng": searxng,
       };
 
@@ -581,6 +584,7 @@ class SearchConfig {
         n: json["n"],
         vector: json["vector"],
         prompt: json["prompt"],
+        timeout: json["timeout"],
         searxng: json["searxng"],
       );
 }

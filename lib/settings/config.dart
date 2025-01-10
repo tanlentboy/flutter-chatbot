@@ -174,7 +174,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               title: s.voice,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.tts.voice,
                 ),
               ],
@@ -217,7 +217,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               title: s.quality,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.cic.quality?.toString(),
                 ),
               ],
@@ -249,11 +249,11 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               title: s.min_width_height,
               fields: [
                 InputDialogField(
-                  hint: s.min_width,
+                  label: s.min_width,
                   text: Config.cic.minWidth?.toString(),
                 ),
                 InputDialogField(
-                  hint: s.min_height,
+                  label: s.min_height,
                   text: Config.cic.minHeight?.toString(),
                 ),
               ],

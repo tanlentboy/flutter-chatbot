@@ -104,7 +104,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               title: s.image_size,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.image.size,
                 ),
               ],
@@ -128,7 +128,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               title: s.image_style,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.image.style,
                 ),
               ],
@@ -152,7 +152,7 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
               title: s.image_quality,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.image.quality,
                 ),
               ],

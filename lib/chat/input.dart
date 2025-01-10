@@ -115,18 +115,22 @@ class _InputWidgetState extends ConsumerState<InputWidget> {
                 child: GestureDetector(
                   onLongPress: () {
                     final old = Preferences.googleSearch;
-                    Preferences.googleSearch = !old;
                     Util.showSnackBar(
                       context: context,
                       content: Text(old
                           ? S.of(context).search_general_mode
                           : S.of(context).search_gemini_mode),
                     );
+                    setState(() => Preferences.googleSearch = !old);
                   },
                   child: IconButton(
                     icon: const Icon(Icons.language),
                     isSelected: Preferences.search,
-                    selectedIcon: const Icon(Icons.language),
+                    selectedIcon: Badge(
+                      label: const Text("G"),
+                      isLabelVisible: Preferences.googleSearch,
+                      child: const Icon(Icons.language),
+                    ),
                     padding: EdgeInsets.zero,
                     onPressed: () => setState(
                         () => Preferences.search = !Preferences.search),

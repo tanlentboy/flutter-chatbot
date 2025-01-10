@@ -48,10 +48,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "chat_settings": MessageLookupByLibrary.simpleMessage("Chat Settings"),
         "chat_title": MessageLookupByLibrary.simpleMessage("Chat Title"),
         "check_for_updates":
-            MessageLookupByLibrary.simpleMessage("Check for updates"),
+            MessageLookupByLibrary.simpleMessage("Check for Updates"),
         "choose_api": MessageLookupByLibrary.simpleMessage("Choose API"),
         "choose_bot": MessageLookupByLibrary.simpleMessage("Choose Bot"),
         "choose_model": MessageLookupByLibrary.simpleMessage("Choose Model"),
+        "chunk_n": MessageLookupByLibrary.simpleMessage("Number of Chunks"),
+        "chunk_n_hint": MessageLookupByLibrary.simpleMessage(
+            "Number of chunks to be integrated into the context"),
+        "chunk_overlap": MessageLookupByLibrary.simpleMessage("Chunk Overlap"),
+        "chunk_overlap_hint": MessageLookupByLibrary.simpleMessage(
+            "Size of the overlapping portion with the previous chunk"),
+        "chunk_size": MessageLookupByLibrary.simpleMessage("Chunk Size"),
+        "chunk_size_hint": MessageLookupByLibrary.simpleMessage(
+            "Maximum number of characters a single chunk can contain"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clear_chat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
         "clear_data": MessageLookupByLibrary.simpleMessage("Clear Data"),
@@ -80,12 +89,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "delete_image": MessageLookupByLibrary.simpleMessage("Delete image"),
         "document": MessageLookupByLibrary.simpleMessage("Document"),
+        "document_config":
+            MessageLookupByLibrary.simpleMessage("Document Configuration"),
+        "document_config_hint": MessageLookupByLibrary.simpleMessage(
+            "Documents are divided into multiple chunks. After search and comparison, the most relevant chunks will be added to the context."),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "duplicate_api_name":
             MessageLookupByLibrary.simpleMessage("Duplicate API name"),
         "duplicate_bot_name":
             MessageLookupByLibrary.simpleMessage("Duplicate Bot name"),
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "embedding_vector":
+            MessageLookupByLibrary.simpleMessage("Embedding Vector"),
+        "embedding_vector_info": MessageLookupByLibrary.simpleMessage(
+            "Batch size is limited by the API service provider. It\'s recommended to check and modify accordingly. Vector dimension is an advanced option and should only be filled if necessary."),
         "empty": MessageLookupByLibrary.simpleMessage("Empty"),
         "empty_link": MessageLookupByLibrary.simpleMessage("Empty Link"),
         "enable": MessageLookupByLibrary.simpleMessage("Enable"),
@@ -170,16 +187,23 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Google Search Mode"),
         "search_general_mode":
             MessageLookupByLibrary.simpleMessage("General Mode"),
-        "search_n": MessageLookupByLibrary.simpleMessage("Number of web pages"),
+        "search_n": MessageLookupByLibrary.simpleMessage("Number of Pages"),
         "search_n_hint": MessageLookupByLibrary.simpleMessage(
-            "Number of web pages to integrate into the context (default is 3)"),
+            "Maximum number of web pages to retrieve"),
         "search_prompt": MessageLookupByLibrary.simpleMessage("Prompt"),
         "search_prompt_hint": MessageLookupByLibrary.simpleMessage(
             "Template for synthesizing context and user messages"),
         "search_prompt_info": m0,
         "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
-        "search_searxng_hint": MessageLookupByLibrary.simpleMessage(
-            "SearXNG instance root URL (without trailing /)"),
+        "search_searxng_hint":
+            MessageLookupByLibrary.simpleMessage("SearXNG instance root URL"),
+        "search_timeout": MessageLookupByLibrary.simpleMessage("Timeout"),
+        "search_timeout_hint": MessageLookupByLibrary.simpleMessage(
+            "Timeout in milliseconds for web page retrieval"),
+        "search_vector":
+            MessageLookupByLibrary.simpleMessage("Embedding Vector"),
+        "search_vector_hint": MessageLookupByLibrary.simpleMessage(
+            "Significantly reduces context size but increases response time"),
         "select_models": MessageLookupByLibrary.simpleMessage("Select Models"),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "setup_api_model_first": MessageLookupByLibrary.simpleMessage(
@@ -188,6 +212,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Set up the SearXNG first"),
         "setup_tts_first":
             MessageLookupByLibrary.simpleMessage("Set up the TTS first"),
+        "setup_vector_first": MessageLookupByLibrary.simpleMessage(
+            "Set up the embedding vector API and model first"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
         "source": MessageLookupByLibrary.simpleMessage("Source"),
         "streaming_response":
@@ -209,6 +235,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Template for the title generation prompt"),
         "up_to_date":
             MessageLookupByLibrary.simpleMessage("You are up to date"),
+        "vector_batch_size": MessageLookupByLibrary.simpleMessage("Batch Size"),
+        "vector_batch_size_hint": MessageLookupByLibrary.simpleMessage(
+            "Maximum number of chunks that can be submitted in a single request"),
+        "vector_dimensions":
+            MessageLookupByLibrary.simpleMessage("Vector Dimensions"),
+        "vector_dimensions_hint": MessageLookupByLibrary.simpleMessage(
+            "Output dimension of the embedding vector model"),
         "voice": MessageLookupByLibrary.simpleMessage("Voice"),
         "web_search": MessageLookupByLibrary.simpleMessage("Web Search"),
         "workspace": MessageLookupByLibrary.simpleMessage("Workspace")

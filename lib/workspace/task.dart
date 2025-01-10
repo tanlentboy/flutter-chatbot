@@ -106,7 +106,7 @@ class _TaskTabState extends ConsumerState<TaskTab> {
               title: s.title_prompt,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.title.prompt,
                   maxLines: null,
                 ),
@@ -132,6 +132,17 @@ class _TaskTabState extends ConsumerState<TaskTab> {
             style: TextStyle(color: primaryColor),
           ),
         ),
+        CheckboxListTile(
+          title: Text(s.search_vector),
+          contentPadding: const EdgeInsets.only(left: 24, right: 16),
+          value: Config.search.vector ?? false,
+          subtitle: Text(s.search_vector_hint),
+          onChanged: (value) {
+            setState(() => Config.search.vector = value);
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
         ListTile(
           title: Text(s.search_searxng),
           contentPadding: padding,
@@ -142,7 +153,8 @@ class _TaskTabState extends ConsumerState<TaskTab> {
               title: s.search_searxng,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
+                  hint: "https://your.searxng.com",
                   text: Config.search.searxng,
                 ),
               ],
@@ -159,6 +171,36 @@ class _TaskTabState extends ConsumerState<TaskTab> {
         ),
         const Divider(height: 1),
         ListTile(
+          title: Text(s.search_timeout),
+          contentPadding: padding,
+          subtitle: Text(s.search_timeout_hint),
+          onTap: () async {
+            final texts = await Dialogs.input(
+              context: context,
+              title: s.search_timeout,
+              fields: [
+                InputDialogField(
+                  label: s.please_input,
+                  hint: "2000",
+                  text: Config.search.timeout?.toString(),
+                ),
+              ],
+            );
+            if (texts == null) return;
+
+            int? n;
+            final text = texts[0].trim();
+            if (text.isNotEmpty) {
+              n = int.tryParse(text);
+              if (n == null) return;
+            }
+
+            Config.search.timeout = n;
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
           title: Text(s.search_n),
           contentPadding: padding,
           subtitle: Text(s.search_n_hint),
@@ -168,7 +210,8 @@ class _TaskTabState extends ConsumerState<TaskTab> {
               title: s.search_n,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
+                  hint: "64",
                   text: Config.search.n?.toString(),
                 ),
               ],
@@ -197,7 +240,7 @@ class _TaskTabState extends ConsumerState<TaskTab> {
               title: s.search_prompt,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.search.prompt,
                 ),
               ],

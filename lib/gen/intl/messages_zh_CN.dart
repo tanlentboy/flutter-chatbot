@@ -48,6 +48,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "choose_api": MessageLookupByLibrary.simpleMessage("选择接口"),
         "choose_bot": MessageLookupByLibrary.simpleMessage("选择角色"),
         "choose_model": MessageLookupByLibrary.simpleMessage("选择模型"),
+        "chunk_n": MessageLookupByLibrary.simpleMessage("块数量"),
+        "chunk_n_hint": MessageLookupByLibrary.simpleMessage("集成到上下文中的块数量"),
+        "chunk_overlap": MessageLookupByLibrary.simpleMessage("块重叠"),
+        "chunk_overlap_hint":
+            MessageLookupByLibrary.simpleMessage("与上一块重叠部分的大小"),
+        "chunk_size": MessageLookupByLibrary.simpleMessage("块大小"),
+        "chunk_size_hint": MessageLookupByLibrary.simpleMessage("单块能包含的最大字符数"),
         "clear": MessageLookupByLibrary.simpleMessage("清空"),
         "clear_chat": MessageLookupByLibrary.simpleMessage("清空对话"),
         "clear_data": MessageLookupByLibrary.simpleMessage("清理数据"),
@@ -68,10 +75,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "delete_image": MessageLookupByLibrary.simpleMessage("删除图片"),
         "document": MessageLookupByLibrary.simpleMessage("文档"),
+        "document_config": MessageLookupByLibrary.simpleMessage("文档配置"),
+        "document_config_hint": MessageLookupByLibrary.simpleMessage(
+            "文档会被划分为若干块，经过搜索比较后，最合适的几个块会被补充进上下文。"),
         "download": MessageLookupByLibrary.simpleMessage("下载"),
         "duplicate_api_name": MessageLookupByLibrary.simpleMessage("接口名重复"),
         "duplicate_bot_name": MessageLookupByLibrary.simpleMessage("角色名重复"),
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),
+        "embedding_vector": MessageLookupByLibrary.simpleMessage("嵌入向量"),
+        "embedding_vector_info": MessageLookupByLibrary.simpleMessage(
+            "批大小受限于接口服务商，建议查询后修改。向量维度为专业选项，非必要请勿填写。"),
         "empty": MessageLookupByLibrary.simpleMessage("空"),
         "empty_link": MessageLookupByLibrary.simpleMessage("空链接"),
         "enable": MessageLookupByLibrary.simpleMessage("启用"),
@@ -136,15 +149,20 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Google Search 模式"),
         "search_general_mode": MessageLookupByLibrary.simpleMessage("通用模式"),
         "search_n": MessageLookupByLibrary.simpleMessage("网页数量"),
-        "search_n_hint":
-            MessageLookupByLibrary.simpleMessage("集成到上下文中的网页数量（默认为 3）"),
+        "search_n_hint": MessageLookupByLibrary.simpleMessage("检索的网页数量上限"),
         "search_prompt": MessageLookupByLibrary.simpleMessage("提示词"),
         "search_prompt_hint":
             MessageLookupByLibrary.simpleMessage("用于合成上下文和用户消息的提示词模板"),
         "search_prompt_info": m0,
         "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
         "search_searxng_hint":
-            MessageLookupByLibrary.simpleMessage("SearXNG 实例根地址（不包含末尾 /）"),
+            MessageLookupByLibrary.simpleMessage("SearXNG 实例根地址"),
+        "search_timeout": MessageLookupByLibrary.simpleMessage("超时时间"),
+        "search_timeout_hint":
+            MessageLookupByLibrary.simpleMessage("检索网页超时的毫秒数"),
+        "search_vector": MessageLookupByLibrary.simpleMessage("嵌入向量"),
+        "search_vector_hint":
+            MessageLookupByLibrary.simpleMessage("大幅减小上下文但增长响应时间"),
         "select_models": MessageLookupByLibrary.simpleMessage("选择模型"),
         "settings": MessageLookupByLibrary.simpleMessage("设置"),
         "setup_api_model_first":
@@ -152,6 +170,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "setup_searxng_first":
             MessageLookupByLibrary.simpleMessage("请先配置 SearXNG 实例地址"),
         "setup_tts_first": MessageLookupByLibrary.simpleMessage("请先配置文本转语音"),
+        "setup_vector_first":
+            MessageLookupByLibrary.simpleMessage("请先配置嵌入向量接口和模型"),
         "share": MessageLookupByLibrary.simpleMessage("分享"),
         "source": MessageLookupByLibrary.simpleMessage("源码"),
         "streaming_response": MessageLookupByLibrary.simpleMessage("流式响应"),
@@ -168,6 +188,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "title_prompt_hint":
             MessageLookupByLibrary.simpleMessage("用于生成标题的提示词模板"),
         "up_to_date": MessageLookupByLibrary.simpleMessage("已是最新版本"),
+        "vector_batch_size": MessageLookupByLibrary.simpleMessage("批大小"),
+        "vector_batch_size_hint":
+            MessageLookupByLibrary.simpleMessage("单次请求能提交的最大块数量"),
+        "vector_dimensions": MessageLookupByLibrary.simpleMessage("向量维度"),
+        "vector_dimensions_hint":
+            MessageLookupByLibrary.simpleMessage("嵌入向量模型输出向量的维度"),
         "voice": MessageLookupByLibrary.simpleMessage("音色"),
         "web_search": MessageLookupByLibrary.simpleMessage("联网搜索"),
         "workspace": MessageLookupByLibrary.simpleMessage("工作空间")

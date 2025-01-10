@@ -113,7 +113,7 @@ class Util {
       if ((search.vector ?? false) && !vectorOk) {
         showSnackBar(
           context: context,
-          content: Text("请先配置向量接口和模型"),
+          content: Text(S.of(context).setup_vector_first),
         );
         return false;
       }
@@ -381,13 +381,15 @@ class Dialogs {
 }
 
 class InputDialogField {
-  final String? hint;
   final String? text;
+  final String? hint;
+  final String? label;
   final int? maxLines;
 
   const InputDialogField({
     this.hint,
     this.text,
+    this.label,
     this.maxLines = 1,
   });
 }
@@ -447,7 +449,8 @@ class _InputDialogState extends State<InputDialog> {
               controller: _ctrls[index],
               maxLines: fields[index].maxLines,
               decoration: InputDecoration(
-                labelText: fields[index].hint,
+                hintText: fields[index].hint,
+                labelText: fields[index].label,
                 border: const UnderlineInputBorder(),
               ),
             ),

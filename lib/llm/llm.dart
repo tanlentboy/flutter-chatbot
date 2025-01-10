@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "web.dart";
 import "../config.dart";
 import "../chat/chat.dart";
 import "../chat/current.dart";
@@ -20,15 +21,14 @@ import "../chat/message.dart";
 import "../markdown/util.dart";
 
 import "dart:io";
-import "dart:convert";
 import "dart:isolate";
+import "dart:convert";
 import "package:http/http.dart";
 import "package:langchain/langchain.dart";
 import "package:audioplayers/audioplayers.dart";
 import "package:langchain_openai/langchain_openai.dart";
 import "package:langchain_google/langchain_google.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:langchain_community/langchain_community.dart";
 
 final llmProvider =
     AutoDisposeNotifierProvider<LlmNotifier, void>(LlmNotifier.new);
@@ -255,18 +255,63 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
     final json = jsonDecode(data);
     final results = json["results"];
 
-    final n = Config.search.n ?? 3;
+    var n = results.length as int;
+    final max = Config.search.n ?? 64;
+
+    if (n > max) n = max;
     final urls = <String>[
       for (var i = 0; i < n; i++) results[i]["url"],
     ];
 
-    final docs = await Isolate.run(() async {
-      final loader = WebBaseLoader(urls);
-      final docs = await loader.load();
-      return docs;
+    final timeout = Config.search.timeout;
+    var docs = await Isolate.run(() async {
+      final loader = WebLoader(urls, timeout: timeout);
+      return await loader.load();
     });
-    final pages = docs.map((it) => "<webPage>\n${it.pageContent}\n</webPage>");
+    if (docs.isEmpty) throw "No web content retrieved.";
 
+    if (Config.search.vector ?? false) {
+      final vector = Config.vector;
+      final document = Config.document;
+      final api = Config.apis[vector.api]!;
+
+      final apiUrl = api.url;
+      final apiKey = api.key;
+      final model = vector.model!;
+      final dimensions = vector.dimensions;
+      final batchSize = vector.batchSize ?? 64;
+
+      final topK = document.n ?? 8;
+      final chunkSize = document.size ?? 2000;
+      final chunkOverlap = document.overlap ?? 100;
+
+      final splitter = RecursiveCharacterTextSplitter(
+        chunkSize: chunkSize,
+        chunkOverlap: chunkOverlap,
+      );
+      final vectorStore = MemoryVectorStore(
+        embeddings: OpenAIEmbeddings(
+          model: model,
+          apiKey: apiKey,
+          baseUrl: apiUrl,
+          client: _chatClient,
+          batchSize: batchSize,
+          dimensions: dimensions,
+        ),
+      );
+
+      docs = await Isolate.run(() => splitter.splitDocuments(docs));
+      await vectorStore.addDocuments(documents: docs);
+
+      docs = await vectorStore.search(
+        query: text,
+        searchType: VectorStoreSearchType.similarity(
+          k: topK,
+        ),
+      );
+    }
+
+    final pages = docs.map((it) => "<webPage>\n${it.pageContent}\n</webPage>");
     final template = Config.search.prompt ??
         """
 You are now an AI model with internet search capabilities.
