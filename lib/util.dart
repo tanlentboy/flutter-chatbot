@@ -139,11 +139,11 @@ class Util {
   }
 
   static String formatDateTime(DateTime time) {
-    return "${_keepTwo(time.month)}-${_keepTwo(time.day)} "
-        "${_keepTwo(time.hour)}:${_keepTwo(time.minute)}";
-  }
+    String keepTwo(int n) => n.toString().padLeft(2, '0');
 
-  static String _keepTwo(int n) => n.toString().padLeft(2, '0');
+    return "${keepTwo(time.month)}-${keepTwo(time.day)} "
+        "${keepTwo(time.hour)}:${keepTwo(time.minute)}";
+  }
 }
 
 class Dialogs {
@@ -383,12 +383,14 @@ class Dialogs {
 class InputDialogField {
   final String? text;
   final String? hint;
+  final String? help;
   final String? label;
   final int? maxLines;
 
   const InputDialogField({
     this.hint,
     this.text,
+    this.help,
     this.label,
     this.maxLines = 1,
   });
@@ -451,6 +453,7 @@ class _InputDialogState extends State<InputDialog> {
               decoration: InputDecoration(
                 hintText: fields[index].hint,
                 labelText: fields[index].label,
+                helperText: fields[index].help,
                 border: const UnderlineInputBorder(),
               ),
             ),

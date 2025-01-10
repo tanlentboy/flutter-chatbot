@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
+import "dart:math";
+
 import "web.dart";
 import "../config.dart";
 import "../chat/chat.dart";
@@ -239,33 +241,16 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
   Future<MessageItem> _buildWebContext(MessageItem origin) async {
     final text = origin.text;
 
-    final searxng = Config.search.searxng!;
-    final endPoint = "$searxng/search?q=$text&format=json";
-
     _chatClient = Client();
-    final response = await _chatClient!.get(
-      Uri.parse(endPoint),
+    final urls = await _getWebPageUrls(
+      text,
+      Config.search.n ?? 64,
     );
+    if (urls.isEmpty) throw "No web page found.";
 
-    if (response.statusCode != 200) {
-      throw "${response.statusCode} ${response.body}";
-    }
-
-    final data = response.body;
-    final json = jsonDecode(data);
-    final results = json["results"];
-
-    var n = results.length as int;
-    final max = Config.search.n ?? 64;
-
-    if (n > max) n = max;
-    final urls = <String>[
-      for (var i = 0; i < n; i++) results[i]["url"],
-    ];
-
-    final timeout = Config.search.timeout;
+    final duration = Duration(milliseconds: Config.search.fetchTime ?? 2000);
     var docs = await Isolate.run(() async {
-      final loader = WebLoader(urls, timeout: timeout);
+      final loader = WebLoader(urls, timeout: duration);
       return await loader.load();
     });
     if (docs.isEmpty) throw "No web content retrieved.";
@@ -334,6 +319,37 @@ You need to answer the user's question based on the above content:
       role: MessageRole.user,
       text: context,
     );
+  }
+
+  Future<List<String>> _getWebPageUrls(String query, int n) async {
+    final searxng = Config.search.searxng!;
+    final baseUrl = searxng.replaceFirst("{text}", query);
+
+    final badResponse = Response("Request Timeout", 408);
+    final duration = Duration(milliseconds: Config.search.queryTime ?? 3000);
+
+    Uri uriOf(int i) => Uri.parse("$baseUrl&pageno=$i");
+    final responses = await Future.wait<Response>(List.generate(
+      (n / 16).ceil(),
+      (i) => _chatClient!
+          .get(uriOf(i))
+          .timeout(duration)
+          .catchError((_) => badResponse),
+    ));
+
+    final urls = <String>[];
+
+    for (final res in responses) {
+      if (res.statusCode != 200) continue;
+      final json = jsonDecode(res.body);
+      final results = json["results"];
+      for (final it in results) {
+        urls.add(it["url"]);
+      }
+    }
+
+    n = min(n, urls.length);
+    return urls.sublist(0, n);
   }
 }
 

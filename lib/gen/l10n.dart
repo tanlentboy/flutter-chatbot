@@ -1310,11 +1310,81 @@ class S {
     );
   }
 
-  /// `Timeout in milliseconds for web page retrieval`
+  /// `Milliseconds for web page retrieval timeout`
   String get search_timeout_hint {
     return Intl.message(
-      'Timeout in milliseconds for web page retrieval',
+      'Milliseconds for web page retrieval timeout',
       name: 'search_timeout_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Base URL`
+  String get search_searxng_base {
+    return Intl.message(
+      'Base URL',
+      name: 'search_searxng_base',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Additional Parameters`
+  String get search_searxng_extra {
+    return Intl.message(
+      'Additional Parameters',
+      name: 'search_searxng_extra',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `For example: engines=google&language=en`
+  String get search_searxng_extra_help {
+    return Intl.message(
+      'For example: engines=google&language=en',
+      name: 'search_searxng_extra_help',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Query Timeout`
+  String get search_timeout_query {
+    return Intl.message(
+      'Query Timeout',
+      name: 'search_timeout_query',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Timeout duration for SearXNG requests`
+  String get search_timeout_query_help {
+    return Intl.message(
+      'Timeout duration for SearXNG requests',
+      name: 'search_timeout_query_help',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fetch Timeout`
+  String get search_timeout_fetch {
+    return Intl.message(
+      'Fetch Timeout',
+      name: 'search_timeout_fetch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Timeout duration for fetching web page content`
+  String get search_timeout_fetch_help {
+    return Intl.message(
+      'Timeout duration for fetching web page content',
+      name: 'search_timeout_fetch_help',
       desc: '',
       args: [],
     );
@@ -1510,10 +1580,10 @@ class S {
     );
   }
 
-  /// `SearXNG instance root URL`
+  /// `SearXNG instance`
   String get search_searxng_hint {
     return Intl.message(
-      'SearXNG instance root URL',
+      'SearXNG instance',
       name: 'search_searxng_hint',
       desc: '',
       args: [],

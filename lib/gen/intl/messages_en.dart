@@ -195,11 +195,24 @@ class MessageLookup extends MessageLookupByLibrary {
             "Template for synthesizing context and user messages"),
         "search_prompt_info": m0,
         "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
+        "search_searxng_base": MessageLookupByLibrary.simpleMessage("Base URL"),
+        "search_searxng_extra":
+            MessageLookupByLibrary.simpleMessage("Additional Parameters"),
+        "search_searxng_extra_help": MessageLookupByLibrary.simpleMessage(
+            "For example: engines=google&language=en"),
         "search_searxng_hint":
-            MessageLookupByLibrary.simpleMessage("SearXNG instance root URL"),
+            MessageLookupByLibrary.simpleMessage("SearXNG instance"),
         "search_timeout": MessageLookupByLibrary.simpleMessage("Timeout"),
+        "search_timeout_fetch":
+            MessageLookupByLibrary.simpleMessage("Fetch Timeout"),
+        "search_timeout_fetch_help": MessageLookupByLibrary.simpleMessage(
+            "Timeout duration for fetching web page content"),
         "search_timeout_hint": MessageLookupByLibrary.simpleMessage(
-            "Timeout in milliseconds for web page retrieval"),
+            "Milliseconds for web page retrieval timeout"),
+        "search_timeout_query":
+            MessageLookupByLibrary.simpleMessage("Query Timeout"),
+        "search_timeout_query_help": MessageLookupByLibrary.simpleMessage(
+            "Timeout duration for SearXNG requests"),
         "search_vector":
             MessageLookupByLibrary.simpleMessage("Embedding Vector"),
         "search_vector_hint": MessageLookupByLibrary.simpleMessage(

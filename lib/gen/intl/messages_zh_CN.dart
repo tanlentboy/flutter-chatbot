@@ -155,11 +155,21 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("用于合成上下文和用户消息的提示词模板"),
         "search_prompt_info": m0,
         "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
+        "search_searxng_base": MessageLookupByLibrary.simpleMessage("根地址"),
+        "search_searxng_extra": MessageLookupByLibrary.simpleMessage("附加参数"),
+        "search_searxng_extra_help": MessageLookupByLibrary.simpleMessage(
+            "例如：engines=google&language=zh"),
         "search_searxng_hint":
-            MessageLookupByLibrary.simpleMessage("SearXNG 实例根地址"),
+            MessageLookupByLibrary.simpleMessage("SearXNG 实例"),
         "search_timeout": MessageLookupByLibrary.simpleMessage("超时时间"),
+        "search_timeout_fetch": MessageLookupByLibrary.simpleMessage("抓取超时"),
+        "search_timeout_fetch_help":
+            MessageLookupByLibrary.simpleMessage("抓取网页内容的超时时间"),
         "search_timeout_hint":
             MessageLookupByLibrary.simpleMessage("检索网页超时的毫秒数"),
+        "search_timeout_query": MessageLookupByLibrary.simpleMessage("检索超时"),
+        "search_timeout_query_help":
+            MessageLookupByLibrary.simpleMessage("请求 SearXNG 的超时时间"),
         "search_vector": MessageLookupByLibrary.simpleMessage("嵌入向量"),
         "search_vector_hint":
             MessageLookupByLibrary.simpleMessage("大幅减小上下文但增长响应时间"),
@@ -168,7 +178,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "setup_api_model_first":
             MessageLookupByLibrary.simpleMessage("请先配置接口和模型"),
         "setup_searxng_first":
-            MessageLookupByLibrary.simpleMessage("请先配置 SearXNG 实例地址"),
+            MessageLookupByLibrary.simpleMessage("请先配置 SearXNG 实例"),
         "setup_tts_first": MessageLookupByLibrary.simpleMessage("请先配置文本转语音"),
         "setup_vector_first":
             MessageLookupByLibrary.simpleMessage("请先配置嵌入向量接口和模型"),

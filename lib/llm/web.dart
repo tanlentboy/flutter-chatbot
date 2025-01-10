@@ -22,23 +22,23 @@ class WebLoader extends BaseDocumentLoader {
   const WebLoader(
     this.urls, {
     this.client,
-    this.timeout,
     this.requestHeaders,
+    this.timeout = const Duration(seconds: 10),
   });
 
-  final int? timeout;
   final Client? client;
+  final Duration timeout;
   final List<String> urls;
   final Map<String, String>? requestHeaders;
 
   @override
   Future<List<Document>> load() async {
+    const badDocument = Document(pageContent: "");
+
     final docs = await Future.wait(urls.map(
-      (it) => _scrape(it)
-          .timeout(Duration(milliseconds: timeout ?? 2000))
-          .catchError((_) => const Document(pageContent: "")),
-    ));
+        (it) => _scrape(it).timeout(timeout).catchError((_) => badDocument)));
     docs.removeWhere((it) => it.pageContent.isEmpty);
+
     return docs;
   }
 
