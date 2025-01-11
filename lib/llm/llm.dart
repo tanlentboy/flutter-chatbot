@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "dart:math";
-
 import "web.dart";
 import "../config.dart";
 import "../chat/chat.dart";
@@ -23,6 +21,7 @@ import "../chat/message.dart";
 import "../markdown/util.dart";
 
 import "dart:io";
+import "dart:math";
 import "dart:isolate";
 import "dart:convert";
 import "package:http/http.dart";
@@ -329,7 +328,7 @@ You need to answer the user's question based on the above content:
     final duration = Duration(milliseconds: Config.search.queryTime ?? 3000);
 
     Uri uriOf(int i) => Uri.parse("$baseUrl&pageno=$i");
-    final responses = await Future.wait<Response>(List.generate(
+    final responses = await Future.wait(List.generate(
       (n / 16).ceil(),
       (i) => _chatClient!
           .get(uriOf(i))

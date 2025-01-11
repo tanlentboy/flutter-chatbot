@@ -90,7 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete_image": MessageLookupByLibrary.simpleMessage("Delete image"),
         "document": MessageLookupByLibrary.simpleMessage("Document"),
         "document_config":
-            MessageLookupByLibrary.simpleMessage("Document Configuration"),
+            MessageLookupByLibrary.simpleMessage("Document Config"),
         "document_config_hint": MessageLookupByLibrary.simpleMessage(
             "Documents are divided into multiple chunks. After search and comparison, the most relevant chunks will be added to the context."),
         "download": MessageLookupByLibrary.simpleMessage("Download"),
@@ -121,7 +121,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("Error"),
         "export_chat_as_image":
             MessageLookupByLibrary.simpleMessage("Export Image"),
-        "export_config": MessageLookupByLibrary.simpleMessage("Export config"),
+        "export_config": MessageLookupByLibrary.simpleMessage("Export Config"),
         "exported_successfully":
             MessageLookupByLibrary.simpleMessage("Exported Successfully"),
         "exporting": MessageLookupByLibrary.simpleMessage("Exporting..."),
@@ -132,7 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "image_compress_failed":
             MessageLookupByLibrary.simpleMessage("Failed to comprese image"),
         "image_enable_hint": MessageLookupByLibrary.simpleMessage(
-            "The original image will be used if compression fails."),
+            "The original image will be used if compression fails"),
         "image_generation":
             MessageLookupByLibrary.simpleMessage("Image Generation"),
         "image_hint": MessageLookupByLibrary.simpleMessage(
@@ -141,7 +141,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "image_size": MessageLookupByLibrary.simpleMessage("Image Size"),
         "image_style": MessageLookupByLibrary.simpleMessage("Image Style"),
         "images": MessageLookupByLibrary.simpleMessage("Images"),
-        "import_config": MessageLookupByLibrary.simpleMessage("Import config"),
+        "import_config": MessageLookupByLibrary.simpleMessage("Import Config"),
         "imported_successfully":
             MessageLookupByLibrary.simpleMessage("Imported Successfully"),
         "importing": MessageLookupByLibrary.simpleMessage("Importing..."),
@@ -157,8 +157,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Minimal Size"),
         "model": MessageLookupByLibrary.simpleMessage("Model"),
         "model_avatar": MessageLookupByLibrary.simpleMessage("Model Avatar"),
-        "model_avatar_hint": MessageLookupByLibrary.simpleMessage(
-            "Click to choose a Model Avatar."),
         "model_list": MessageLookupByLibrary.simpleMessage("Model List"),
         "model_name": MessageLookupByLibrary.simpleMessage("Model Name"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
@@ -192,7 +190,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Maximum number of web pages to retrieve"),
         "search_prompt": MessageLookupByLibrary.simpleMessage("Prompt"),
         "search_prompt_hint": MessageLookupByLibrary.simpleMessage(
-            "Template for synthesizing context and user messages"),
+            "Template for context synthesis"),
         "search_prompt_info": m0,
         "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
         "search_searxng_base": MessageLookupByLibrary.simpleMessage("Base URL"),
@@ -208,15 +206,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "search_timeout_fetch_help": MessageLookupByLibrary.simpleMessage(
             "Timeout duration for fetching web page content"),
         "search_timeout_hint": MessageLookupByLibrary.simpleMessage(
-            "Milliseconds for web page retrieval timeout"),
+            "Retrieval timeout in milliseconds"),
         "search_timeout_query":
             MessageLookupByLibrary.simpleMessage("Query Timeout"),
         "search_timeout_query_help": MessageLookupByLibrary.simpleMessage(
             "Timeout duration for SearXNG requests"),
         "search_vector":
             MessageLookupByLibrary.simpleMessage("Embedding Vector"),
-        "search_vector_hint": MessageLookupByLibrary.simpleMessage(
-            "Significantly reduces context size but increases response time"),
+        "search_vector_hint":
+            MessageLookupByLibrary.simpleMessage("Recommended to enable"),
         "select_models": MessageLookupByLibrary.simpleMessage("Select Models"),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "setup_api_model_first": MessageLookupByLibrary.simpleMessage(

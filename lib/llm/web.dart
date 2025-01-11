@@ -79,16 +79,15 @@ class WebLoader extends BaseDocumentLoader {
     final BeautifulSoup soup,
   ) {
     final title = soup.title;
-    final description = soup.find(
-      "meta",
-      attrs: {"name": "description"},
-    )?.getAttrValue("content");
     final language = soup.find("html")?.getAttrValue("lang");
+    final description = soup
+        .find("meta", attrs: {"name": "description"})?.getAttrValue("content");
+
     return {
       "source": url,
       if (title != null) "title": title.text,
-      if (description != null) "description": description.trim(),
       if (language != null) "language": language,
+      if (description != null) "description": description.trim(),
     };
   }
 }

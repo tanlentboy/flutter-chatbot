@@ -41,7 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannot_open": MessageLookupByLibrary.simpleMessage("无法打开"),
         "chat_image_compress": MessageLookupByLibrary.simpleMessage("对话图片压缩"),
         "chat_model": MessageLookupByLibrary.simpleMessage("对话模型"),
-        "chat_model_hint": MessageLookupByLibrary.simpleMessage("是否是对话模型"),
+        "chat_model_hint": MessageLookupByLibrary.simpleMessage("是否是对话模型？"),
         "chat_settings": MessageLookupByLibrary.simpleMessage("对话设置"),
         "chat_title": MessageLookupByLibrary.simpleMessage("对话标题"),
         "check_for_updates": MessageLookupByLibrary.simpleMessage("检查更新"),
@@ -124,7 +124,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "min_width_height": MessageLookupByLibrary.simpleMessage("最小宽高"),
         "model": MessageLookupByLibrary.simpleMessage("模型"),
         "model_avatar": MessageLookupByLibrary.simpleMessage("模型头像"),
-        "model_avatar_hint": MessageLookupByLibrary.simpleMessage("点击选择一个模型头像"),
         "model_list": MessageLookupByLibrary.simpleMessage("模型列表"),
         "model_name": MessageLookupByLibrary.simpleMessage("模型名称"),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
@@ -152,7 +151,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search_n_hint": MessageLookupByLibrary.simpleMessage("检索的网页数量上限"),
         "search_prompt": MessageLookupByLibrary.simpleMessage("提示词"),
         "search_prompt_hint":
-            MessageLookupByLibrary.simpleMessage("用于合成上下文和用户消息的提示词模板"),
+            MessageLookupByLibrary.simpleMessage("用于合成上下文的提示词模板"),
         "search_prompt_info": m0,
         "search_searxng": MessageLookupByLibrary.simpleMessage("SearXNG"),
         "search_searxng_base": MessageLookupByLibrary.simpleMessage("根地址"),
@@ -165,14 +164,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "search_timeout_fetch": MessageLookupByLibrary.simpleMessage("抓取超时"),
         "search_timeout_fetch_help":
             MessageLookupByLibrary.simpleMessage("抓取网页内容的超时时间"),
-        "search_timeout_hint":
-            MessageLookupByLibrary.simpleMessage("检索网页超时的毫秒数"),
+        "search_timeout_hint": MessageLookupByLibrary.simpleMessage("检索的超时毫秒数"),
         "search_timeout_query": MessageLookupByLibrary.simpleMessage("检索超时"),
         "search_timeout_query_help":
             MessageLookupByLibrary.simpleMessage("请求 SearXNG 的超时时间"),
         "search_vector": MessageLookupByLibrary.simpleMessage("嵌入向量"),
-        "search_vector_hint":
-            MessageLookupByLibrary.simpleMessage("大幅减小上下文但增长响应时间"),
+        "search_vector_hint": MessageLookupByLibrary.simpleMessage("建议开启"),
         "select_models": MessageLookupByLibrary.simpleMessage("选择模型"),
         "settings": MessageLookupByLibrary.simpleMessage("设置"),
         "setup_api_model_first":

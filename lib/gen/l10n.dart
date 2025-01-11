@@ -640,20 +640,20 @@ class S {
     );
   }
 
-  /// `Export config`
+  /// `Export Config`
   String get export_config {
     return Intl.message(
-      'Export config',
+      'Export Config',
       name: 'export_config',
       desc: '',
       args: [],
     );
   }
 
-  /// `Import config`
+  /// `Import Config`
   String get import_config {
     return Intl.message(
-      'Import config',
+      'Import Config',
       name: 'import_config',
       desc: '',
       args: [],
@@ -710,10 +710,10 @@ class S {
     );
   }
 
-  /// `The original image will be used if compression fails.`
+  /// `The original image will be used if compression fails`
   String get image_enable_hint {
     return Intl.message(
-      'The original image will be used if compression fails.',
+      'The original image will be used if compression fails',
       name: 'image_enable_hint',
       desc: '',
       args: [],
@@ -1160,16 +1160,6 @@ class S {
     );
   }
 
-  /// `Click to choose a Model Avatar.`
-  String get model_avatar_hint {
-    return Intl.message(
-      'Click to choose a Model Avatar.',
-      name: 'model_avatar_hint',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Title Generation`
   String get title_generation {
     return Intl.message(
@@ -1290,10 +1280,10 @@ class S {
     );
   }
 
-  /// `Significantly reduces context size but increases response time`
+  /// `Recommended to enable`
   String get search_vector_hint {
     return Intl.message(
-      'Significantly reduces context size but increases response time',
+      'Recommended to enable',
       name: 'search_vector_hint',
       desc: '',
       args: [],
@@ -1310,10 +1300,10 @@ class S {
     );
   }
 
-  /// `Milliseconds for web page retrieval timeout`
+  /// `Retrieval timeout in milliseconds`
   String get search_timeout_hint {
     return Intl.message(
-      'Milliseconds for web page retrieval timeout',
+      'Retrieval timeout in milliseconds',
       name: 'search_timeout_hint',
       desc: '',
       args: [],
@@ -1450,10 +1440,10 @@ class S {
     );
   }
 
-  /// `Document Configuration`
+  /// `Document Config`
   String get document_config {
     return Intl.message(
-      'Document Configuration',
+      'Document Config',
       name: 'document_config',
       desc: '',
       args: [],
@@ -1620,10 +1610,10 @@ class S {
     );
   }
 
-  /// `Template for synthesizing context and user messages`
+  /// `Template for context synthesis`
   String get search_prompt_hint {
     return Intl.message(
-      'Template for synthesizing context and user messages',
+      'Template for context synthesis',
       name: 'search_prompt_hint',
       desc: '',
       args: [],

@@ -129,8 +129,7 @@
     "chat_model": "对话模型",
     "model_name": "模型名称",
     "model_avatar": "模型头像",
-    "chat_model_hint": "是否是对话模型",
-    "model_avatar_hint": "点击选择一个模型头像",
+    "chat_model_hint": "是否是对话模型？",
 
     "title_generation": "标题生成",
     "title_enable_hint": "禁用则将以用户消息为标题",
@@ -146,10 +145,9 @@
 
     "setup_vector_first": "请先配置嵌入向量接口和模型",
     "search_vector": "嵌入向量",
-    "search_vector_hint": "大幅减小上下文但增长响应时间",
+    "search_vector_hint": "建议开启",
     "search_timeout": "超时时间",
-
-    "search_timeout_hint": "检索网页超时的毫秒数",
+    "search_timeout_hint": "检索的超时毫秒数",
     "search_searxng_base": "根地址",
     "search_searxng_extra": "附加参数",
     "search_searxng_extra_help": "例如：engines=google&language=zh",
@@ -182,6 +180,6 @@
     "search_n": "网页数量",
     "search_n_hint": "检索的网页数量上限",
     "search_prompt": "提示词",
-    "search_prompt_hint": "用于合成上下文和用户消息的提示词模板",
+    "search_prompt_hint": "用于合成上下文的提示词模板",
     "search_prompt_info": "提示词模板中的 {pages} 占位变量会被网页内容替换，{text} 占位变量会被用户消息替换。如不清楚，可留空以使用内置模板。"
 }

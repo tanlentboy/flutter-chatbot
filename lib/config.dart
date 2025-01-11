@@ -128,9 +128,6 @@ class Config {
     }
   }
 
-  static bool get isOkToTts =>
-      tts.api != null && tts.model != null && tts.voice != null;
-
   static void _initDir() {
     final chatPath = "$_dir$_sep$_chatDir";
     final chatDir = Directory(chatPath);

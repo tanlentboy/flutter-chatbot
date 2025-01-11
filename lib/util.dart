@@ -139,10 +139,10 @@ class Util {
   }
 
   static String formatDateTime(DateTime time) {
-    String keepTwo(int n) => n.toString().padLeft(2, '0');
+    String two(int n) => n.toString().padLeft(2, '0');
 
-    return "${keepTwo(time.month)}-${keepTwo(time.day)} "
-        "${keepTwo(time.hour)}:${keepTwo(time.minute)}";
+    return "${two(time.month)}-${two(time.day)} "
+        "${two(time.hour)}:${two(time.minute)}";
   }
 }
 

@@ -46,9 +46,9 @@ class _TaskTabState extends ConsumerState<TaskTab> {
         ),
         CheckboxListTile(
           title: Text(s.enable),
+          subtitle: Text(s.title_enable_hint),
           contentPadding: const EdgeInsets.only(left: 24, right: 16),
           value: Config.title.enable ?? false,
-          subtitle: Text(s.title_enable_hint),
           onChanged: (value) {
             setState(() => Config.title.enable = value);
             Config.save();
@@ -134,9 +134,9 @@ class _TaskTabState extends ConsumerState<TaskTab> {
         ),
         CheckboxListTile(
           title: Text(s.search_vector),
+          subtitle: Text(s.search_vector_hint),
           contentPadding: const EdgeInsets.only(left: 24, right: 16),
           value: Config.search.vector ?? false,
-          subtitle: Text(s.search_vector_hint),
           onChanged: (value) {
             setState(() => Config.search.vector = value);
             Config.save();

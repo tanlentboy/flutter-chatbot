@@ -68,15 +68,15 @@
     "min_width": "Minimal Width",
     "min_height": "Minimal Height",
     "min_width_height": "Minimal Size",
-    "export_config": "Export config",
-    "import_config": "Import config",
+    "export_config": "Export Config",
+    "import_config": "Import Config",
     "exporting": "Exporting...",
     "importing": "Importing...",
 
     "empty": "Empty",
     "enable": "Enable",
     "please_input": "Please Input",
-    "image_enable_hint": "The original image will be used if compression fails.",
+    "image_enable_hint": "The original image will be used if compression fails",
     "image_hint": "The Quality should be between 1 and 100, with lower values resulting in higher compression. Minimum Width and Minimum Height restrict image resizing. Leave these fields empty if you're unsure.",
     "config_hint": "To avoid export failures, it's recommended to export the configuration to the Documents directory, or create a ChatBot subdirectory within your Downloads folder.",
 
@@ -130,7 +130,6 @@
     "model_name": "Model Name",
     "model_avatar": "Model Avatar",
     "chat_model_hint": "Is it a Chat Model?",
-    "model_avatar_hint": "Click to choose a Model Avatar.",
 
     "title_generation": "Title Generation",
     "title_enable_hint": "If disabled, the user's message will be used as the title",
@@ -146,10 +145,9 @@
 
     "setup_vector_first": "Set up the embedding vector API and model first",
     "search_vector": "Embedding Vector",
-    "search_vector_hint": "Significantly reduces context size but increases response time",
+    "search_vector_hint": "Recommended to enable",
     "search_timeout": "Timeout",
-
-    "search_timeout_hint": "Milliseconds for web page retrieval timeout",
+    "search_timeout_hint": "Retrieval timeout in milliseconds",
     "search_searxng_base": "Base URL",
     "search_searxng_extra": "Additional Parameters",
     "search_searxng_extra_help": "For example: engines=google&language=en",
@@ -164,7 +162,7 @@
     "vector_dimensions": "Vector Dimensions",
     "vector_dimensions_hint": "Output dimension of the embedding vector model",
     "embedding_vector_info": "Batch size is limited by the API service provider. It's recommended to check and modify accordingly. Vector dimension is an advanced option and should only be filled if necessary.",
-    "document_config": "Document Configuration",
+    "document_config": "Document Config",
     "chunk_n": "Number of Chunks",
     "chunk_n_hint": "Number of chunks to be integrated into the context",
     "chunk_size": "Chunk Size",
@@ -182,6 +180,6 @@
     "search_n": "Number of Pages",
     "search_n_hint": "Maximum number of web pages to retrieve",
     "search_prompt": "Prompt",
-    "search_prompt_hint": "Template for synthesizing context and user messages",
+    "search_prompt_hint": "Template for context synthesis",
     "search_prompt_info": "In the prompt template, the {pages} placeholder will be replaced with web page content, and the {text} placeholder will be replaced with the user message. If unsure, leave it empty to use the built-in template."
 }

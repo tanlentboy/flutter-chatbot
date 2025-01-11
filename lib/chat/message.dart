@@ -465,7 +465,10 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     final text = message.item.text;
     if (text.isEmpty) return;
 
-    if (!Config.isOkToTts) {
+    final tts = Config.tts;
+    final ttsOk = tts.api != null && tts.model != null && tts.voice != null;
+
+    if (!ttsOk) {
       Util.showSnackBar(
         context: context,
         content: Text(S.of(context).setup_tts_first),
@@ -829,19 +832,18 @@ class _MessageEditorState extends ConsumerState<_MessageEditor> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
-        child: TextField(
-          expands: true,
-          maxLines: null,
-          controller: _editCtrl,
-          undoController: _undoCtrl,
-          textAlign: TextAlign.start,
-          keyboardType: TextInputType.multiline,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: S.of(context).enter_message,
-          ),
+      body: TextField(
+        expands: true,
+        maxLines: null,
+        controller: _editCtrl,
+        undoController: _undoCtrl,
+        textAlign: TextAlign.start,
+        keyboardType: TextInputType.multiline,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: S.of(context).enter_message,
+          contentPadding:
+              const EdgeInsets.only(top: 12, left: 16, right: 16, bottom: 12),
         ),
       ),
     );
