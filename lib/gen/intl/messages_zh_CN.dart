@@ -55,6 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("与上一块重叠部分的大小"),
         "chunk_size": MessageLookupByLibrary.simpleMessage("块大小"),
         "chunk_size_hint": MessageLookupByLibrary.simpleMessage("单块能包含的最大字符数"),
+        "citations": MessageLookupByLibrary.simpleMessage("引用"),
         "clear": MessageLookupByLibrary.simpleMessage("清空"),
         "clear_chat": MessageLookupByLibrary.simpleMessage("清空对话"),
         "clear_data": MessageLookupByLibrary.simpleMessage("清理数据"),

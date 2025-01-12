@@ -280,6 +280,16 @@ class S {
     );
   }
 
+  /// `Citations`
+  String get citations {
+    return Intl.message(
+      'Citations',
+      name: 'citations',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `API`
   String get api {
     return Intl.message(

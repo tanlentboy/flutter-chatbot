@@ -193,22 +193,17 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
 
   Future<PromptValue> _buildContext(List<Message> messages) async {
     final context = <ChatMessage>[];
-    final items = <MessageItem>[
-      for (final it in messages) it.item,
-    ];
     final system = Current.systemPrompts;
+    final items = messages.map((it) => it.item).toList();
 
-    if (items.last.role.isAssistant) {
-      items.removeLast();
-    }
+    if (items.last.role.isAssistant) items.removeLast();
 
     if (Preferences.search && !Preferences.googleSearch) {
       items.last = await _buildWebContext(items.last);
+      messages.last.item.citations = items.last.citations;
     }
 
-    if (system != null) {
-      context.add(ChatMessage.system(system));
-    }
+    if (system != null) context.add(ChatMessage.system(system));
 
     for (final item in items) {
       switch (item.role) {
@@ -314,10 +309,19 @@ You need to answer the user's question based on the above content:
       "text": text,
     });
 
-    return MessageItem(
+    final item = MessageItem(
       role: MessageRole.user,
       text: context,
     );
+
+    for (final doc in docs) {
+      item.citations.add((
+        source: doc.metadata["source"].toString(),
+        chunkContent: doc.pageContent,
+      ));
+    }
+
+    return item;
   }
 
   Future<List<String>> _getWebPageUrls(String query, int n) async {

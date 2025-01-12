@@ -63,7 +63,7 @@ class Util {
         context: context,
         builder: (context) => AlertDialog(
           title: Text(newVersion),
-          content: Text(changeLog),
+          content: SingleChildScrollView(child: Text(changeLog)),
           actions: [
             TextButton(
               onPressed: Navigator.of(context).pop,
@@ -177,7 +177,7 @@ class Dialogs {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(S.of(context).error),
-        content: Text(info),
+        content: SingleChildScrollView(child: SelectableText(info)),
         actions: [
           TextButton(
             onPressed: Navigator.of(context).pop,
@@ -286,10 +286,6 @@ class Dialogs {
         title: Text(S.of(context).link),
         content: Text(link),
         actions: [
-          TextButton(
-            onPressed: Navigator.of(context).pop,
-            child: Text(S.of(context).cancel),
-          ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(1),
             child: Text(S.of(context).copy),

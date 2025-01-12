@@ -61,6 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chunk_size": MessageLookupByLibrary.simpleMessage("Chunk Size"),
         "chunk_size_hint": MessageLookupByLibrary.simpleMessage(
             "Maximum number of characters a single chunk can contain"),
+        "citations": MessageLookupByLibrary.simpleMessage("Citations"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clear_chat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
         "clear_data": MessageLookupByLibrary.simpleMessage("Clear Data"),
