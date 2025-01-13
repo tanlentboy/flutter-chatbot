@@ -49,8 +49,15 @@ enum MessageRole {
   bool get isAssistant => this == MessageRole.assistant;
 }
 
-typedef MessageImage = ({Uint8List bytes, String base64});
-typedef MessageSource = ({String source, String chunkContent});
+typedef MessageImage = ({
+  Uint8List bytes,
+  String base64,
+});
+
+typedef MessageCitation = ({
+  String source,
+  String content,
+});
 
 class MessageItem {
   String text;
@@ -58,7 +65,7 @@ class MessageItem {
   String? model;
   MessageRole role;
   List<MessageImage> images = [];
-  List<MessageSource> citations = [];
+  List<MessageCitation> citations = [];
 
   MessageItem({
     required this.role,
@@ -551,7 +558,7 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
               itemCount: citations.length,
               itemBuilder: (context, index) {
                 final source = citations[index].source;
-                final content = citations[index].chunkContent;
+                final content = citations[index].content;
 
                 return Card.filled(
                   margin: EdgeInsets.zero,
