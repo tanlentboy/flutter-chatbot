@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "util.dart";
 import "../util.dart";
 import "../gen/l10n.dart";
 
@@ -21,6 +20,18 @@ import "package:flutter/material.dart";
 import "package:markdown/markdown.dart" as md;
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:flutter_highlighter/flutter_highlighter.dart";
+import "package:flutter_highlighter/themes/atom-one-dark.dart";
+import "package:flutter_highlighter/themes/atom-one-light.dart";
+
+final codeDarkTheme = Map.of(atomOneDarkTheme)
+  ..["root"] = TextStyle(
+      color: Colors.white.withOpacity(0.7),
+      backgroundColor: Colors.transparent);
+
+final codeLightTheme = Map.of(atomOneLightTheme)
+  ..["root"] = TextStyle(
+      color: Colors.black.withOpacity(0.7),
+      backgroundColor: Colors.transparent);
 
 class CodeBlockBuilder extends MarkdownElementBuilder {
   var language = "";

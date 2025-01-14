@@ -256,6 +256,7 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
 
       final apiUrl = api.url;
       final apiKey = api.key;
+      final apiType = api.type;
       final model = vector.model!;
       final dimensions = vector.dimensions;
       final batchSize = vector.batchSize ?? 64;
@@ -268,15 +269,36 @@ class LlmNotifier extends AutoDisposeNotifier<void> {
         chunkSize: chunkSize,
         chunkOverlap: chunkOverlap,
       );
+
+      _chatClient = switch (apiType) {
+        "google" => _GoogleClient(
+            baseUrl: apiUrl,
+            enableSearch: false,
+          ),
+        _ => _chatClient,
+      };
+
+      final embeddings = switch (apiType) {
+        "google" => GoogleGenerativeAIEmbeddings(
+            model: model,
+            apiKey: apiKey,
+            baseUrl: apiUrl,
+            client: _chatClient,
+            batchSize: batchSize,
+            dimensions: dimensions,
+          ),
+        _ => OpenAIEmbeddings(
+            model: model,
+            apiKey: apiKey,
+            baseUrl: apiUrl,
+            client: _chatClient,
+            batchSize: batchSize,
+            dimensions: dimensions,
+          ),
+      };
+
       final vectorStore = MemoryVectorStore(
-        embeddings: OpenAIEmbeddings(
-          model: model,
-          apiKey: apiKey,
-          baseUrl: apiUrl,
-          client: _chatClient,
-          batchSize: batchSize,
-          dimensions: dimensions,
-        ),
+        embeddings: embeddings,
       );
 
       docs = await Isolate.run(() => splitter.splitDocuments(docs));

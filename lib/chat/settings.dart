@@ -13,15 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "package:chatbot/settings/api.dart";
-import "package:chatbot/settings/bot.dart";
-import "package:chatbot/workspace/model.dart";
-
 import "chat.dart";
 import "current.dart";
 import "../util.dart";
 import "../config.dart";
 import "../gen/l10n.dart";
+import "../settings/api.dart";
+import "../settings/bot.dart";
+import "../workspace/model.dart";
 
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";

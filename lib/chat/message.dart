@@ -20,7 +20,9 @@ import "../util.dart";
 import "../config.dart";
 import "../llm/llm.dart";
 import "../gen/l10n.dart";
-import "../markdown/all.dart";
+import "../markdown/util.dart";
+import "../markdown/code.dart";
+import "../markdown/latex.dart";
 
 import "dart:async";
 import "dart:convert";
