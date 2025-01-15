@@ -140,6 +140,7 @@
 
     "clearing": "Clearing...",
     "clear_data": "Clear Data",
+    "cleared_successfully": "Cleared Successfully",
     "clear_data_chat": "All chat history",
     "clear_data_audio": "All TTS cache files",
     "clear_data_image": "All generated images",

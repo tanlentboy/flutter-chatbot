@@ -71,6 +71,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("All chat history"),
         "clear_data_image":
             MessageLookupByLibrary.simpleMessage("All generated images"),
+        "cleared_successfully":
+            MessageLookupByLibrary.simpleMessage("Cleared Successfully"),
         "clearing": MessageLookupByLibrary.simpleMessage("Clearing..."),
         "clone_chat": MessageLookupByLibrary.simpleMessage("Clone Chat"),
         "cloned_successfully":

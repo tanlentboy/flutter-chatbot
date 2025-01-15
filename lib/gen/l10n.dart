@@ -1240,6 +1240,16 @@ class S {
     );
   }
 
+  /// `Cleared Successfully`
+  String get cleared_successfully {
+    return Intl.message(
+      'Cleared Successfully',
+      name: 'cleared_successfully',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `All chat history`
   String get clear_data_chat {
     return Intl.message(

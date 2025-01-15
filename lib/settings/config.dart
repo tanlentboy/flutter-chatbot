@@ -467,6 +467,12 @@ class _ConfigTabState extends ConsumerState<ConfigTab> {
       ref.read(messagesProvider.notifier).notify();
     }
 
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    Navigator.of(context).pop();
+
+    Util.showSnackBar(
+      context: context,
+      content: Text(S.of(context).cleared_successfully),
+    );
   }
 }

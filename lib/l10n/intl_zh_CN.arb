@@ -140,6 +140,7 @@
 
     "clearing": "清理中...",
     "clear_data": "清理数据",
+    "cleared_successfully": "清理成功",
     "clear_data_chat": "所有的对话数据",
     "clear_data_audio": "所有的 TTS 缓存",
     "clear_data_image": "所有的图片生成结果",

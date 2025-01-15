@@ -62,6 +62,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "clear_data_audio": MessageLookupByLibrary.simpleMessage("所有的 TTS 缓存"),
         "clear_data_chat": MessageLookupByLibrary.simpleMessage("所有的对话数据"),
         "clear_data_image": MessageLookupByLibrary.simpleMessage("所有的图片生成结果"),
+        "cleared_successfully": MessageLookupByLibrary.simpleMessage("清理成功"),
         "clearing": MessageLookupByLibrary.simpleMessage("清理中..."),
         "clone_chat": MessageLookupByLibrary.simpleMessage("复制对话"),
         "cloned_successfully": MessageLookupByLibrary.simpleMessage("复制成功"),
