@@ -338,8 +338,9 @@ You need to answer the user's question based on the above content:
 
     for (final doc in docs) {
       item.citations.add((
-        source: doc.metadata["source"],
+        type: CitationType.web,
         content: doc.pageContent,
+        source: doc.metadata["source"],
       ));
     }
 

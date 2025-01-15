@@ -51,14 +51,19 @@ enum MessageRole {
   bool get isAssistant => this == MessageRole.assistant;
 }
 
+enum CitationType {
+  web,
+}
+
 typedef MessageImage = ({
   Uint8List bytes,
   String base64,
 });
 
 typedef MessageCitation = ({
-  String source,
+  CitationType type,
   String content,
+  String source,
 });
 
 class MessageItem {
@@ -546,6 +551,17 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
     InputWidget.unFocus();
     final citations = widget.message.item.citations;
 
+    void onTap(MessageCitation citation) {
+      switch (citation.type) {
+        case CitationType.web:
+          Dialogs.openLink(
+            context: context,
+            link: citation.source,
+          );
+          break;
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -559,19 +575,25 @@ class _MessageWidgetState extends ConsumerState<MessageWidget> {
             child: ListView.separated(
               itemCount: citations.length,
               itemBuilder: (context, index) {
-                final source = citations[index].source;
-                final content = citations[index].content;
+                final citation = citations[index];
+                final content = citation.content;
+                final source = citation.source;
 
                 return Card.filled(
                   margin: EdgeInsets.zero,
                   color: Theme.of(context).colorScheme.surfaceContainer,
                   child: ListTile(
-                    title: Text(source,
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text(content,
-                        maxLines: 2, overflow: TextOverflow.ellipsis),
-                    onTap: () =>
-                        Dialogs.openLink(context: context, link: source),
+                    title: Text(
+                      source,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      content,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () => onTap(citation),
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
