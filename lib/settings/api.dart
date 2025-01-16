@@ -335,7 +335,9 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
     if (text.isEmpty) return;
 
     final models = text.split(',').map((it) => it.trim()).toList();
-    final chosen = {for (final model in models) model: true};
+    models.removeWhere((e) => e.isEmpty);
+
+    final chosen = {for (final it in models) it: true};
     if (chosen.isEmpty) return;
 
     final result = await showModalBottomSheet<bool>(
@@ -416,6 +418,7 @@ class _ApiSettingsState extends ConsumerState<ApiSettings> {
 
     if (api != null) Config.apis.remove(api);
     final modelList = models.split(',').map((e) => e.trim()).toList();
+    modelList.removeWhere((e) => e.isEmpty);
 
     Config.apis[name] = ApiConfig(
       url: apiUrl,
