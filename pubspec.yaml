@@ -15,7 +15,7 @@ dependencies:
   intl: ^0.19.0
   flutter_riverpod: ^2.6.1
 
-  archive: ^3.6.1
+  archive: ^4.0.2
   screenshot: ^3.0.0
   file_picker: ^8.1.4
   image_picker: ^1.1.2
@@ -23,11 +23,11 @@ dependencies:
   beautiful_soup_dart: ^0.3.0
   flutter_image_compress: ^2.3.0
 
-  langchain: ^0.7.7+1
-  langchain_core: ^0.3.6
-  langchain_openai: ^0.7.2+5
-  langchain_google: ^0.6.4+1
-  langchain_community: ^0.3.2+2
+  langchain: ^0.7.7+2
+  langchain_core: ^0.3.6+1
+  langchain_openai: ^0.7.3
+  langchain_google: ^0.6.4+2
+  langchain_community: ^0.3.3
 
   animate_do: ^3.3.4
   share_plus: ^10.1.2
@@ -44,10 +44,11 @@ dependencies:
   flutter_markdown: ^0.7.4+2
   flutter_highlighter: ^0.1.1
 
+dependency_overrides:
+  path: 1.9.1
+
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  intl_utils: ^2.8.7
+  intl_utils: ^2.8.8
   flutter_lints: ^5.0.0
 
 flutter:
