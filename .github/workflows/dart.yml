@@ -14,10 +14,15 @@ jobs:
         with:
           channel: 'stable'
           architecture: x64
+          flutter-version: '3.16.0' # 明确指定 flutter 版本
+
+      - run: flutter clean # 清理依赖
       - run: flutter pub get
       
+      - run: ls -al # 打印当前目录列表
+      
       - run: pod repo update
-        working-directory: ios
+        working-directory: ./ios # 修改这里使用相对路径
 
       - run: flutter build ios --release --no-codesign
 
